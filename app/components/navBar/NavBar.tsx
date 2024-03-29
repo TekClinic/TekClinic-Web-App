@@ -23,6 +23,7 @@ export function Navbar() {
     { to: '/patients', label: 'Patients' },
     { to: '/volunteers-doctors', label: 'Volunteers' },
     { to: '/appointments', label: 'Appointments' },
+    { to: '/table-test', label: 'Table Test' },
   ];
 
   return (

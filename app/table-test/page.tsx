@@ -99,7 +99,11 @@ const Example = () => {
 
       const fetchPatientListData = async () => {
         try {
-          const patientListData = await fetchPatientList(patientEndpointData.results, authContext, setError);
+          const patientList = await fetchPatientList(patientEndpointData.results, authContext, setError);
+          // console.log("tryyyy");
+          console.log(patientList[0]['personal_id']);
+          return patientList;
+          //return new Promise((resolve) => patientList);
           //console.log(patientListData);
           //setPatientList(patientListData);
         } catch (error) {
@@ -108,7 +112,7 @@ const Example = () => {
           //authContext.logout();
         }
       };
-      fetchPatientListData();
+      return fetchPatientListData();
 
     } catch (error) {
       console.error('Error occurred:', error);
@@ -120,17 +124,18 @@ const Example = () => {
   function useGetPatients() {
     return useQuery<PatientResponse[]>({
       queryKey: ['patients'],
-      queryFn: async () => {
-        //send api request here
-        // !
+      queryFn: () => fetchEndpointData(pagination.pageSize, pagination.pageIndex * pagination.pageSize),
+      // queryFn: async () => {
+      //   //send api request here
+      //   // !
 
-        return (new Promise((resolve) => fetchEndpointData(pagination.pageSize, pagination.pageIndex * pagination.pageSize)));
+      //   return (new Promise((resolve) => fetchEndpointData(pagination.pageSize, pagination.pageIndex * pagination.pageSize)));
 
-        //const data = fetchEndpointData(pagination.pageSize, pagination.pageIndex * pagination.pageSize);
-        //return Promise.resolve(data);
-        //await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
-        // return Promise.resolve(fakeData);
-      },
+      //   //const data = fetchEndpointData(pagination.pageSize, pagination.pageIndex * pagination.pageSize);
+      //   //return Promise.resolve(data);
+      //   //await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
+      //   // return Promise.resolve(fakeData);
+      // },
       refetchOnWindowFocus: false,
     });
   }
@@ -148,8 +153,8 @@ const Example = () => {
         size: 80,
       },
       {
-        accessorKey: 'firstName',
-        header: 'First Name',
+        accessorKey: 'name',
+        header: 'Name',
         mantineEditTextInputProps: {
           type: 'text',
           //type: 'email',
@@ -516,8 +521,8 @@ const validateEmail = (email: string) =>
 
 function validatePatient(patient: PatientResponse) {
   return {
-    firstName: !validateRequired(patient.name)
-      ? 'First Name is Required'
+    name: !validateRequired(patient.name)
+      ? 'Name is Required'
       : '',
   };
 }
