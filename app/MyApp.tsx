@@ -6,6 +6,7 @@ import VolunteersDoctorsPage from './pages/VolunteersDoctorsPage';
 import AppointmentsPage from './pages/AppointmentsPage'; import { Loader, Center, Container } from '@mantine/core';
 import { AuthContext } from './context/AuthContextProvider';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import ExampleWithProviders from "./table-test/page";
 
 function MyApp() {
   const authContext = useContext(AuthContext);
@@ -19,6 +20,7 @@ function MyApp() {
           <Route path="/patients" element={<PatientsPage />} />
           <Route path="/volunteers-doctors" element={<VolunteersDoctorsPage />} />
           <Route path="/appointments" element={<AppointmentsPage />} />
+          <Route path="/table-test" element={<ExampleWithProviders />} />
         </Routes>
       </Router>
     ) : (

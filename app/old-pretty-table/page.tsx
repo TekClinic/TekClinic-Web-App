@@ -1,9 +1,12 @@
-'use client';
+import React, { useContext } from 'react';
+import { AuthContext } from "../context/AuthContextProvider";
+import { useEffect, useState } from "react";
+import { PatientResponse, EndpointResponse, fetchEndpointResponse, fetchPatientList } from "../apiCalls";
+import { PatientTable, generatePatientRows } from '../components/PatientTable';
+import styles from './general.module.css'; // Import CSS module for styling
+import { Pagination, Group } from '@mantine/core';
 
-import '@mantine/core/styles.css';
-import '@mantine/dates/styles.css'; //if using mantine date picker features
-import 'mantine-react-table/styles.css'; //make sure MRT styles were imported in your app root (once)
-import { useContext, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import {
   MRT_EditActionButtons,
   MantineReactTable,
@@ -31,110 +34,9 @@ import {
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query';
-// import { type User, fakeData, usStates } from './makeData';
-
-import { PatientResponse, EndpointResponse, fetchEndpointResponse, fetchPatientList } from "../apiCalls";
-import { AuthContext } from '../context/AuthContextProvider';
-//import { type User, fakeData, usStates } from './makeData';
-
-//const authContext = useContext(AuthContext);
-
-const defaultLimit = 10;
-const defaultOffset = 0;
-let defaultCount = 1;
-
-// useEffect(() => {
-//   //do something when the pagination state changes
-// }, [pagination.pageIndex, pagination.pageSize]);
 
 
-// const fetchEndpointData = async (limit: number, offset: number) => {
-//   const authContext = useContext(AuthContext);
-
-//   try {
-//     const patientEndpointData = await fetchEndpointResponse("patient", limit, offset, authContext, setError);
-//     //console.log(patientEndpointData);
-//     //setPatientEndpointResponse(patientEndpointData);
-
-//     defaultCount = Math.ceil(patientEndpointData.count / defaultLimit);
-
-//     const fetchPatientListData = async () => {
-//       try {
-//         const patientListData = await fetchPatientList(patientEndpointData.results, authContext, setError);
-//         //console.log(patientListData);
-//         //setPatientList(patientListData);
-//       } catch (error) {
-//         console.error('Error occurred:', error);
-//         console.error('Logging out...', error);
-//         authContext.logout();
-//       }
-//     };
-//     fetchPatientListData();
-
-//   } catch (error) {
-//     console.error('Error occurred:', error);
-//     console.error('Logging out...', error);
-//     authContext.logout();
-//   }
-// };
-
-const Example = () => {
-  const [error, setError] = useState<string | null>(null);
-
-  const [pagination, setPagination] = useState({
-    pageIndex: 0,
-    pageSize: 10,
-  });
-
-  const authContext = useContext(AuthContext);
-
-  const fetchEndpointData = async (limit: number, offset: number) => {
-
-    try {
-      const patientEndpointData = await fetchEndpointResponse("patient", limit, offset, authContext, setError);
-      //console.log(patientEndpointData);
-      //setPatientEndpointResponse(patientEndpointData);
-
-      defaultCount = Math.ceil(patientEndpointData.count / defaultLimit);
-
-      const fetchPatientListData = async () => {
-        try {
-          const patientListData = await fetchPatientList(patientEndpointData.results, authContext, setError);
-          //console.log(patientListData);
-          //setPatientList(patientListData);
-        } catch (error) {
-          console.error('Error occurred:', error);
-          console.error('Logging out...', error);
-          //authContext.logout();
-        }
-      };
-      fetchPatientListData();
-
-    } catch (error) {
-      console.error('Error occurred:', error);
-      console.error('Logging out...', error);
-      //authContext.logout();
-    }
-  };
-
-  function useGetPatients() {
-    return useQuery<PatientResponse[]>({
-      queryKey: ['patients'],
-      queryFn: async () => {
-        //send api request here
-        // !
-
-        return (new Promise((resolve) => fetchEndpointData(pagination.pageSize, pagination.pageIndex * pagination.pageSize)));
-
-        //const data = fetchEndpointData(pagination.pageSize, pagination.pageIndex * pagination.pageSize);
-        //return Promise.resolve(data);
-        //await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
-        // return Promise.resolve(fakeData);
-      },
-      refetchOnWindowFocus: false,
-    });
-  }
-
+const PatientsTable = () => {
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string | undefined>
   >({});
@@ -249,12 +151,27 @@ const Example = () => {
           require: false,
         },
       },
+      // {
+      //   accessorKey: 'email',
+      //   header: 'Email',
+      //   mantineEditTextInputProps: {
+      //     type: 'email',
+      //     required: true,
+      //     error: validationErrors?.email,
+      //     //remove any previous validation errors when user focuses on the input
+      //     onFocus: () =>
+      //       setValidationErrors({
+      //         ...validationErrors,
+      //         email: undefined,
+      //       }),
+      //   },
+      // },
     ],
     [validationErrors],
   );
 
   //call CREATE hook
-  const { mutateAsync: createPatient, isPending: isCreatingPatient } =
+  const { mutateAsync: createPatient, isLoading: isCreatingPatient } =
     useCreatePatient();
   //call READ hook
   const {
@@ -264,39 +181,39 @@ const Example = () => {
     isLoading: isLoadingPatients,
   } = useGetPatients();
   //call UPDATE hook
-  const { mutateAsync: updatePatient, isPending: isUpdatingPatient } =
-    useUpdatePatient();
+  const { mutateAsync: updateUser, isLoading: isUpdatingUser } =
+    useUpdateUser();
   //call DELETE hook
-  const { mutateAsync: deletePatient, isPending: isDeletingPatient } =
-    useDeletePatient();
+  const { mutateAsync: deleteUser, isLoading: isDeletingUser } =
+    useDeleteUser();
 
   //CREATE action
-  const handleCreatePatient: MRT_TableOptions<PatientResponse>['onCreatingRowSave'] = async ({
+  const handleCreateUser: MRT_TableOptions<PatientResponse>['onCreatingRowSave'] = async ({
     values,
     exitCreatingMode,
   }) => {
-    const newValidationErrors = validatePatient(values);
+    const newValidationErrors = validateUser(values);
     if (Object.values(newValidationErrors).some((error) => error)) {
       setValidationErrors(newValidationErrors);
       return;
     }
     setValidationErrors({});
-    await createPatient(values);
+    await createUser(values);
     exitCreatingMode();
   };
 
   //UPDATE action
-  const handleSavePatient: MRT_TableOptions<PatientResponse>['onEditingRowSave'] = async ({
+  const handleSaveUser: MRT_TableOptions<PatientResponse>['onEditingRowSave'] = async ({
     values,
     table,
   }) => {
-    const newValidationErrors = validatePatient(values);
+    const newValidationErrors = validateUser(values);
     if (Object.values(newValidationErrors).some((error) => error)) {
       setValidationErrors(newValidationErrors);
       return;
     }
     setValidationErrors({});
-    await updatePatient(values);
+    await updateUser(values);
     table.setEditingRow(null); //exit editing mode
   };
 
@@ -306,36 +223,37 @@ const Example = () => {
       title: 'Are you sure you want to delete this user?',
       children: (
         <Text>
-          Are you sure you want to delete {row.original.name}? This action cannot be undone.
+          Are you sure you want to delete {row.original.name}{' '}
+          {row.original.name}? This action cannot be undone.
         </Text>
       ),
       labels: { confirm: 'Delete', cancel: 'Cancel' },
       confirmProps: { color: 'red' },
-      onConfirm: () => deletePatient(row.original.id),
+      onConfirm: () => deleteUser(String(row.original.id)), //!should be string?
     });
 
   const table = useMantineReactTable({
     columns,
-    data: fetchedPatients,
+    data: fetchedUsers,
     createDisplayMode: 'modal', //default ('row', and 'custom' are also available)
     editDisplayMode: 'modal', //default ('row', 'cell', 'table', and 'custom' are also available)
     enableEditing: true,
-    //getRowId: (row) => row.id.toString(),
-    mantineToolbarAlertBannerProps: isLoadingPatientsError
+    getRowId: (row) => row.id,
+    mantineToolbarAlertBannerProps: isLoadingUsersError
       ? {
         color: 'red',
         children: 'Error loading data',
       }
       : undefined,
     mantineTableContainerProps: {
-      style: {
+      sx: {
         minHeight: '500px',
       },
     },
     onCreatingRowCancel: () => setValidationErrors({}),
-    onCreatingRowSave: handleCreatePatient,
+    onCreatingRowSave: handleCreateUser,
     onEditingRowCancel: () => setValidationErrors({}),
-    onEditingRowSave: handleSavePatient,
+    onEditingRowSave: handleSaveUser,
     renderCreateRowModalContent: ({ table, row, internalEditComponents }) => (
       <Stack>
         <Title order={3}>Create New User</Title>
@@ -383,13 +301,11 @@ const Example = () => {
         Create New User
       </Button>
     ),
-    onPaginationChange: setPagination,
     state: {
-      isLoading: isLoadingPatients,
-      isSaving: isCreatingPatient || isUpdatingPatient || isDeletingPatient,
-      showAlertBanner: isLoadingPatientsError,
-      showProgressBars: isFetchingPatients,
-      pagination: pagination,
+      isLoading: isLoadingUsers,
+      isSaving: isCreatingUser || isUpdatingUser || isDeletingUser,
+      showAlertBanner: isLoadingUsersError,
+      showProgressBars: isFetchingUsers,
     },
   });
 
@@ -400,22 +316,21 @@ const Example = () => {
 function useCreatePatient() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (patient: PatientResponse) => {
+    mutationFn: async (pateint: PatientResponse) => {
       //send api update request here
-      // !
       await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
       return Promise.resolve();
     },
     //client side optimistic update
     onMutate: (newPatientInfo: PatientResponse) => {
       queryClient.setQueryData(
-        ['patients'],
+        ['pateints'],
         (prevPatients: any) =>
           [
             ...prevPatients,
             {
               ...newPatientInfo,
-              id: (Math.random() * 1000 + 1),
+              id: (Math.random() + 1).toString(36).substring(7),
             },
           ] as PatientResponse[],
       );
@@ -424,40 +339,35 @@ function useCreatePatient() {
   });
 }
 
-//READ hook (get users from api)
-// function useGetPatients() {
-//   return useQuery<PatientResponse[]>({
-//     queryKey: ['patients'],
-//     queryFn: async () => {
-//       //send api request here
-//       // !
-
-//       return (new Promise((resolve) => fetchEndpointData(pagination.pageSize, pagination.pageIndex * pagination.pageSize)));
-
-//       //const data = fetchEndpointData(pagination.pageSize, pagination.pageIndex * pagination.pageSize);
-//       //return Promise.resolve(data);
-//       //await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
-//       // return Promise.resolve(fakeData);
-//     },
-//     refetchOnWindowFocus: false,
-//   });
-// }
+function useGetPatients() {
+  return useQuery<PatientResponse[]>({
+    queryKey: ['patients'],
+    queryFn: async () => {
+      //send api request here
+      await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
+      return Promise.resolve(fakeData);
+    },
+    refetchOnWindowFocus: false,
+  });
+}
 
 //UPDATE hook (put user in api)
-function useUpdatePatient() {
+function useUpdateUser() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (patient: PatientResponse) => {
+    mutationFn: async (user: User) => {
       //send api update request here
       await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
       return Promise.resolve();
     },
     //client side optimistic update
-    onMutate: (newPatientInfo: PatientResponse) => {
-      queryClient.setQueryData(['patients'], (prevPatients: any) =>
-        prevPatients?.map((prevPatient: PatientResponse) =>
-          prevPatient.id === newPatientInfo.id ? newPatientInfo : prevPatient,
-        ),
+    onMutate: (newUserInfo: User) => {
+      queryClient.setQueryData(
+        ['users'],
+        (prevUsers: any) =>
+          prevUsers?.map((prevUser: User) =>
+            prevUser.id === newUserInfo.id ? newUserInfo : prevUser,
+          ),
       );
     },
     // onSettled: () => queryClient.invalidateQueries({ queryKey: ['users'] }), //refetch users after mutation, disabled for demo
@@ -465,18 +375,20 @@ function useUpdatePatient() {
 }
 
 //DELETE hook (delete user in api)
-function useDeletePatient() {
+function useDeleteUser() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (patientId: number) => {
+    mutationFn: async (userId: string) => {
       //send api update request here
       await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
       return Promise.resolve();
     },
     //client side optimistic update
-    onMutate: (patientId: number) => {
-      queryClient.setQueryData(['patients'], (prevPatients: any) =>
-        prevPatients?.filter((patient: PatientResponse) => patient.id !== patientId),
+    onMutate: (userId: string) => {
+      queryClient.setQueryData(
+        ['users'],
+        (prevUsers: any) =>
+          prevUsers?.filter((user: User) => user.id !== userId),
       );
     },
     // onSettled: () => queryClient.invalidateQueries({ queryKey: ['users'] }), //refetch users after mutation, disabled for demo
@@ -485,23 +397,14 @@ function useDeletePatient() {
 
 const queryClient = new QueryClient();
 
-const ExampleWithProviders = () => {
-  // const [error, setError] = useState<string | null>(null);
-
-  // const [pagination, setPagination] = useState({
-  //   pageIndex: 0,
-  //   pageSize: 10,
-  // });
-
+const ExampleWithProviders = () => (
   //Put this with your other react-query providers near root of your app
-  return (
-    <QueryClientProvider client={queryClient}>
-      <ModalsProvider>
-        <Example />
-      </ModalsProvider>
-    </QueryClientProvider>
-  );
-};
+  <QueryClientProvider client={queryClient}>
+    <ModalsProvider>
+      <Example />
+    </ModalsProvider>
+  </QueryClientProvider>
+);
 
 export default ExampleWithProviders;
 
@@ -514,10 +417,15 @@ const validateEmail = (email: string) =>
       /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
     );
 
-function validatePatient(patient: PatientResponse) {
+function validateUser(user: User) {
   return {
-    firstName: !validateRequired(patient.name)
+    firstName: !validateRequired(user.firstName)
       ? 'First Name is Required'
       : '',
+    lastName: !validateRequired(user.lastName) ? 'Last Name is Required' : '',
+    email: !validateEmail(user.email) ? 'Incorrect Email Format' : '',
   };
 }
+
+
+export default PatientsPage;
