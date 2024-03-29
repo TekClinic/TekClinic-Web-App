@@ -7,8 +7,8 @@ import axios, { isCancel, AxiosError } from 'axios';
 const keycloakConfig: KeycloakConfig = { 
   realm: "tekclinic", 
   clientId: "web-app", 
-  //url: "http://localhost:8180/auth"
-  url: "http://auth.tekclinic.org/", 
+  url: "http://localhost:8180/"
+  //url: "http://auth.tekclinic.org/", 
 };
 
 const keycloakInitOptions: KeycloakInitOptions = {
