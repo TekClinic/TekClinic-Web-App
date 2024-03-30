@@ -3,7 +3,7 @@
 import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css'; //if using mantine date picker features
 import 'mantine-react-table/styles.css'; //make sure MRT styles were imported in your app root (once)
-import { useContext, useMemo, useState } from 'react';
+import { useContext, useMemo, useState, useEffect } from 'react';
 import {
   MRT_EditActionButtons,
   MantineReactTable,
@@ -12,6 +12,7 @@ import {
   type MRT_Row,
   type MRT_TableOptions,
   useMantineReactTable,
+  MRT_PaginationState,
 } from 'mantine-react-table';
 import {
   ActionIcon,
@@ -21,6 +22,7 @@ import {
   Text,
   Title,
   Tooltip,
+  Badge,
 } from '@mantine/core';
 import { ModalsProvider, modals } from '@mantine/modals';
 import { IconEdit, IconTrash } from '@tabler/icons-react';
@@ -81,14 +83,20 @@ let defaultCount = 1;
 const Example = () => {
   const [error, setError] = useState<string | null>(null);
 
-  const [pagination, setPagination] = useState({
+  const [pagination, setPagination] = useState<MRT_PaginationState>({
     pageIndex: 0,
-    pageSize: 10,
+    pageSize: 15,
   });
+
+  useEffect(() => {
+    console.log("pagination changed");
+    
+  }, [pagination.pageIndex, pagination.pageSize]);
+
 
   const authContext = useContext(AuthContext);
 
-  const fetchEndpointData = async (limit: number, offset: number) => {
+  const fetchEndpointData = async (limit: number, offset: number): Promise<PatientResponse[]> => {
 
     try {
       const patientEndpointData = await fetchEndpointResponse("patient", limit, offset, authContext, setError);
@@ -97,26 +105,44 @@ const Example = () => {
 
       defaultCount = Math.ceil(patientEndpointData.count / defaultLimit);
 
-      const fetchPatientListData = async () => {
-        try {
-          const patientList = await fetchPatientList(patientEndpointData.results, authContext, setError);
-          // console.log("tryyyy");
-          console.log(patientList[0]['personal_id']);
-          return patientList;
-          //return new Promise((resolve) => patientList);
-          //console.log(patientListData);
-          //setPatientList(patientListData);
-        } catch (error) {
-          console.error('Error occurred:', error);
-          console.error('Logging out...', error);
-          //authContext.logout();
-        }
-      };
-      return fetchPatientListData();
+      // const fetchPatientListData = async () => {
+      //   try {
+      //     const patientList = await fetchPatientList(patientEndpointData.results, authContext, setError);
+      //     // console.log("tryyyy");
+      //     console.log(patientList[0]['personal_id']);
+      //     return patientList;
+      //     //return new Promise((resolve) => patientList);
+      //     //console.log(patientListData);
+      //     //setPatientList(patientListData);
+      //   } catch (error) {
+      //     console.error('Error occurred:', error);
+      //     console.error('Logging out...', error);
+      //     return new Promise((resolve) => []);
+      //     //authContext.logout();
+      //   }
+      // };
+
+      try {
+        const patientList = await fetchPatientList(patientEndpointData.results, authContext, setError);
+        // console.log("tryyyy");
+        console.log(patientList[0]['personal_id']);
+        return patientList;
+        //return new Promise((resolve) => patientList);
+        //console.log(patientListData);
+        //setPatientList(patientListData);
+      } catch (error) {
+        console.error('Error occurred:', error);
+        console.error('Logging out...', error);
+        return new Promise((resolve) => []);
+        //authContext.logout();
+      }
+
+      //return fetchPatientListData();
 
     } catch (error) {
       console.error('Error occurred:', error);
       console.error('Logging out...', error);
+      return new Promise((resolve) => []);
       //authContext.logout();
     }
   };
@@ -177,6 +203,7 @@ const Example = () => {
           type: 'text',
           require: true,
         },
+        Cell: ({ cell }) => `${cell.row.original.personal_id.id} (${cell.row.original.personal_id.type})`,
       },
       {
         accessorKey: 'gender',
@@ -199,8 +226,10 @@ const Example = () => {
           type: 'phone',
           require: true,
         },
+        Cell: ({ cell }) => `${cell.row.original.phone_number.substring(0, 3)}-${cell.row.original.phone_number.substring(3, 6)}-${cell.row.original.phone_number.substring(6, 10)}`,
       },
       {
+        Cell: ({ cell }) => cell.row.original.languages.map((language) => <Badge key={language} variant="gradient" gradient={{ from: 'blue', to: 'cyan', deg: 90 }}>{language}</Badge>),
         accessorKey: 'languages',
         header: 'Languages',
         enableEditing: true,
@@ -217,6 +246,7 @@ const Example = () => {
           type: 'date',
           require: true,
         },
+        Cell: ({ cell }) => `${cell.row.original.birth_date.month}/${cell.row.original.birth_date.day}/${cell.row.original.birth_date.year}`,
       },
       {
         accessorKey: 'age',
@@ -235,15 +265,24 @@ const Example = () => {
           type: 'text',
           require: false,
         },
+        Cell: ({ cell }) => cell.row.original.referred_by,
       },
       {
         accessorKey: 'emergencyContacts',
-        header: 'emergency_contacts',
+        header: 'Emergency Contacts',
         enableEditing: true,
         mantineEditTextInputProps: {
           type: 'list',
           require: false,
         },
+      //   Cell: ({ cell }) => {
+      //     const emergencyContacts = cell.row.original.emergency_contacts.map(contact => {
+      //         return `${contact.name} (${contact.closeness}) ${contact.phone.substring(0, 3)}-${contact.phone.substring(3, 6)}-${contact.phone.substring(6, 10)}`;
+      //     });
+      //     return emergencyContacts.join('\n');
+      // }
+        Cell: ({ cell }) => cell.row.original.emergency_contacts.map((contact) => <Badge key={contact.name} variant="gradient" gradient={{ from: 'blue', to: 'cyan', deg: 90 }}>
+          {contact.name} ({contact.closeness}) {contact.phone.substring(0, 3)}-{contact.phone.substring(3, 6)}-{contact.phone.substring(6, 10)}</Badge>),
       },
       {
         accessorKey: 'specialNotes',
@@ -253,6 +292,7 @@ const Example = () => {
           type: 'text',
           require: false,
         },
+        Cell: ({ cell }) => cell.row.original.special_note,
       },
     ],
     [validationErrors],
@@ -324,8 +364,10 @@ const Example = () => {
     data: fetchedPatients,
     createDisplayMode: 'modal', //default ('row', and 'custom' are also available)
     editDisplayMode: 'modal', //default ('row', 'cell', 'table', and 'custom' are also available)
-    enableEditing: true,
     //getRowId: (row) => row.id.toString(),
+    enableFilters: false,
+    enableSorting: false,
+    //initialState: { density: 'compact' },
     mantineToolbarAlertBannerProps: isLoadingPatientsError
       ? {
         color: 'red',
@@ -359,15 +401,22 @@ const Example = () => {
         </Flex>
       </Stack>
     ),
+    defaultColumn: {
+      minSize: 20, //allow columns to get smaller than default
+      maxSize: 100, //allow columns to get larger than default
+      size: 260, //make columns wider by default
+    },
+    //!! for the future: remove this comment and add support for editing rows and deleting rows
+    enableEditing: true,
     renderRowActions: ({ row, table }) => (
       <Flex gap="md">
         <Tooltip label="Edit">
-          <ActionIcon onClick={() => table.setEditingRow(row)}>
+          <ActionIcon variant="gradient" gradient={{ from: 'blue', to: 'cyan', deg: -45 }} onClick={() => table.setEditingRow(row)} >
             <IconEdit />
           </ActionIcon>
         </Tooltip>
         <Tooltip label="Delete">
-          <ActionIcon color="red" onClick={() => openDeleteConfirmModal(row)}>
+          <ActionIcon variant="gradient" gradient={{ from: '#df1b1b', to: '#ce2525', deg: -45}} onClick={() => openDeleteConfirmModal(row)}>
             <IconTrash />
           </ActionIcon>
         </Tooltip>
@@ -388,6 +437,8 @@ const Example = () => {
         Create New User
       </Button>
     ),
+    enablePagination: true,
+    paginationDisplayMode: 'pages', 
     onPaginationChange: setPagination,
     state: {
       isLoading: isLoadingPatients,
@@ -500,11 +551,13 @@ const ExampleWithProviders = () => {
 
   //Put this with your other react-query providers near root of your app
   return (
-    <QueryClientProvider client={queryClient}>
-      <ModalsProvider>
-        <Example />
-      </ModalsProvider>
-    </QueryClientProvider>
+    <Flex direction="column" style={{ margin: '20px' }}>
+      <QueryClientProvider client={queryClient}>
+        <ModalsProvider>
+          <Example />
+        </ModalsProvider>
+      </QueryClientProvider>
+    </Flex>
   );
 };
 
