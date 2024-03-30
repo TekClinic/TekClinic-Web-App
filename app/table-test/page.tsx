@@ -36,10 +36,10 @@ import {
 import { PatientResponse, EndpointResponse, fetchEndpointResponse, fetchPatientList } from "../apiCalls";
 import { AuthContext } from '../context/AuthContextProvider';
 import { defaultNumRows, staleTimeForRefetch } from './consts';
-import { useGetPatients } from './patients-utils';
+import { useCreatePatient, useDeletePatient, useGetPatients, useUpdatePatient, validatePatient } from './patients-utils';
 
 
-const Example = () => {
+const PatientsTable = () => {
   const [error, setError] = useState<string | null>(null);
 
   //!! Change after backend implementation changes
@@ -317,6 +317,7 @@ const Example = () => {
     ),
     renderTopToolbarCustomActions: ({ table }) => (
       <Button
+        variant="gradient" gradient={{ from: 'blue', to: 'cyan', deg: -45 }}
         onClick={() => {
           table.setCreatingRow(true); //simplest way to open the create row modal with no default values
           //or you can pass in a row object to set default values with the `createRow` helper function
@@ -347,78 +348,10 @@ const Example = () => {
   return <MantineReactTable table={table} />;
 };
 
-//CREATE hook (post new user to api)
-function useCreatePatient() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (patient: PatientResponse) => {
-      //send api update request here
-      // !
-      await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
-      return Promise.resolve();
-    },
-    //client side optimistic update
-    onMutate: (newPatientInfo: PatientResponse) => {
-      queryClient.setQueryData(
-        ['patients'],
-        (prevPatients: any) =>
-          [
-            ...prevPatients,
-            {
-              ...newPatientInfo,
-              id: (Math.random() * 1000 + 1),
-            },
-          ] as PatientResponse[],
-      );
-    },
-    // onSettled: () => queryClient.invalidateQueries({ queryKey: ['users'] }), //refetch users after mutation, disabled for demo
-  });
-}
-
-
-//UPDATE hook (put user in api)
-function useUpdatePatient() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (patient: PatientResponse) => {
-      //send api update request here
-      await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
-      return Promise.resolve();
-    },
-    //client side optimistic update
-    onMutate: (newPatientInfo: PatientResponse) => {
-      queryClient.setQueryData(['patients'], (prevPatients: any) =>
-        prevPatients?.map((prevPatient: PatientResponse) =>
-          prevPatient.id === newPatientInfo.id ? newPatientInfo : prevPatient,
-        ),
-      );
-    },
-    // onSettled: () => queryClient.invalidateQueries({ queryKey: ['users'] }), //refetch users after mutation, disabled for demo
-  });
-}
-
-//DELETE hook (delete user in api)
-function useDeletePatient() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (patientId: number) => {
-      //send api update request here
-      await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
-      return Promise.resolve();
-    },
-    //client side optimistic update
-    onMutate: (patientId: number) => {
-      queryClient.setQueryData(['patients'], (prevPatients: any) =>
-        prevPatients?.filter((patient: PatientResponse) => patient.id !== patientId),
-      );
-    },
-    // onSettled: () => queryClient.invalidateQueries({ queryKey: ['users'] }), //refetch users after mutation, disabled for demo
-  });
-}
 
 const queryClient = new QueryClient();
 
-const ExampleWithProviders = () => {
+const PatientsTableWithProviders = () => {
   // const [error, setError] = useState<string | null>(null);
 
   // const [pagination, setPagination] = useState({
@@ -431,28 +364,11 @@ const ExampleWithProviders = () => {
     <Flex direction="column" style={{ margin: '20px' }}>
       <QueryClientProvider client={queryClient}>
         <ModalsProvider>
-          <Example />
+          <PatientsTable />
         </ModalsProvider>
       </QueryClientProvider>
     </Flex>
   );
 };
 
-export default ExampleWithProviders;
-
-const validateRequired = (value: string) => !!value.length;
-const validateEmail = (email: string) =>
-  !!email.length &&
-  email
-    .toLowerCase()
-    .match(
-      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
-    );
-
-function validatePatient(patient: PatientResponse) {
-  return {
-    name: !validateRequired(patient.name)
-      ? 'Name is Required'
-      : '',
-  };
-}
+export default PatientsTableWithProviders;
