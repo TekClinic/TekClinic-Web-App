@@ -1,19 +1,18 @@
 'use client';
-
 import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css'; //if using mantine date picker features
 import 'mantine-react-table/styles.css'; //make sure MRT styles were imported in your app root (once)
-import { useContext, useMemo, useState, useEffect } from 'react';
+import { useContext, useMemo, useState, useEffect, ContextType } from 'react';
 import {
   MRT_EditActionButtons,
   MantineReactTable,
-  // createRow,
   type MRT_ColumnDef,
   type MRT_Row,
   type MRT_TableOptions,
   useMantineReactTable,
   MRT_PaginationState,
 } from 'mantine-react-table';
+import { AuthContextValues } from "../context/AuthContextProvider";
 import {
   ActionIcon,
   Button,
@@ -32,139 +31,33 @@ import {
   useMutation,
   useQuery,
   useQueryClient,
+  keepPreviousData
 } from '@tanstack/react-query';
-// import { type User, fakeData, usStates } from './makeData';
-
 import { PatientResponse, EndpointResponse, fetchEndpointResponse, fetchPatientList } from "../apiCalls";
 import { AuthContext } from '../context/AuthContextProvider';
-//import { type User, fakeData, usStates } from './makeData';
+import { defaultNumRows, staleTimeForRefetch } from './consts';
+import { useGetPatients } from './patients-utils';
 
-//const authContext = useContext(AuthContext);
-
-const defaultLimit = 10;
-const defaultOffset = 0;
-let defaultCount = 1;
-
-// useEffect(() => {
-//   //do something when the pagination state changes
-// }, [pagination.pageIndex, pagination.pageSize]);
-
-
-// const fetchEndpointData = async (limit: number, offset: number) => {
-//   const authContext = useContext(AuthContext);
-
-//   try {
-//     const patientEndpointData = await fetchEndpointResponse("patient", limit, offset, authContext, setError);
-//     //console.log(patientEndpointData);
-//     //setPatientEndpointResponse(patientEndpointData);
-
-//     defaultCount = Math.ceil(patientEndpointData.count / defaultLimit);
-
-//     const fetchPatientListData = async () => {
-//       try {
-//         const patientListData = await fetchPatientList(patientEndpointData.results, authContext, setError);
-//         //console.log(patientListData);
-//         //setPatientList(patientListData);
-//       } catch (error) {
-//         console.error('Error occurred:', error);
-//         console.error('Logging out...', error);
-//         authContext.logout();
-//       }
-//     };
-//     fetchPatientListData();
-
-//   } catch (error) {
-//     console.error('Error occurred:', error);
-//     console.error('Logging out...', error);
-//     authContext.logout();
-//   }
-// };
 
 const Example = () => {
   const [error, setError] = useState<string | null>(null);
+
+  //!! Change after backend implementation changes
+  const [rowCount, setRowCount] = useState<number>(defaultNumRows);
 
   const [pagination, setPagination] = useState<MRT_PaginationState>({
     pageIndex: 0,
     pageSize: 15,
   });
 
-  useEffect(() => {
-    console.log("pagination changed");
-    
-  }, [pagination.pageIndex, pagination.pageSize]);
+  // useEffect(() => {
+  //   console.log(`pagination changed: pageIndex: ${pagination.pageIndex}, pageSize: ${pagination.pageSize}`);
+  //   console.log(`rowsCount: ${rowCount}`);
+  // }, [pagination.pageIndex, pagination.pageSize, rowCount]);
 
 
   const authContext = useContext(AuthContext);
 
-  const fetchEndpointData = async (limit: number, offset: number): Promise<PatientResponse[]> => {
-
-    try {
-      const patientEndpointData = await fetchEndpointResponse("patient", limit, offset, authContext, setError);
-      //console.log(patientEndpointData);
-      //setPatientEndpointResponse(patientEndpointData);
-
-      defaultCount = Math.ceil(patientEndpointData.count / defaultLimit);
-
-      // const fetchPatientListData = async () => {
-      //   try {
-      //     const patientList = await fetchPatientList(patientEndpointData.results, authContext, setError);
-      //     // console.log("tryyyy");
-      //     console.log(patientList[0]['personal_id']);
-      //     return patientList;
-      //     //return new Promise((resolve) => patientList);
-      //     //console.log(patientListData);
-      //     //setPatientList(patientListData);
-      //   } catch (error) {
-      //     console.error('Error occurred:', error);
-      //     console.error('Logging out...', error);
-      //     return new Promise((resolve) => []);
-      //     //authContext.logout();
-      //   }
-      // };
-
-      try {
-        const patientList = await fetchPatientList(patientEndpointData.results, authContext, setError);
-        // console.log("tryyyy");
-        console.log(patientList[0]['personal_id']);
-        return patientList;
-        //return new Promise((resolve) => patientList);
-        //console.log(patientListData);
-        //setPatientList(patientListData);
-      } catch (error) {
-        console.error('Error occurred:', error);
-        console.error('Logging out...', error);
-        return new Promise((resolve) => []);
-        //authContext.logout();
-      }
-
-      //return fetchPatientListData();
-
-    } catch (error) {
-      console.error('Error occurred:', error);
-      console.error('Logging out...', error);
-      return new Promise((resolve) => []);
-      //authContext.logout();
-    }
-  };
-
-  function useGetPatients() {
-    return useQuery<PatientResponse[]>({
-      queryKey: ['patients'],
-      queryFn: () => fetchEndpointData(pagination.pageSize, pagination.pageIndex * pagination.pageSize),
-      // queryFn: async () => {
-      //   //send api request here
-      //   // !
-
-      //   return (new Promise((resolve) => fetchEndpointData(pagination.pageSize, pagination.pageIndex * pagination.pageSize)));
-
-      //   //const data = fetchEndpointData(pagination.pageSize, pagination.pageIndex * pagination.pageSize);
-      //   //return Promise.resolve(data);
-      //   //await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
-      //   // return Promise.resolve(fakeData);
-      // },
-      refetchOnWindowFocus: false,
-    });
-  }
 
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string | undefined>
@@ -275,12 +168,12 @@ const Example = () => {
           type: 'list',
           require: false,
         },
-      //   Cell: ({ cell }) => {
-      //     const emergencyContacts = cell.row.original.emergency_contacts.map(contact => {
-      //         return `${contact.name} (${contact.closeness}) ${contact.phone.substring(0, 3)}-${contact.phone.substring(3, 6)}-${contact.phone.substring(6, 10)}`;
-      //     });
-      //     return emergencyContacts.join('\n');
-      // }
+        //   Cell: ({ cell }) => {
+        //     const emergencyContacts = cell.row.original.emergency_contacts.map(contact => {
+        //         return `${contact.name} (${contact.closeness}) ${contact.phone.substring(0, 3)}-${contact.phone.substring(3, 6)}-${contact.phone.substring(6, 10)}`;
+        //     });
+        //     return emergencyContacts.join('\n');
+        // }
         Cell: ({ cell }) => cell.row.original.emergency_contacts.map((contact) => <Badge key={contact.name} variant="gradient" gradient={{ from: 'blue', to: 'cyan', deg: 90 }}>
           {contact.name} ({contact.closeness}) {contact.phone.substring(0, 3)}-{contact.phone.substring(3, 6)}-{contact.phone.substring(6, 10)}</Badge>),
       },
@@ -307,7 +200,7 @@ const Example = () => {
     isError: isLoadingPatientsError,
     isFetching: isFetchingPatients,
     isLoading: isLoadingPatients,
-  } = useGetPatients();
+  } = useGetPatients({ authContext, setError, pagination, setRowCount });
   //call UPDATE hook
   const { mutateAsync: updatePatient, isPending: isUpdatingPatient } =
     useUpdatePatient();
@@ -416,7 +309,7 @@ const Example = () => {
           </ActionIcon>
         </Tooltip>
         <Tooltip label="Delete">
-          <ActionIcon variant="gradient" gradient={{ from: '#df1b1b', to: '#ce2525', deg: -45}} onClick={() => openDeleteConfirmModal(row)}>
+          <ActionIcon variant="gradient" gradient={{ from: '#df1b1b', to: '#ce2525', deg: -45 }} onClick={() => openDeleteConfirmModal(row)}>
             <IconTrash />
           </ActionIcon>
         </Tooltip>
@@ -434,12 +327,14 @@ const Example = () => {
           // );
         }}
       >
-        Create New User
+        Create New Patient
       </Button>
     ),
     enablePagination: true,
-    paginationDisplayMode: 'pages', 
+    manualPagination: true,
+    paginationDisplayMode: 'pages',
     onPaginationChange: setPagination,
+    rowCount: rowCount,
     state: {
       isLoading: isLoadingPatients,
       isSaving: isCreatingPatient || isUpdatingPatient || isDeletingPatient,
@@ -480,24 +375,6 @@ function useCreatePatient() {
   });
 }
 
-//READ hook (get users from api)
-// function useGetPatients() {
-//   return useQuery<PatientResponse[]>({
-//     queryKey: ['patients'],
-//     queryFn: async () => {
-//       //send api request here
-//       // !
-
-//       return (new Promise((resolve) => fetchEndpointData(pagination.pageSize, pagination.pageIndex * pagination.pageSize)));
-
-//       //const data = fetchEndpointData(pagination.pageSize, pagination.pageIndex * pagination.pageSize);
-//       //return Promise.resolve(data);
-//       //await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
-//       // return Promise.resolve(fakeData);
-//     },
-//     refetchOnWindowFocus: false,
-//   });
-// }
 
 //UPDATE hook (put user in api)
 function useUpdatePatient() {
