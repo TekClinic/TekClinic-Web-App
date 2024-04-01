@@ -7,8 +7,6 @@ import {
 } from 'mantine-react-table';
 import { AuthContextValues } from "../context/AuthContextProvider";
 import {
-  QueryClient,
-  QueryClientProvider,
   useMutation,
   useQuery,
   useQueryClient,

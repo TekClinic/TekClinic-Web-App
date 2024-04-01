@@ -2,7 +2,7 @@
 import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css'; //if using mantine date picker features
 import 'mantine-react-table/styles.css'; //make sure MRT styles were imported in your app root (once)
-import { useContext, useMemo, useState, useEffect, ContextType } from 'react';
+import { useContext, useMemo, useState } from 'react';
 import {
   MRT_EditActionButtons,
   MantineReactTable,
@@ -12,7 +12,6 @@ import {
   useMantineReactTable,
   MRT_PaginationState,
 } from 'mantine-react-table';
-import { AuthContextValues } from "../context/AuthContextProvider";
 import {
   ActionIcon,
   Button,
@@ -28,14 +27,10 @@ import { IconEdit, IconTrash } from '@tabler/icons-react';
 import {
   QueryClient,
   QueryClientProvider,
-  useMutation,
-  useQuery,
-  useQueryClient,
-  keepPreviousData
 } from '@tanstack/react-query';
-import { PatientResponse, EndpointResponse, fetchEndpointResponse, fetchPatientList } from "../apiCalls";
+import { PatientResponse } from "../apiCalls";
 import { AuthContext } from '../context/AuthContextProvider';
-import { defaultNumRows, staleTimeForRefetch } from './consts';
+import { defaultNumRows } from './consts';
 import { useCreatePatient, useDeletePatient, useGetPatients, useUpdatePatient, validatePatient } from './patients-utils';
 
 
@@ -168,14 +163,29 @@ const PatientsTable = () => {
           type: 'list',
           require: false,
         },
-        //   Cell: ({ cell }) => {
-        //     const emergencyContacts = cell.row.original.emergency_contacts.map(contact => {
-        //         return `${contact.name} (${contact.closeness}) ${contact.phone.substring(0, 3)}-${contact.phone.substring(3, 6)}-${contact.phone.substring(6, 10)}`;
-        //     });
-        //     return emergencyContacts.join('\n');
-        // }
-        Cell: ({ cell }) => cell.row.original.emergency_contacts.map((contact) => <Badge key={contact.name} variant="gradient" gradient={{ from: 'blue', to: 'cyan', deg: 90 }}>
+        Cell: ({ cell }) => cell.row.original.emergency_contacts.map((contact) => <Badge key={contact.name} variant="gradient" gradient={{ from: '#DBDBDB', to: '#CCCCCC', deg: 90 }} style={{ color: 'black' }}>
           {contact.name} ({contact.closeness}) {contact.phone.substring(0, 3)}-{contact.phone.substring(3, 6)}-{contact.phone.substring(6, 10)}</Badge>),
+        // Cell: ({ cell }) => {
+        //   return (
+        //     <>
+        //       {cell.row.original.emergency_contacts.map((contact) => (
+        //         <Badge
+        //           key={contact.name}
+        //           color="gray"
+        //           style={{ backgroundColor: 'lightgray', color: 'black' }}
+        //         >
+        //           <div>
+        //             <span>{contact.name} ({contact.closeness})</span>
+        //             <br />
+        //             <span>
+        //               {contact.phone.substring(0, 3)}-{contact.phone.substring(3, 6)}-{contact.phone.substring(6, 10)}
+        //             </span>
+        //           </div>
+        //         </Badge>
+        //       ))}
+        //     </>
+        //   );
+        // }
       },
       {
         accessorKey: 'specialNotes',
@@ -260,7 +270,7 @@ const PatientsTable = () => {
     //getRowId: (row) => row.id.toString(),
     enableFilters: false,
     enableSorting: false,
-    //initialState: { density: 'compact' },
+    //initialState: {density: 'compact' },
     mantineToolbarAlertBannerProps: isLoadingPatientsError
       ? {
         color: 'red',
@@ -271,6 +281,9 @@ const PatientsTable = () => {
       style: {
         minHeight: '500px',
       },
+    },
+    mantinePaginationProps: {
+      rowsPerPageOptions: ['5', '10', '15', '25', '50', '100', '200', '1000'],
     },
     onCreatingRowCancel: () => setValidationErrors({}),
     onCreatingRowSave: handleCreatePatient,
@@ -351,15 +364,7 @@ const PatientsTable = () => {
 
 const queryClient = new QueryClient();
 
-const PatientsTableWithProviders = () => {
-  // const [error, setError] = useState<string | null>(null);
-
-  // const [pagination, setPagination] = useState({
-  //   pageIndex: 0,
-  //   pageSize: 10,
-  // });
-
-  //Put this with your other react-query providers near root of your app
+const PatientsTablePage = () => {
   return (
     <Flex direction="column" style={{ margin: '20px' }}>
       <QueryClientProvider client={queryClient}>
@@ -371,4 +376,4 @@ const PatientsTableWithProviders = () => {
   );
 };
 
-export default PatientsTableWithProviders;
+export default PatientsTablePage;
