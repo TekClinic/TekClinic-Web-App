@@ -1,8 +1,8 @@
-'use client';
-import '@mantine/core/styles.css';
-import '@mantine/dates/styles.css';
-import 'mantine-react-table/styles.css';
-import { useContext, useMemo, useState } from 'react';
+'use client'
+import '@mantine/core/styles.css'
+import '@mantine/dates/styles.css'
+import 'mantine-react-table/styles.css'
+import { useContext, useMemo, useState } from 'react'
 import {
   MRT_EditActionButtons,
   MantineReactTable,
@@ -10,8 +10,8 @@ import {
   type MRT_Row,
   type MRT_TableOptions,
   useMantineReactTable,
-  MRT_PaginationState,
-} from 'mantine-react-table';
+  type MRT_PaginationState
+} from 'mantine-react-table'
 import {
   ActionIcon,
   Button,
@@ -21,53 +21,53 @@ import {
   Title,
   Tooltip,
   Badge,
-} from '@mantine/core';
-import { ModalsProvider, modals } from '@mantine/modals';
-import { IconEdit, IconTrash } from '@tabler/icons-react';
+  Divider,
+  Container
+} from '@mantine/core'
+import { ModalsProvider, modals } from '@mantine/modals'
+import { IconEdit, IconTrash } from '@tabler/icons-react'
 import {
   QueryClient,
-  QueryClientProvider,
-} from '@tanstack/react-query';
-import { PatientResponse } from "../apiCalls";
-import { AuthContext } from '../context/AuthContextProvider';
-import { defaultNumRows } from './consts';
-import { useCreatePatient, useDeletePatient, useGetPatients, useUpdatePatient, validatePatient } from './patients-utils';
-
+  QueryClientProvider
+} from '@tanstack/react-query'
+import { type PatientResponse } from '../apiCalls'
+import { AuthContext } from '../context/AuthContextProvider'
+import { defaultNumRows } from './consts'
+import { useCreatePatient, useDeletePatient, useGetPatients, useUpdatePatient, validatePatient } from './patients-utils'
 
 const PatientsTable = () => {
-  const [error, setError] = useState<string | null>(null);
+  const [, setError] = useState<string | null>(null)
 
-  //!! Change after backend implementation changes
-  const [rowCount, setRowCount] = useState<number>(defaultNumRows);
+  //! ! Change after backend implementation changes
+  const [rowCount, setRowCount] = useState<number>(defaultNumRows)
 
   const [pagination, setPagination] = useState<MRT_PaginationState>({
     pageIndex: 0,
-    pageSize: 10,
-  });
+    pageSize: 10
+  })
 
-
-  const authContext = useContext(AuthContext);
-
+  const authContext = useContext(AuthContext)
 
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string | undefined>
-  >({});
+  >({})
 
-  const columns = useMemo<MRT_ColumnDef<PatientResponse>[]>(
+  const columns = useMemo<Array<MRT_ColumnDef<PatientResponse>>>(
     () => [
       {
         accessorKey: 'id',
         header: 'Id',
         enableEditing: false,
-        size: 80,
+        minSize: 40,
+        maxSize: 45
       },
       {
         accessorKey: 'name',
         header: 'Name',
         mantineEditTextInputProps: {
           type: 'text',
-          required: true,
-        },
+          required: true
+        }
       },
       {
         accessorKey: 'personalId',
@@ -75,9 +75,9 @@ const PatientsTable = () => {
         enableEditing: true,
         mantineEditTextInputProps: {
           type: 'text',
-          require: true,
+          require: true
         },
-        Cell: ({ cell }) => `${cell.row.original.personal_id.id} (${cell.row.original.personal_id.type})`,
+        Cell: ({ cell }) => `${cell.row.original.personal_id.id} (${cell.row.original.personal_id.type})`
       },
       {
         accessorKey: 'gender',
@@ -87,10 +87,10 @@ const PatientsTable = () => {
           type: 'select',
           options: [
             { value: 'male', label: 'Male' },
-            { value: 'female', label: 'Female' },
+            { value: 'female', label: 'Female' }
           ],
-          require: true,
-        },
+          require: true
+        }
       },
       {
         accessorKey: 'phoneNumber',
@@ -98,9 +98,9 @@ const PatientsTable = () => {
         enableEditing: true,
         mantineEditTextInputProps: {
           type: 'phone',
-          require: true,
+          require: true
         },
-        Cell: ({ cell }) => `${cell.row.original.phone_number.substring(0, 3)}-${cell.row.original.phone_number.substring(3, 6)}-${cell.row.original.phone_number.substring(6, 10)}`,
+        Cell: ({ cell }) => `${cell.row.original.phone_number.substring(0, 3)}-${cell.row.original.phone_number.substring(3, 6)}-${cell.row.original.phone_number.substring(6, 10)}`
       },
       {
         accessorKey: 'languages',
@@ -108,9 +108,18 @@ const PatientsTable = () => {
         enableEditing: true,
         mantineEditTextInputProps: {
           type: 'list',
-          require: true,
+          require: true
         },
-        Cell: ({ cell }) => cell.row.original.languages.map((language) => <Badge key={language} variant="gradient" gradient={{ from: 'blue', to: 'cyan', deg: 90 }}>{language}</Badge>),
+        Cell: ({ cell }) => (
+          <Container>
+            {cell.row.original.languages.map((language) =>
+              <Flex key={language} direction="column" style={{ margin: '2px' }}>
+                <Badge variant="gradient" gradient={{ from: 'blue', to: 'cyan', deg: 90 }}>
+                  {language}
+                </Badge>
+              </Flex>)
+            }
+          </Container >)
       },
       {
         accessorKey: 'birthdate',
@@ -118,9 +127,9 @@ const PatientsTable = () => {
         enableEditing: true,
         mantineEditTextInputProps: {
           type: 'date',
-          require: true,
+          require: true
         },
-        Cell: ({ cell }) => `${cell.row.original.birth_date.month}/${cell.row.original.birth_date.day}/${cell.row.original.birth_date.year}`,
+        Cell: ({ cell }) => `${cell.row.original.birth_date.month}/${cell.row.original.birth_date.day}/${cell.row.original.birth_date.year}`
       },
       {
         accessorKey: 'age',
@@ -128,8 +137,8 @@ const PatientsTable = () => {
         enableEditing: true,
         mantineEditTextInputProps: {
           type: 'number',
-          require: true,
-        },
+          require: true
+        }
       },
       {
         accessorKey: 'refferedBy',
@@ -137,9 +146,9 @@ const PatientsTable = () => {
         enableEditing: true,
         mantineEditTextInputProps: {
           type: 'text',
-          require: false,
+          require: false
         },
-        Cell: ({ cell }) => cell.row.original.referred_by,
+        Cell: ({ cell }) => cell.row.original.referred_by
       },
       {
         accessorKey: 'emergencyContacts',
@@ -147,10 +156,20 @@ const PatientsTable = () => {
         enableEditing: true,
         mantineEditTextInputProps: {
           type: 'list',
-          require: false,
+          require: false
         },
-        Cell: ({ cell }) => cell.row.original.emergency_contacts.map((contact) => <Badge key={contact.name} variant="gradient" gradient={{ from: '#DBDBDB', to: '#CCCCCC', deg: 90 }} style={{ color: 'black' }}>
-          {contact.name} ({contact.closeness}) {contact.phone.substring(0, 3)}-{contact.phone.substring(3, 6)}-{contact.phone.substring(6, 10)}</Badge>),
+        Cell: ({ cell }) =>
+          <Container style={{ textAlign: 'left' }}>
+            {
+              cell.row.original.emergency_contacts.map((contact, index) =>
+                <Container key={index} >
+                  <Badge key={contact.name} variant="gradient" gradient={{ from: '#DBDBDB', to: '#CCCCCC', deg: 90 }} style={{ color: 'black' }}>
+                    {contact.name} ({contact.closeness}) {contact.phone.substring(0, 3)}-{contact.phone.substring(3, 6)}-{contact.phone.substring(6, 10)}
+                  </Badge>
+                  {index !== cell.row.original.emergency_contacts.length - 1 && <Divider my='xs' size="xs" />}
+                </Container>)
+            }
+          </Container>
       },
       {
         accessorKey: 'specialNotes',
@@ -158,63 +177,63 @@ const PatientsTable = () => {
         enableEditing: true,
         mantineEditTextInputProps: {
           type: 'text',
-          require: false,
+          require: false
         },
-        Cell: ({ cell }) => cell.row.original.special_note,
-      },
+        Cell: ({ cell }) => cell.row.original.special_note
+      }
     ],
-    [validationErrors],
-  );
+    []
+  )
 
-  //call CREATE hook
+  // call CREATE hook
   const { mutateAsync: createPatient, isPending: isCreatingPatient } =
-    useCreatePatient();
-  //call READ hook
+    useCreatePatient()
+  // call READ hook
   const {
     data: fetchedPatients = [],
     isError: isLoadingPatientsError,
     isFetching: isFetchingPatients,
-    isLoading: isLoadingPatients,
-  } = useGetPatients({ authContext, setError, pagination, setRowCount });
-  //call UPDATE hook
+    isLoading: isLoadingPatients
+  } = useGetPatients({ authContext, setError, pagination, setRowCount })
+  // call UPDATE hook
   const { mutateAsync: updatePatient, isPending: isUpdatingPatient } =
-    useUpdatePatient();
-  //call DELETE hook
+    useUpdatePatient()
+  // call DELETE hook
   const { mutateAsync: deletePatient, isPending: isDeletingPatient } =
-    useDeletePatient();
+    useDeletePatient()
 
-  //CREATE action
+  // CREATE action
   const handleCreatePatient: MRT_TableOptions<PatientResponse>['onCreatingRowSave'] = async ({
     values,
-    exitCreatingMode,
+    exitCreatingMode
   }) => {
-    const newValidationErrors = validatePatient(values);
+    const newValidationErrors = validatePatient(values)
     if (Object.values(newValidationErrors).some((error) => error)) {
-      setValidationErrors(newValidationErrors);
-      return;
+      setValidationErrors(newValidationErrors)
+      return
     }
-    setValidationErrors({});
-    await createPatient(values);
-    exitCreatingMode();
-  };
+    setValidationErrors({})
+    await createPatient(values)
+    exitCreatingMode()
+  }
 
-  //UPDATE action
+  // UPDATE action
   const handleSavePatient: MRT_TableOptions<PatientResponse>['onEditingRowSave'] = async ({
     values,
-    table,
+    table
   }) => {
-    const newValidationErrors = validatePatient(values);
+    const newValidationErrors = validatePatient(values)
     if (Object.values(newValidationErrors).some((error) => error)) {
-      setValidationErrors(newValidationErrors);
-      return;
+      setValidationErrors(newValidationErrors)
+      return
     }
-    setValidationErrors({});
-    await updatePatient(values);
-    table.setEditingRow(null);
-  };
+    setValidationErrors({})
+    await updatePatient(values)
+    table.setEditingRow(null)
+  }
 
-  //DELETE action
-  const openDeleteConfirmModal = (row: MRT_Row<PatientResponse>) =>
+  // DELETE action
+  const openDeleteConfirmModal = (row: MRT_Row<PatientResponse>) => {
     modals.openConfirmModal({
       title: 'Are you sure you want to delete this user?',
       children: (
@@ -224,8 +243,9 @@ const PatientsTable = () => {
       ),
       labels: { confirm: 'Delete', cancel: 'Cancel' },
       confirmProps: { color: 'red' },
-      onConfirm: () => deletePatient(row.original.id),
-    });
+      onConfirm: async () => { await deletePatient(row.original.id) }
+    })
+  }
 
   const table = useMantineReactTable({
     columns,
@@ -237,20 +257,16 @@ const PatientsTable = () => {
     mantineToolbarAlertBannerProps: isLoadingPatientsError
       ? {
         color: 'red',
-        children: 'Error loading data',
+        children: 'Error loading data'
       }
       : undefined,
-    mantineTableContainerProps: {
-      style: {
-        minHeight: '500px',
-      },
-    },
+
     mantinePaginationProps: {
-      rowsPerPageOptions: ['5', '10', '15', '25', '50', '100', '200', '1000'],
+      rowsPerPageOptions: ['5', '10', '15', '25', '50', '100', '200', '1000']
     },
-    onCreatingRowCancel: () => setValidationErrors({}),
+    onCreatingRowCancel: () => { setValidationErrors({}) },
     onCreatingRowSave: handleCreatePatient,
-    onEditingRowCancel: () => setValidationErrors({}),
+    onEditingRowCancel: () => { setValidationErrors({}) },
     onEditingRowSave: handleSavePatient,
     renderCreateRowModalContent: ({ table, row, internalEditComponents }) => (
       <Stack>
@@ -270,22 +286,26 @@ const PatientsTable = () => {
         </Flex>
       </Stack>
     ),
+    // defaultColumn: {
+    //   minSize: 20,
+    //   maxSize: 80,
+    //   size: 200,
+    // },
     defaultColumn: {
       minSize: 20,
-      maxSize: 80,
-      size: 200,
+      maxSize: 60
     },
-    //!! for the future: remove this comment and add support for editing rows and deleting rows
+    //! ! for the future: remove this comment and add support for editing rows and deleting rows
     enableEditing: true,
     renderRowActions: ({ row, table }) => (
       <Flex gap="md">
         <Tooltip label="Edit">
-          <ActionIcon variant="gradient" gradient={{ from: 'blue', to: 'cyan', deg: -45 }} onClick={() => table.setEditingRow(row)} >
+          <ActionIcon variant="gradient" gradient={{ from: 'blue', to: 'cyan', deg: -45 }} onClick={() => { table.setEditingRow(row) }} >
             <IconEdit />
           </ActionIcon>
         </Tooltip>
         <Tooltip label="Delete">
-          <ActionIcon variant="gradient" gradient={{ from: '#df1b1b', to: '#ce2525', deg: -45 }} onClick={() => openDeleteConfirmModal(row)}>
+          <ActionIcon variant="gradient" gradient={{ from: '#df1b1b', to: '#ce2525', deg: -45 }} onClick={() => { openDeleteConfirmModal(row) }}>
             <IconTrash />
           </ActionIcon>
         </Tooltip>
@@ -295,7 +315,7 @@ const PatientsTable = () => {
       <Button
         variant="gradient" gradient={{ from: 'blue', to: 'cyan', deg: -45 }}
         onClick={() => {
-          table.setCreatingRow(true);
+          table.setCreatingRow(true)
         }}
       >
         Create New Patient
@@ -305,21 +325,20 @@ const PatientsTable = () => {
     manualPagination: true,
     paginationDisplayMode: 'pages',
     onPaginationChange: setPagination,
-    rowCount: rowCount,
+    rowCount,
     state: {
       isLoading: isLoadingPatients,
       isSaving: isCreatingPatient || isUpdatingPatient || isDeletingPatient,
       showAlertBanner: isLoadingPatientsError,
       showProgressBars: isFetchingPatients,
-      pagination: pagination,
-    },
-  });
+      pagination
+    }
+  })
 
-  return <MantineReactTable table={table} />;
-};
+  return <MantineReactTable table={table} />
+}
 
-
-const queryClient = new QueryClient();
+const queryClient = new QueryClient()
 
 const PatientsTablePage = () => {
   return (
@@ -330,7 +349,7 @@ const PatientsTablePage = () => {
         </ModalsProvider>
       </QueryClientProvider>
     </Flex>
-  );
-};
+  )
+}
 
-export default PatientsTablePage;
+export default PatientsTablePage
