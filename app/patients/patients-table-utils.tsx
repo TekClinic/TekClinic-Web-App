@@ -45,7 +45,7 @@ interface UseGetPatientsParams {
   setRowCount: React.Dispatch<React.SetStateAction<number>>
 }
 
-export function useGetPatients({ authContext, setError, pagination, setRowCount }: UseGetPatientsParams): QueryResult<PatientResponse[]> {
+export function useGetPatients({ authContext, setError, pagination, setRowCount }: UseGetPatientsParams) {
   return useQuery<PatientResponse[]>({
     queryKey: ['patients', pagination.pageSize, pagination.pageIndex],
     queryFn: async () => await fetchEndpointData(pagination.pageSize, pagination.pageIndex * pagination.pageSize, authContext, setError, setRowCount),

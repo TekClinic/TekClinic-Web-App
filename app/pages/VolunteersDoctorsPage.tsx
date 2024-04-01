@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import { AuthContext } from "../context/AuthContextProvider";
 import { useEffect, useState } from "react";
 import { DoctorResponse, EndpointResponse, fetchEndpointResponse, fetchDoctorList } from "../apiCalls";
-import { DoctorTable, generateDoctorRows } from '../components/DoctorTable';
+import DoctorTable, { generateDoctorRows } from '../components/DoctorTable';
 import styles from './general.module.css'; // Import CSS module for styling
 import { Pagination, Group } from '@mantine/core';
 
