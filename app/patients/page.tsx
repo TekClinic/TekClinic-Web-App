@@ -33,7 +33,7 @@ import {
 import { type PatientResponse } from '../apiCalls'
 import { AuthContext } from '../context/AuthContextProvider'
 import { defaultNumRows } from './consts'
-import { useCreatePatient, useDeletePatient, useGetPatients, useUpdatePatient, validatePatient } from './patients-utils'
+import { useCreatePatient, useDeletePatient, useGetPatients, useUpdatePatient, validatePatient } from './patients-table-utils'
 
 const PatientsTable = () => {
   const [, setError] = useState<string | null>(null)
@@ -286,11 +286,6 @@ const PatientsTable = () => {
         </Flex>
       </Stack>
     ),
-    // defaultColumn: {
-    //   minSize: 20,
-    //   maxSize: 80,
-    //   size: 200,
-    // },
     defaultColumn: {
       minSize: 20,
       maxSize: 60
