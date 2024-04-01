@@ -64,8 +64,6 @@ export function useCreatePatient() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (patient: PatientResponse) => {
-      //send api update request here
-      // !
       await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
       return Promise.resolve();
     },

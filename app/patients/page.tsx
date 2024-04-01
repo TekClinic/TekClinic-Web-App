@@ -1,7 +1,7 @@
 'use client';
 import '@mantine/core/styles.css';
-import '@mantine/dates/styles.css'; //if using mantine date picker features
-import 'mantine-react-table/styles.css'; //make sure MRT styles were imported in your app root (once)
+import '@mantine/dates/styles.css';
+import 'mantine-react-table/styles.css';
 import { useContext, useMemo, useState } from 'react';
 import {
   MRT_EditActionButtons,
@@ -42,13 +42,8 @@ const PatientsTable = () => {
 
   const [pagination, setPagination] = useState<MRT_PaginationState>({
     pageIndex: 0,
-    pageSize: 15,
+    pageSize: 10,
   });
-
-  // useEffect(() => {
-  //   console.log(`pagination changed: pageIndex: ${pagination.pageIndex}, pageSize: ${pagination.pageSize}`);
-  //   console.log(`rowsCount: ${rowCount}`);
-  // }, [pagination.pageIndex, pagination.pageSize, rowCount]);
 
 
   const authContext = useContext(AuthContext);
@@ -71,16 +66,7 @@ const PatientsTable = () => {
         header: 'Name',
         mantineEditTextInputProps: {
           type: 'text',
-          //type: 'email',
           required: true,
-          // error: validationErrors?.firstName,
-          // //remove any previous validation errors when user focuses on the input
-          // onFocus: () =>
-          //   setValidationErrors({
-          //     ...validationErrors,
-          //     firstName: undefined,
-          //   }),
-          //optionally add validation checking for onBlur or onChange
         },
       },
       {
@@ -117,7 +103,6 @@ const PatientsTable = () => {
         Cell: ({ cell }) => `${cell.row.original.phone_number.substring(0, 3)}-${cell.row.original.phone_number.substring(3, 6)}-${cell.row.original.phone_number.substring(6, 10)}`,
       },
       {
-        Cell: ({ cell }) => cell.row.original.languages.map((language) => <Badge key={language} variant="gradient" gradient={{ from: 'blue', to: 'cyan', deg: 90 }}>{language}</Badge>),
         accessorKey: 'languages',
         header: 'Languages',
         enableEditing: true,
@@ -125,6 +110,7 @@ const PatientsTable = () => {
           type: 'list',
           require: true,
         },
+        Cell: ({ cell }) => cell.row.original.languages.map((language) => <Badge key={language} variant="gradient" gradient={{ from: 'blue', to: 'cyan', deg: 90 }}>{language}</Badge>),
       },
       {
         accessorKey: 'birthdate',
@@ -165,27 +151,6 @@ const PatientsTable = () => {
         },
         Cell: ({ cell }) => cell.row.original.emergency_contacts.map((contact) => <Badge key={contact.name} variant="gradient" gradient={{ from: '#DBDBDB', to: '#CCCCCC', deg: 90 }} style={{ color: 'black' }}>
           {contact.name} ({contact.closeness}) {contact.phone.substring(0, 3)}-{contact.phone.substring(3, 6)}-{contact.phone.substring(6, 10)}</Badge>),
-        // Cell: ({ cell }) => {
-        //   return (
-        //     <>
-        //       {cell.row.original.emergency_contacts.map((contact) => (
-        //         <Badge
-        //           key={contact.name}
-        //           color="gray"
-        //           style={{ backgroundColor: 'lightgray', color: 'black' }}
-        //         >
-        //           <div>
-        //             <span>{contact.name} ({contact.closeness})</span>
-        //             <br />
-        //             <span>
-        //               {contact.phone.substring(0, 3)}-{contact.phone.substring(3, 6)}-{contact.phone.substring(6, 10)}
-        //             </span>
-        //           </div>
-        //         </Badge>
-        //       ))}
-        //     </>
-        //   );
-        // }
       },
       {
         accessorKey: 'specialNotes',
@@ -245,7 +210,7 @@ const PatientsTable = () => {
     }
     setValidationErrors({});
     await updatePatient(values);
-    table.setEditingRow(null); //exit editing mode
+    table.setEditingRow(null);
   };
 
   //DELETE action
@@ -265,12 +230,10 @@ const PatientsTable = () => {
   const table = useMantineReactTable({
     columns,
     data: fetchedPatients,
-    createDisplayMode: 'modal', //default ('row', and 'custom' are also available)
-    editDisplayMode: 'modal', //default ('row', 'cell', 'table', and 'custom' are also available)
-    //getRowId: (row) => row.id.toString(),
+    createDisplayMode: 'modal',
+    editDisplayMode: 'modal',
     enableFilters: false,
     enableSorting: false,
-    //initialState: {density: 'compact' },
     mantineToolbarAlertBannerProps: isLoadingPatientsError
       ? {
         color: 'red',
@@ -308,9 +271,9 @@ const PatientsTable = () => {
       </Stack>
     ),
     defaultColumn: {
-      minSize: 20, //allow columns to get smaller than default
-      maxSize: 100, //allow columns to get larger than default
-      size: 260, //make columns wider by default
+      minSize: 20,
+      maxSize: 80,
+      size: 200,
     },
     //!! for the future: remove this comment and add support for editing rows and deleting rows
     enableEditing: true,
@@ -332,13 +295,7 @@ const PatientsTable = () => {
       <Button
         variant="gradient" gradient={{ from: 'blue', to: 'cyan', deg: -45 }}
         onClick={() => {
-          table.setCreatingRow(true); //simplest way to open the create row modal with no default values
-          //or you can pass in a row object to set default values with the `createRow` helper function
-          // table.setCreatingRow(
-          //   createRow(table, {
-          //     //optionally pass in default values for the new row, useful for nested data or other complex scenarios
-          //   }),
-          // );
+          table.setCreatingRow(true);
         }}
       >
         Create New Patient
