@@ -1,5 +1,5 @@
-/** 
- * 1. Maybe add type checking? 
+/**
+ * 1. Maybe add type checking?
 */
 import { AuthContextValues } from "./context/AuthContextProvider"; //I changed AuthContextValues interface to make it exportable
 import axios, { AxiosResponse, AxiosError } from 'axios';
@@ -176,7 +176,7 @@ export function fetchAppointmentList(
     appointments.forEach((appointment: Results, index: number) => { // Replace 'any' with the correct type/interface
         // Extract the ID from the appointment URL
         const appointmentId = parseInt(appointment.url.split('/').pop() ?? '', 10);
-        
+
         const requestPromise = axios.get<AppointmentResponse>(appointment.url, {
             headers: {
                 Authorization: `Bearer ${authContext.keycloakToken}`,

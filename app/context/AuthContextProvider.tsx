@@ -4,11 +4,11 @@ import axios, { isCancel, AxiosError } from 'axios';
 /**
  * KeycloakConfig configures the connection to the Keycloak server.
  */
-const keycloakConfig: KeycloakConfig = { 
-  realm: "tekclinic", 
-  clientId: "web-app", 
+const keycloakConfig: KeycloakConfig = {
+  realm: "tekclinic",
+  clientId: "web-app",
   //url: "http://localhost:8180/"
-  url: "http://auth.tekclinic.org/", 
+  url: "http://auth.tekclinic.org/",
 };
 
 const keycloakInitOptions: KeycloakInitOptions = {

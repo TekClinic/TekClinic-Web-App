@@ -22,6 +22,7 @@
     "@syncfusion/ej2-react-calendars": "^25.1.37",
     "@syncfusion/ej2-react-dropdowns": "^25.1.37",
     "@syncfusion/ej2-react-schedule": "^25.1.37",
+    "@modulz/radix-icons": "^4.0.0",
     "add-to-calendar-button": "^2.6.6",
     "add-to-calendar-button-react": "^2.6.6",
     "axios": "^1.6.7",
@@ -36,6 +37,7 @@
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "^18.2.0",
+    "react-icons": "^5.0.1",
     "react-router-dom": "^6.22.2"
   },
   "devDependencies": {

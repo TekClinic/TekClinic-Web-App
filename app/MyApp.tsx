@@ -1,26 +1,40 @@
 import React, { useContext } from 'react';
-import { Navbar } from './components/navBar/NavBar';
-import Home from './pages/Home';
-import VolunteersDoctorsPage from './pages/VolunteersDoctorsPage';
-import AppointmentsPage from './pages/AppointmentsPage'; import { Loader, Center, Container } from '@mantine/core';
 import { AuthContext } from './context/AuthContextProvider';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import PatientsTablePage from "./patients/page";
+import { useDisclosure } from '@mantine/hooks';
+import {AppShell, Center, Loader} from '@mantine/core';
+import './App.css';
+import Navbar from './components/Navbar';
+import Header from './components/Header';
+import RouterSwitcher from './components/RouterSwitcher';
 
 function MyApp() {
   const authContext = useContext(AuthContext);
+  const [opened, {toggle}] = useDisclosure();
 
   return (
     authContext.isAuthenticated ? (
-      <Router>
-        <Navbar />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/patients" element={<PatientsTablePage />} />
-          <Route path="/volunteers-doctors" element={<VolunteersDoctorsPage />} />
-          <Route path="/appointments" element={<AppointmentsPage />} />
-        </Routes>
-      </Router>
+      <div className='App' style={{marginTop: '20px'}}>
+      <AppShell
+      header={{ height: 60}}
+      navbar={{
+        width: 200,
+        breakpoint: 'sm',
+        collapsed: { mobile: !opened}
+      }}
+      padding="md"
+    >
+      <Header toggle={toggle} opened={opened} />
+
+      <Navbar />
+      <AppShell.Main>
+        <RouterSwitcher />
+      </AppShell.Main>
+
+      <AppShell.Footer>
+        <div style={{ color: '#888', fontSize: '17px'}}> built by team 8 </div>
+      </AppShell.Footer>
+      </AppShell>
+    </div>
     ) : (
       <Center style={{ height: '100vh' }}>
         <Loader />
