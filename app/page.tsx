@@ -7,8 +7,7 @@ import '@mantine/core/styles.css'
 import '@mantine/dates/styles.css'
 import 'mantine-react-table/styles.css'
 import React from 'react'
-import {BrowserRouter} from "react-router-dom";
-
+import { BrowserRouter } from 'react-router-dom'
 
 const syncfusionLicenseKey = process.env.NEXT_PUBLIC_SYNCFUSION_LICENSE_KEY
 if (syncfusionLicenseKey == null) {

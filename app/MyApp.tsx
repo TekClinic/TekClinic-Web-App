@@ -1,25 +1,26 @@
-import React, { useContext } from 'react';
-import { AuthContext } from './context/AuthContextProvider';
-import { useDisclosure } from '@mantine/hooks';
-import {AppShell, Center, Loader} from '@mantine/core';
-import './App.css';
-import Navbar from './components/Navbar';
-import Header from './components/Header';
-import RouterSwitcher from './components/RouterSwitcher';
+import React, { useContext } from 'react'
+import { AuthContext } from './context/AuthContextProvider'
+import { useDisclosure } from '@mantine/hooks'
+import { AppShell, Center, Loader } from '@mantine/core'
+import './App.css'
+import Navbar from './components/Navbar'
+import Header from './components/Header'
+import RouterSwitcher from './components/RouterSwitcher'
 
-function MyApp() {
-  const authContext = useContext(AuthContext);
-  const [opened, {toggle}] = useDisclosure();
+function MyApp (): React.JSX.Element {
+  const authContext = useContext(AuthContext)
+  const [opened, { toggle }] = useDisclosure()
 
   return (
-    authContext.isAuthenticated ? (
-      <div className='App' style={{marginTop: '20px'}}>
+    authContext.isAuthenticated
+      ? (
+      <div className='App' style={{ marginTop: '20px' }}>
       <AppShell
-      header={{ height: 60}}
+      header={{ height: 60 }}
       navbar={{
         width: 230,
         breakpoint: 'sm',
-        collapsed: { mobile: !opened, desktop: !opened}
+        collapsed: { mobile: !opened, desktop: !opened }
       }}
       padding="md"
     >
@@ -31,15 +32,16 @@ function MyApp() {
       </AppShell.Main>
 
       <AppShell.Footer>
-        <div style={{ color: '#888', fontSize: '17px'}}> built by team 8 </div>
+        <div style={{ color: '#888', fontSize: '17px' }}> built by team 8 </div>
       </AppShell.Footer>
       </AppShell>
     </div>
-    ) : (
+        )
+      : (
       <Center style={{ height: '100vh' }}>
         <Loader />
       </Center>
-    )
-  );
+        )
+  )
 }
-export default MyApp;
+export default MyApp

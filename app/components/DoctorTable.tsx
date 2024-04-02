@@ -1,7 +1,8 @@
-import { Table } from '@mantine/core';
-import { DoctorResponse } from '../apiCalls';
+import { Table } from '@mantine/core'
+import { type DoctorResponse } from '../apiCalls'
+import React from 'react'
 
-const generateDoctorRows = (doctorList: DoctorResponse[]) => {
+const generateDoctorRows = (doctorList: DoctorResponse[]): React.JSX.Element[] => {
   return doctorList.map((doctor) => (
     <Table.Tr key={doctor.id}>
       <Table.Td>{doctor.name}</Table.Td>
@@ -10,8 +11,8 @@ const generateDoctorRows = (doctorList: DoctorResponse[]) => {
       <Table.Td>{doctor.specialities.join(', ')}</Table.Td>
       <Table.Td>{doctor.special_note}</Table.Td>
     </Table.Tr>
-  ));
-};
+  ))
+}
 
 const DoctorTable: React.FC<{ rows: React.ReactNode }> = ({ rows }) => (
   <Table striped highlightOnHover withTableBorder withColumnBorders>
@@ -26,6 +27,6 @@ const DoctorTable: React.FC<{ rows: React.ReactNode }> = ({ rows }) => (
     </Table.Thead>
     <Table.Tbody>{rows}</Table.Tbody>
   </Table>
-);
+)
 
-export { generateDoctorRows, DoctorTable as default };
+export { generateDoctorRows, DoctorTable as default }

@@ -22,7 +22,6 @@
     "@syncfusion/ej2-react-calendars": "^25.1.37",
     "@syncfusion/ej2-react-dropdowns": "^25.1.37",
     "@syncfusion/ej2-react-schedule": "^25.1.37",
-    "@modulz/radix-icons": "^4.0.0",
     "add-to-calendar-button": "^2.6.6",
     "add-to-calendar-button-react": "^2.6.6",
     "axios": "^1.6.7",

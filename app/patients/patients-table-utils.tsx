@@ -10,10 +10,11 @@ import {
   useMutation,
   useQuery,
   useQueryClient,
-  keepPreviousData
+  keepPreviousData, type UseQueryResult, type UseMutationResult
 } from '@tanstack/react-query'
 import { type PatientResponse, fetchEndpointResponse, fetchPatientList } from '../apiCalls'
 import { staleTimeForRefetch } from './consts'
+import type React from 'react'
 
 const fetchEndpointData = async (
   limit: number,
@@ -45,7 +46,7 @@ interface UseGetPatientsParams {
   setRowCount: React.Dispatch<React.SetStateAction<number>>
 }
 
-export function useGetPatients({ authContext, setError, pagination, setRowCount }: UseGetPatientsParams) {
+export function useGetPatients ({ authContext, setError, pagination, setRowCount }: UseGetPatientsParams): UseQueryResult<PatientResponse[], Error> {
   return useQuery<PatientResponse[]>({
     queryKey: ['patients', pagination.pageSize, pagination.pageIndex],
     queryFn: async () => await fetchEndpointData(pagination.pageSize, pagination.pageIndex * pagination.pageSize, authContext, setError, setRowCount),
@@ -56,7 +57,7 @@ export function useGetPatients({ authContext, setError, pagination, setRowCount 
 }
 
 // CREATE hook (post new user to api)
-export function useCreatePatient() {
+export function useCreatePatient (): UseMutationResult<void, Error, PatientResponse, void> {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async (patient: PatientResponse) => {
@@ -82,7 +83,7 @@ export function useCreatePatient() {
 }
 
 // UPDATE hook (put user in api)
-export function useUpdatePatient() {
+export function useUpdatePatient (): UseMutationResult<void, Error, PatientResponse, void> {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async (patient: PatientResponse) => {
@@ -103,7 +104,7 @@ export function useUpdatePatient() {
 }
 
 // DELETE hook (delete user in api)
-export function useDeletePatient() {
+export function useDeletePatient (): UseMutationResult<void, Error, number, void> {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async (patientId: number) => {
@@ -121,17 +122,9 @@ export function useDeletePatient() {
   })
 }
 
-const validateRequired = (value: string) => !!value.length
+const validateRequired = (value: string): boolean => !(value.length === 0)
 
-export const validateEmail = (email: string) =>
-  !!email.length &&
-  email
-    .toLowerCase()
-    .match(
-      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-    )
-
-export function validatePatient(patient: PatientResponse) {
+export function validatePatient (patient: PatientResponse): { name: string } {
   return {
     name: !validateRequired(patient.name)
       ? 'Name is Required'

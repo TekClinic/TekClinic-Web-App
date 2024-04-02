@@ -2,7 +2,7 @@
 import '@mantine/core/styles.css'
 import '@mantine/dates/styles.css'
 import 'mantine-react-table/styles.css'
-import { useContext, useMemo, useState } from 'react'
+import React, { useContext, useMemo, useState } from 'react'
 import {
   MRT_EditActionButtons,
   MantineReactTable,
@@ -35,7 +35,7 @@ import { AuthContext } from '../context/AuthContextProvider'
 import { defaultNumRows } from './consts'
 import { useCreatePatient, useDeletePatient, useGetPatients, useUpdatePatient, validatePatient } from './patients-table-utils'
 
-const PatientsTable = () => {
+const PatientsTable = (): React.JSX.Element => {
   const [, setError] = useState<string | null>(null)
 
   //! ! Change after backend implementation changes
@@ -48,8 +48,8 @@ const PatientsTable = () => {
 
   const authContext = useContext(AuthContext)
 
-  const [validationErrors, setValidationErrors] = useState<
-    Record<string, string | undefined>
+  const [, setValidationErrors] = useState<
+  Record<string, string | undefined>
   >({})
 
   const columns = useMemo<Array<MRT_ColumnDef<PatientResponse>>>(
@@ -203,6 +203,7 @@ const PatientsTable = () => {
     useDeletePatient()
 
   // CREATE action
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   const handleCreatePatient: MRT_TableOptions<PatientResponse>['onCreatingRowSave'] = async ({
     values,
     exitCreatingMode
@@ -233,7 +234,7 @@ const PatientsTable = () => {
   }
 
   // DELETE action
-  const openDeleteConfirmModal = (row: MRT_Row<PatientResponse>) => {
+  const openDeleteConfirmModal = (row: MRT_Row<PatientResponse>): void => {
     modals.openConfirmModal({
       title: 'Are you sure you want to delete this user?',
       children: (
@@ -243,6 +244,7 @@ const PatientsTable = () => {
       ),
       labels: { confirm: 'Delete', cancel: 'Cancel' },
       confirmProps: { color: 'red' },
+      // eslint-disable-next-line @typescript-eslint/no-misused-promises
       onConfirm: async () => { await deletePatient(row.original.id) }
     })
   }
@@ -256,9 +258,9 @@ const PatientsTable = () => {
     enableSorting: false,
     mantineToolbarAlertBannerProps: isLoadingPatientsError
       ? {
-        color: 'red',
-        children: 'Error loading data'
-      }
+          color: 'red',
+          children: 'Error loading data'
+        }
       : undefined,
 
     mantinePaginationProps: {
@@ -335,7 +337,7 @@ const PatientsTable = () => {
 
 const queryClient = new QueryClient()
 
-const PatientsTablePage = () => {
+const PatientsTablePage = (): React.JSX.Element => {
   return (
     <Flex direction="column" style={{ margin: '20px' }}>
       <QueryClientProvider client={queryClient}>
