@@ -1,6 +1,6 @@
 import { AppShell, NavLink } from '@mantine/core';
 import { useNavigate } from 'react-router-dom';
-import { HomeIcon, PersonIcon} from '@modulz/radix-icons';
+//import { HomeIcon, PersonIcon} from '@modulz/radix-icons';
 import { AuthContext } from "../context/AuthContextProvider";
 import { useEffect, useState, useContext } from "react";
 import { IconHome2, IconGauge, IconChevronRight, IconActivity, IconCircleOff } from '@tabler/icons-react';
@@ -65,7 +65,7 @@ const Navbar = () => {
       </div>
       {/* Footer */}
       <footer style={{ textAlign: 'center', padding: '10px' , fontSize: '15px'}}>
-      <h4 style={{ textAlign: 'left' , fontSize: '15px',  fontWeight: '300',  color: 'rgb(100, 140, 200)'}} >logged as : {username}</h4>
+      <h4 style={{ textAlign: 'left' , fontSize: '15px',  fontWeight: '300',  color: 'rgb(100, 140, 200)'}} >logged in as {username}</h4>
       <NavLink
             
             label= "Logout"

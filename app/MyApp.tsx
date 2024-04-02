@@ -19,7 +19,7 @@ function MyApp() {
       navbar={{
         width: 230,
         breakpoint: 'sm',
-        collapsed: { mobile: !opened}
+        collapsed: { mobile: !opened, desktop: !opened}
       }}
       padding="md"
     >
