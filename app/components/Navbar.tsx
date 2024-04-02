@@ -4,7 +4,7 @@ import { HomeIcon, PersonIcon} from '@modulz/radix-icons';
 import { AuthContext } from "../context/AuthContextProvider";
 import { useEffect, useState, useContext } from "react";
 import { IconHome2, IconGauge, IconChevronRight, IconActivity, IconCircleOff } from '@tabler/icons-react';
-import { Logout, Man, Home2, ReportMedical } from 'tabler-icons-react';
+import { Logout, Man, Home2, ReportMedical , CalendarEvent} from 'tabler-icons-react';
 
 
 const Navbar = () => {
@@ -53,14 +53,22 @@ const Navbar = () => {
         leftSection={<ReportMedical size="20px"/>}
       />
 
+      <NavLink
+        label={<div style={{ fontSize: '14px'}}>Appointments</div>}
+        onClick={() => navigate('/appointments')}
+        style={{ margin: '5px' }}
+        leftSection={<CalendarEvent size="20px"/>}
+      />
+
 <div style={{ flex: '1' }}>
         {/* Your main content here */}
       </div>
       {/* Footer */}
       <footer style={{ textAlign: 'center', padding: '10px' , fontSize: '15px'}}>
+      <h4 style={{ textAlign: 'left' , fontSize: '15px',  fontWeight: '300',  color: 'rgb(100, 140, 200)'}} >logged as : {username}</h4>
       <NavLink
             
-            label="Logout"
+            label= "Logout"
             onClick={handleLogout}
             style={{ margin: '5px'}}
             leftSection={<Logout size="20px"/>}

@@ -50,7 +50,9 @@ const AppointmentsPage = () => {
 
 
   return (
+    
     <div className={styles.container} style={{ height: '100%', overflow: 'auto' }}>
+      <h1></h1>
       <h1 className={styles.heading}>Appointments</h1>
       <MyScheduler />
     </div>
