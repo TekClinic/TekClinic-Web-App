@@ -1,5 +1,7 @@
 import React from 'react'
 import Image from 'next/image'
+import clinicIntro from '@/public/clinic_intro.png'
+import './styles.css'
 
 export default function Home (): React.JSX.Element {
   return (
@@ -11,7 +13,7 @@ export default function Home (): React.JSX.Element {
             <td><h1 className="main_header">Your clinic organizer</h1>
             <h3 className='main_description'>Manage your patients, doctors, <br /> and appointments</h3>
             </td>
-            <td> <Image src="./clinic_intro.png" style={{ tabSize: '10px' }} alt="clinic intro" />  </td>
+            <td> <Image quality={100} src={clinicIntro} style={{ tabSize: '10px' }} alt="clinic intro" />  </td>
           </tr>
           </tbody>
       </table>

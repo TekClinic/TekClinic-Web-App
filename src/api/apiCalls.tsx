@@ -1,7 +1,7 @@
 /**
  * 1. Maybe add type checking?
 */
-import { type AuthContextValues } from './context/AuthContextProvider' // I changed AuthContextValues interface to make it exportable
+import { type AuthContextValues } from '../context/AuthContextProvider' // I changed AuthContextValues interface to make it exportable
 import axios, { type AxiosResponse, type AxiosError } from 'axios'
 import type React from 'react'
 

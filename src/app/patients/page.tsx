@@ -30,9 +30,9 @@ import {
   QueryClient,
   QueryClientProvider
 } from '@tanstack/react-query'
-import { type PatientResponse } from '../apiCalls'
-import { AuthContext } from '../context/AuthContextProvider'
-import { defaultNumRows } from './consts'
+import { type PatientResponse } from '@/src/api/apiCalls'
+import { AuthContext } from '@/src/context/AuthContextProvider'
+import { defaultNumRows } from './const'
 import { useCreatePatient, useDeletePatient, useGetPatients, useUpdatePatient, validatePatient } from './patients-table-utils'
 
 const PatientsTable = (): React.JSX.Element => {

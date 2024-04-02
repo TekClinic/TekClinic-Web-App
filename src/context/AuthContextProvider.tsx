@@ -75,27 +75,19 @@ interface AuthContextProviderProps {
  * @param props
  */
 const AuthContextProvider = (props: AuthContextProviderProps): React.JSX.Element => {
-  // This is just here to check that we set up the provider correctly.
-  console.log('rendering AuthContextProvider')
-
   // Creating the local state to keep track of the authentication & the token
   const [isAuthenticated, setAuthenticated] = useState<boolean>(false)
   const [keycloakToken, setToken] = useState<string | undefined>('')
 
   useEffect(() => {
     async function initializeKeycloak (): Promise<void> {
-      console.log('initialize Keycloak')
       try {
         const isAuthenticatedResponse = await keycloak.init(
           keycloakInitOptions
         )
         if (!isAuthenticatedResponse) {
-          console.log(
-            'user is not yet authenticated. forwarding user to login.'
-          )
-          await keycloak.login()
+          await keycloak.login({ prompt: 'none' })
         }
-        console.log('user already authenticated')
         setAuthenticated(isAuthenticatedResponse)
         // Updating token state
         setToken(keycloak.token)

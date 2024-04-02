@@ -5,15 +5,15 @@ import 'mantine-react-table/styles.css' // make sure MRT styles were imported in
 import {
   type MRT_PaginationState
 } from 'mantine-react-table'
-import { type AuthContextValues } from '../context/AuthContextProvider'
+import { type AuthContextValues } from '@/src/context/AuthContextProvider'
 import {
   useMutation,
   useQuery,
   useQueryClient,
   keepPreviousData, type UseQueryResult, type UseMutationResult
 } from '@tanstack/react-query'
-import { type PatientResponse, fetchEndpointResponse, fetchPatientList } from '../apiCalls'
-import { staleTimeForRefetch } from './consts'
+import { type PatientResponse, fetchEndpointResponse, fetchPatientList } from '@/src/api/apiCalls'
+import { staleTimeForRefetch } from './const'
 import type React from 'react'
 
 const fetchEndpointData = async (
