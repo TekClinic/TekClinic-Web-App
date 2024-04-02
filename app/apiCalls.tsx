@@ -1,8 +1,11 @@
+/** 
+ * 1. Maybe add type checking? 
+*/
 import { AuthContextValues } from "./context/AuthContextProvider"; //I changed AuthContextValues interface to make it exportable
 import axios, { AxiosResponse, AxiosError } from 'axios';
 
 //const url = 'http://localhost:8080';
-const url = 'http://api.tekclinic.org';
+const url = "http://api.tekclinic.org";
 
 interface Results {
     name: string;
@@ -58,15 +61,22 @@ export interface DoctorResponse {
 export interface AppointmentResponse {
     patient_id: number;
     doctor_id: number;
-    date: { year: number; month: number; day: number };
-    time: { hour: number; minute: number };
+    start_time: Date;
+    end_time: Date;
     approved_by_patient: boolean;
     visited: boolean;
 }
+
+export interface Appointment extends AppointmentResponse {
+    id: number;
+}
+
+
+
 export function fetchEndpointResponse(endpoint: string, limit: number, offset: number, authContext: AuthContextValues, setError: React.Dispatch<React.SetStateAction<string | null>>): Promise<EndpointResponse> {
     return new Promise((resolve, reject) => {
         if (authContext.isAuthenticated && authContext.keycloakToken) {
-            let get_url = `${url}/${endpoint}?limit=${limit}&offset=${offset}`;
+            let get_url = `${url}/${endpoint}?limit=${limit}&skip=${offset}`;
             axios.get<EndpointResponse>(get_url, {
                 headers: {
                     Authorization: `Bearer ${authContext.keycloakToken}`,
@@ -156,28 +166,39 @@ export function fetchDoctorList(doctors: Results[], authContext: AuthContextValu
     return Promise.all(doctorRequests);
 }
 
-export function fetchAppointmentList(appointments: Results[], authContext: AuthContextValues, setError: React.Dispatch<React.SetStateAction<string | null>>): Promise<AppointmentResponse[]> {
-    const appointmentRequests: Promise<AppointmentResponse>[] = [];
+export function fetchAppointmentList(
+    appointments: Results[], // Replace any[] with a type/interface that represents an appointment
+    authContext: AuthContextValues,
+    setError: React.Dispatch<React.SetStateAction<string | null>>
+): Promise<Appointment[]> {
+    const appointmentRequests: Promise<Appointment>[] = [];
 
-    appointments.forEach((appointment: Results, index: number) => {
+    appointments.forEach((appointment: Results, index: number) => { // Replace 'any' with the correct type/interface
+        // Extract the ID from the appointment URL
+        const appointmentId = parseInt(appointment.url.split('/').pop() ?? '', 10);
+        
         const requestPromise = axios.get<AppointmentResponse>(appointment.url, {
             headers: {
                 Authorization: `Bearer ${authContext.keycloakToken}`,
             },
         })
             .then((response: AxiosResponse<AppointmentResponse>) => {
-                //console.log(`GET appointment/${index} Response:`, response.data);
-                return response.data;
+                // Assign the ID extracted from the URL to the ID field of the appointment response
+                const appointmentData = response.data as Appointment; // Cast to Appointment
+                appointmentData.id = appointmentId; // Use the ID from the URL
+                return appointmentData;
             })
             .catch((error: AxiosError) => {
                 console.error(`Error fetching appointment/${index} data:`, error);
+                let errorMessage = 'An error occurred while fetching appointments.';
                 if (error.response) {
-                    setError(`Error: ${(error.response.status as number)} - ${(error.response.data as { error: string }).error}`);
+                    errorMessage = `Error: ${(error.response.status as number)} - ${(error.response.data as { error: string }).error}`;
                 } else if (error.request) {
-                    setError('No response received from the server.');
+                    errorMessage = 'No response received from the server.';
                 } else {
-                    setError(`Error: ${error.message}`);
+                    errorMessage = `Error: ${error.message}`;
                 }
+                setError(errorMessage);
                 throw error; // Propagate the error
             });
 
@@ -185,4 +206,91 @@ export function fetchAppointmentList(appointments: Results[], authContext: AuthC
     });
 
     return Promise.all(appointmentRequests);
+}
+
+export interface CreateAppointmentRequest {
+    patient_id?: number;
+    doctor_id: number;
+    start_time: string;
+    end_time: string;
+}
+
+export interface CreateAppointmentResponse {
+    id: {
+        id: number;
+    };
+}
+
+export function createAppointment(
+    appointmentData: CreateAppointmentRequest,
+    authContext: AuthContextValues,
+    setError: React.Dispatch<React.SetStateAction<string | null>>
+  ): Promise<CreateAppointmentResponse> {
+    return new Promise((resolve, reject) => {
+      if (authContext.isAuthenticated && authContext.keycloakToken) {
+        axios.post(`${url}/appointment`, appointmentData, {
+          headers: {
+            Authorization: `Bearer ${authContext.keycloakToken}`,
+          },
+        })
+          .then((response: AxiosResponse<{ id: number }>) => {
+            const appointmentResponse: CreateAppointmentResponse = {
+              id: {
+                id: response.data.id
+              }
+            };
+            resolve(appointmentResponse);
+          })
+          .catch((error: AxiosError) => {
+            console.error('Error creating appointment:', error);
+            if (error.response) {
+              setError(`Error: ${(error.response.status as number)} - ${(error.response.data as { error: string }).error}`);
+            } else if (error.request) {
+              setError('No response received from the server.');
+            } else {
+              setError(`Error: ${error.message}`);
+            }
+            reject(error);
+          });
+      } else {
+        reject(new Error('User not authenticated'));
+        console.log('Logging out...');
+        authContext.logout();
+      }
+    });
+  }
+
+export function deleteAppointment(
+    appointmentId: number,
+    authContext: AuthContextValues,
+    setError: React.Dispatch<React.SetStateAction<string | null>>
+): Promise<void> {
+    return new Promise((resolve, reject) => {
+        if (authContext.isAuthenticated && authContext.keycloakToken) {
+            axios.delete<void>(`${url}/appointment/${appointmentId}`, {
+                headers: {
+                    Authorization: `Bearer ${authContext.keycloakToken}`,
+                },
+            })
+            .then(() => {
+                console.log(`Appointment with ID ${appointmentId} deleted successfully`);
+                resolve();
+            })
+            .catch((error: AxiosError) => {
+                console.error(`Error deleting appointment with ID ${appointmentId}:`, error);
+                if (error.response) {
+                    setError(`Error: ${(error.response.status as number)} - ${(error.response.data as { error: string }).error}`);
+                } else if (error.request) {
+                    setError('No response received from the server.');
+                } else {
+                    setError(`Error: ${error.message}`);
+                }
+                reject(error);
+            });
+        } else {
+            reject(new Error('User not authenticated'));
+            console.log('Logging out...');
+            authContext.logout();
+        }
+    });
 }

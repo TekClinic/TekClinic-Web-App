@@ -9,7 +9,7 @@ export const metadata = {
 
 const theme = createTheme({
   fontFamily: 'Open Sans, sans-serif',
-  primaryColor: 'cyan',
+  primaryColor: 'blue',
 });
 
 export default function RootLayout({ children }: { children: any }) {

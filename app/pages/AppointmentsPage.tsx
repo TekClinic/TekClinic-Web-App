@@ -2,9 +2,8 @@ import React, { useContext } from 'react';
 import { AuthContext } from "../context/AuthContextProvider";
 import { useEffect, useState } from "react";
 import {  AppointmentResponse, EndpointResponse, fetchEndpointResponse, fetchAppointmentList  } from "../apiCalls";
-import AppointmentTable from '../components/AppointmentTable';
 import styles from './general.module.css'; // Import CSS module for styling
-
+import MyScheduler from '../components/Calendar';
 
 const AppointmentsPage = () => {
   const authContext = useContext(AuthContext);
@@ -48,10 +47,12 @@ const AppointmentsPage = () => {
     };
     fetchEndpointData();
   }, [authContext.isAuthenticated, authContext.keycloakToken, authContext.username]);
+
+
   return (
     <div className={styles.container} style={{ height: '100%', overflow: 'auto' }}>
       <h1 className={styles.heading}>Appointments</h1>
-      <AppointmentTable appointmentList={appointmentList} />
+      <MyScheduler />
     </div>
   );
 };
