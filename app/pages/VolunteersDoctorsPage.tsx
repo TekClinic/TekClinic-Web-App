@@ -75,10 +75,10 @@ const VolunteersDoctorsPage = () => {
   const rows = doctorList ? generateDoctorRows(doctorList) : null;
   return (
     rows ? (
-      <div className={styles.container} style={{ height: '100%', overflow: 'auto' }}>
+      <div className={styles.container} >
         <h1>Doctors</h1>
         <DoctorTable rows={rows} />
-        <div style={{ height: '100px', overflow: 'auto' }}> {/* Adjust the height as needed */}
+        <div > {/* Adjust the height as needed */}
           <Pagination.Root total={count} value={activePage} onChange={setPage}>
             <Group gap={5} justify="center">
               <Pagination.First />
@@ -91,8 +91,10 @@ const VolunteersDoctorsPage = () => {
         </div>
       </div>
     ) : (
-      <div className={styles.container} style={{ height: '100%', overflow: 'auto' }}>
+      <div>
+      <div className={styles.container} >
         <h1>Volunteers and Doctors</h1>
+      </div>
       </div>
     )
   );

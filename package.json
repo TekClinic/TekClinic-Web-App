@@ -33,12 +33,13 @@
     "next": "^14.1.0",
     "next-themes": "^0.2.1",
     "prop-types": "^15.8.1",
-    "react": "^18",
+    "react": "^18.2.0",
+    "react-dom": "^18",
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",
-    "react-dom": "^18.2.0",
     "react-icons": "^5.0.1",
-    "react-router-dom": "^6.22.2"
+    "react-router-dom": "^6.22.3",
+    "tabler-icons-react": "^1.56.0"
   },
   "devDependencies": {
     "@types/globalize": "^1.5.5",

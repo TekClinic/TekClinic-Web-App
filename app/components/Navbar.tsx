@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { HomeIcon, PersonIcon} from '@modulz/radix-icons';
 import { AuthContext } from "../context/AuthContextProvider";
 import { useEffect, useState, useContext } from "react";
+import { IconHome2, IconGauge, IconChevronRight, IconActivity, IconCircleOff } from '@tabler/icons-react';
+import { Logout, Man, Home2, ReportMedical } from 'tabler-icons-react';
+
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -31,21 +34,23 @@ const Navbar = () => {
   return (
     <AppShell.Navbar p="md" style={{ gap: '10px' , fontSize: '15px'}}>
         <NavLink
-            
-            label="Home"
+            label={<div style={{ fontSize: '14px'}}>Home</div>}
             onClick={() => navigate('/')}
             style={{ margin: '5px'}}
+            leftSection={<Home2 size="20px"/>}
         />
 
       <NavLink
-        label=" Patients"
+        label={<div style={{ fontSize: '14px'}}>Patients</div>}
         onClick={() => navigate('/patients')}
         style={{ margin: '5px' }}
+        leftSection={<Man size="20px"/>}
       />
       <NavLink
-        label="Volunteers & Doctors"
+        label={<div style={{ fontSize: '14px'}}>Volunteers & Doctors</div>}
         onClick={() => navigate('/volunteers-doctors')}
         style={{ margin: '5px' }}
+        leftSection={<ReportMedical size="20px"/>}
       />
 
 <div style={{ flex: '1' }}>
@@ -58,6 +63,8 @@ const Navbar = () => {
             label="Logout"
             onClick={handleLogout}
             style={{ margin: '5px'}}
+            leftSection={<Logout size="20px"/>}
+
         />
 
       </footer>
