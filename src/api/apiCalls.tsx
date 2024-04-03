@@ -23,12 +23,6 @@ interface PersonalId {
   type: string
 }
 
-interface BirthDate {
-  day: number
-  month: number
-  year: number
-}
-
 interface EmergencyContact {
   name: string
   closeness: string
@@ -43,7 +37,7 @@ export interface PatientResponse {
   gender: string
   phone_number: string
   languages: string[]
-  birth_date: BirthDate
+  birth_date: string
   age: number
   referred_by: string
   emergency_contacts: EmergencyContact[]

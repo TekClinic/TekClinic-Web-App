@@ -77,7 +77,17 @@ const PatientsTable = (): React.JSX.Element => {
           type: 'text',
           require: true
         },
-        Cell: ({ cell }) => `${cell.row.original.personal_id.id} (${cell.row.original.personal_id.type})`
+        Cell: ({ cell }) => `${cell.row.original.personal_id.id}`
+      },
+      {
+        accessorKey: 'personalIdType',
+        header: 'Personal ID Type',
+        enableEditing: true,
+        mantineEditTextInputProps: {
+          type: 'text',
+          require: true
+        },
+        Cell: ({ cell }) => `${cell.row.original.personal_id.type}`
       },
       {
         accessorKey: 'gender',
@@ -129,7 +139,11 @@ const PatientsTable = (): React.JSX.Element => {
           type: 'date',
           require: true
         },
-        Cell: ({ cell }) => `${cell.row.original.birth_date.month}/${cell.row.original.birth_date.day}/${cell.row.original.birth_date.year}`
+        Cell: ({ cell }) => {
+          const date = new Date(cell.row.original.birth_date);
+          const formattedDate = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+          return formattedDate;
+        }
       },
       {
         accessorKey: 'age',
