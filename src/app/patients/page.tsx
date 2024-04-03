@@ -140,9 +140,9 @@ const PatientsTable = (): React.JSX.Element => {
           require: true
         },
         Cell: ({ cell }) => {
-          const date = new Date(cell.row.original.birth_date);
-          const formattedDate = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
-          return formattedDate;
+          const date = new Date(cell.row.original.birth_date)
+          const formattedDate = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`
+          return formattedDate
         }
       },
       {
