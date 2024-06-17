@@ -82,7 +82,7 @@ export async function fetchEndpointResponse (endpoint: string, limit: number, of
         .catch((error: AxiosError) => {
           console.error(`Error fetching ${endpoint} data:`, error)
           if (error.response != null) {
-            setError(`Error: ${(error.response.status)} - ${(error.response.data as { error: string }).error}`)
+            setError(`Error: ${(error.response.status)} - ${(error.response.statusText)}`)
           } else if (error.request != null) {
             setError('No response received from the server.')
           } else {
@@ -114,7 +114,7 @@ export async function fetchPatientList (patients: Results[], authContext: AuthCo
       .catch((error: AxiosError) => {
         console.error(`Error fetching patient/${index} data:`, error)
         if (error.response != null) {
-          setError(`Error: ${(error.response.status)} - ${(error.response.data as { error: string }).error}`)
+          setError(`Error: ${(error.response.status)} - ${(error.response.statusText)}`)
         } else if (error.request != null) {
           setError('No response received from the server.')
         } else {
@@ -144,7 +144,7 @@ export async function fetchDoctorList (doctors: Results[], authContext: AuthCont
       .catch((error: AxiosError) => {
         console.error(`Error fetching doctor/${index} data:`, error)
         if (error.response != null) {
-          setError(`Error: ${(error.response.status)} - ${(error.response.data as { error: string }).error}`)
+          setError(`Error: ${(error.response.status)} - ${(error.response.statusText)}`)
         } else if (error.request != null) {
           setError('No response received from the server.')
         } else {
@@ -185,7 +185,7 @@ export async function fetchAppointmentList (
         console.error(`Error fetching appointment/${index} data:`, error)
         let errorMessage: string
         if (error.response != null) {
-          errorMessage = `Error: ${(error.response.status)} - ${(error.response.data as { error: string }).error}`
+          errorMessage = `Error: ${(error.response.status)} - ${(error.response.statusText)}}`
         } else if (error.request != null) {
           errorMessage = 'No response received from the server.'
         } else {
@@ -237,7 +237,7 @@ export async function createAppointment (
         .catch((error: AxiosError) => {
           console.error('Error creating appointment:', error)
           if (error.response != null) {
-            setError(`Error: ${(error.response.status)} - ${(error.response.data as { error: string }).error}`)
+            setError(`Error: ${(error.response.status)} - ${(error.response.statusText)}`)
           } else if (error.request != null) {
             setError('No response received from the server.')
           } else {
@@ -272,7 +272,7 @@ export async function deleteAppointment (
         .catch((error: AxiosError) => {
           console.error(`Error deleting appointment with ID ${appointmentId}:`, error)
           if (error.response != null) {
-            setError(`Error: ${(error.response.status)} - ${(error.response.data as { error: string }).error}`)
+            setError(`Error: ${(error.response.status)} - ${(error.response.statusText)}`)
           } else if (error.request != null) {
             setError('No response received from the server.')
           } else {

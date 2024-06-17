@@ -2,7 +2,7 @@
 import '@mantine/core/styles.css'
 import '@mantine/dates/styles.css'
 import 'mantine-react-table/styles.css'
-import React, { useContext, useMemo, useState } from 'react'
+import React, { useContext, useEffect, useMemo, useState } from 'react'
 import {
   MRT_EditActionButtons,
   MantineReactTable,
@@ -22,7 +22,8 @@ import {
   Tooltip,
   Badge,
   Divider,
-  Container
+  Container,
+  useMantineColorScheme
 } from '@mantine/core'
 import { ModalsProvider, modals } from '@mantine/modals'
 import { IconEdit, IconTrash } from '@tabler/icons-react'
@@ -35,8 +36,23 @@ import { AuthContext } from '@/src/context/AuthContextProvider'
 import { defaultNumRows } from './const'
 import { useCreatePatient, useDeletePatient, useGetPatients, useUpdatePatient, validatePatient } from './patients-table-utils'
 
+import { toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
+
 const PatientsTable = (): React.JSX.Element => {
-  const [, setError] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  const { colorScheme } = useMantineColorScheme()
+
+  useEffect(() => {
+    if (error != null) {
+      // Show the error popup
+      toast.error(`${(error)}. Please try again later.`, {
+        theme: colorScheme
+      })
+      setError(null)
+    }
+  }, [error, colorScheme])
 
   //! ! Change after backend implementation changes
   const [rowCount, setRowCount] = useState<number>(defaultNumRows)

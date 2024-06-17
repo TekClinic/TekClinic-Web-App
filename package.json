@@ -9,19 +9,19 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@bitnoi.se/react-scheduler": "^0.1.5",
     "@mantine/core": "^7.7.1",
     "@mantine/dates": "^7.7.1",
     "@mantine/hooks": "^7.7.1",
     "@mantine/modals": "^7.7.1",
-    "@tabler/icons-react": "^3.1.0",
-    "@tanstack/react-query": "^5.28.9",
-    "@bitnoi.se/react-scheduler": "^0.1.5",
     "@syncfusion/ej2-base": "^25.1.35",
     "@syncfusion/ej2-data": "^25.1.35",
     "@syncfusion/ej2-react-buttons": "^25.1.35",
     "@syncfusion/ej2-react-calendars": "^25.1.37",
     "@syncfusion/ej2-react-dropdowns": "^25.1.37",
     "@syncfusion/ej2-react-schedule": "^25.1.37",
+    "@tabler/icons-react": "^3.1.0",
+    "@tanstack/react-query": "^5.28.9",
     "add-to-calendar-button": "^2.6.6",
     "add-to-calendar-button-react": "^2.6.6",
     "axios": "^1.6.7",
@@ -33,11 +33,12 @@
     "next-themes": "^0.2.1",
     "prop-types": "^15.8.1",
     "react": "^18.2.0",
-    "react-dom": "^18",
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",
+    "react-dom": "^18",
     "react-icons": "^5.0.1",
     "react-router-dom": "^6.22.3",
+    "react-toastify": "^10.0.5",
     "tabler-icons-react": "^1.56.0"
   },
   "devDependencies": {
@@ -50,9 +51,9 @@
     "eslint": "^8",
     "eslint-config-next": "14.1.0",
     "eslint-config-standard-with-typescript": "^43.0.1",
+    "postcss": "^8",
     "postcss-preset-mantine": "^1.13.0",
     "postcss-simple-vars": "^7.0.1",
-    "postcss": "^8",
     "tailwindcss": "^3.3.0",
     "typescript": "^5"
   }

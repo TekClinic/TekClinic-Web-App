@@ -23,11 +23,27 @@ import {
 import {DateTimePickerComponent} from '@syncfusion/ej2-react-calendars'
 import './Calendar.css'
 
+import { toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
+import { useMantineColorScheme } from '@mantine/core'
+
 const MyScheduler = (): React.JSX.Element => {
   const scheduleObj = useRef<ScheduleComponent>(null)
   const authContext = useContext(AuthContext)
   const [appointments, setAppointments] = useState<Appointment[]>([])
-  const [, setError] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  const { colorScheme } = useMantineColorScheme()
+
+  useEffect(() => {
+    if (error != null) {
+      // Show the error popup
+      toast.error(`${(error)}. Please try again later.`, {
+        theme: colorScheme
+      })
+      setError(null)
+    }
+  }, [error, colorScheme])
 
   const onPopupOpen = (args: any): void => {
     if (args.type === 'QuickInfo') {
