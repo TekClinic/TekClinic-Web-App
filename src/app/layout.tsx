@@ -7,13 +7,9 @@ import { useDisclosure } from '@mantine/hooks'
 import Header from '@/src/components/Header'
 import Navbar from '@/src/components/Navbar'
 import { registerLicense } from '@syncfusion/ej2-base'
+import { requireBuildEnv } from '@/src/api/utils'
 
-const syncfusionLicenseKey = process.env.NEXT_PUBLIC_SYNCFUSION_LICENSE_KEY
-if (syncfusionLicenseKey == null) {
-  throw new Error('NEXT_PUBLIC_SYNCFUSION_LICENSE_KEY is not set. ' +
-    'You probably forgot to set it in your .env.local file.')
-}
-registerLicense(syncfusionLicenseKey)
+registerLicense(requireBuildEnv('NEXT_PUBLIC_SYNCFUSION_LICENSE_KEY', process.env.NEXT_PUBLIC_SYNCFUSION_LICENSE_KEY))
 
 const theme = createTheme({
   fontFamily: 'Open Sans, sans-serif',

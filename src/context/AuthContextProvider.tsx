@@ -1,5 +1,6 @@
 import Keycloak, { type KeycloakConfig, type KeycloakInitOptions } from 'keycloak-js'
 import React, { createContext, useEffect, useState } from 'react'
+import { requireBuildEnv } from '@/src/api/utils'
 
 /**
  * KeycloakConfig configures the connection to the Keycloak server.
@@ -7,7 +8,7 @@ import React, { createContext, useEffect, useState } from 'react'
 const keycloakConfig: KeycloakConfig = {
   realm: 'tekclinic',
   clientId: 'web-app',
-  url: 'http://auth.tekclinic.org/'
+  url: requireBuildEnv('NEXT_PUBLIC_AUTH_URL', process.env.NEXT_PUBLIC_AUTH_URL)
 }
 
 const keycloakInitOptions: KeycloakInitOptions = {

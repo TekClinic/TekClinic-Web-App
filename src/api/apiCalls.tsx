@@ -4,8 +4,9 @@
 import { type AuthContextValues } from '../context/AuthContextProvider' // I changed AuthContextValues interface to make it exportable
 import axios, { type AxiosResponse, type AxiosError } from 'axios'
 import type React from 'react'
+import { requireBuildEnv } from '@/src/api/utils'
 
-const url = 'http://api.tekclinic.org'
+const API_URL = requireBuildEnv('NEXT_PUBLIC_API_URL', process.env.NEXT_PUBLIC_API_URL)
 
 interface Results {
   name: string
@@ -68,7 +69,7 @@ export interface Appointment extends AppointmentResponse {
 export async function fetchEndpointResponse (endpoint: string, limit: number, offset: number, authContext: AuthContextValues, setError: React.Dispatch<React.SetStateAction<string | null>>): Promise<EndpointResponse> {
   return await new Promise((resolve, reject) => {
     if (authContext.isAuthenticated && (authContext.keycloakToken != null)) {
-      const getUrl = `${url}/${endpoint}?limit=${limit}&skip=${offset}`
+      const getUrl = `${API_URL}/${endpoint}?limit=${limit}&skip=${offset}`
       axios.get<EndpointResponse>(getUrl, {
         headers: {
           Authorization: `Bearer ${authContext.keycloakToken}`
@@ -220,7 +221,7 @@ export async function createAppointment (
 ): Promise<CreateAppointmentResponse> {
   return await new Promise((resolve, reject) => {
     if (authContext.isAuthenticated && (authContext.keycloakToken != null)) {
-      axios.post(`${url}/appointment`, appointmentData, {
+      axios.post(`${API_URL}/appointment`, appointmentData, {
         headers: {
           Authorization: `Bearer ${authContext.keycloakToken}`
         }
@@ -259,7 +260,7 @@ export async function deleteAppointment (
 ): Promise<void> {
   await new Promise<void>((resolve, reject) => {
     if (authContext.isAuthenticated && (authContext.keycloakToken != null)) {
-      axios.delete(`${url}/appointment/${appointmentId}`, {
+      axios.delete(`${API_URL}/appointment/${appointmentId}`, {
         headers: {
           Authorization: `Bearer ${authContext.keycloakToken}`
         }
