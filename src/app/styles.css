@@ -1,11 +1,6 @@
-a {
-    text-decoration: none;
-    color: inherit;
-}
-
 .heading {
     margin-bottom: 16px; /* Add margin to the bottom of the heading */
-  }
+}
 
 .headerspecial {
     background-color: #282c34;
@@ -21,10 +16,10 @@ a {
 .main_header {
     color: darkblue; /* Set the color to dark blue */
     font-weight: 300; /* Set the font weight to thin */
-  }
+}
 
 
 .main_description {
     color: rgb(100, 140, 200);
     font-weight: 300; /* Set the font weight to thin */
-  }
+}

@@ -3,14 +3,13 @@ import { AuthContext } from '@/src/context/AuthContextProvider'
 import React, { useEffect, useState, useContext } from 'react'
 import { Logout, Man, Home2, CalendarEvent } from 'tabler-icons-react'
 import Link from 'next/link'
+import './NavBar.css'
 
 const Navbar = (): React.JSX.Element => {
   const authContext = useContext(AuthContext)
   const [username, setUsername] = useState<string>('')
 
   const handleLogout = async (): Promise<void> => {
-    // TODO: Implement logout function
-    // navigate('/') // Navigate to home page
     await authContext.logout() // Call logout function
   }
 
