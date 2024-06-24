@@ -1,8 +1,18 @@
 'use client'
 import '@mantine/core/styles.css'
 import React, { useContext } from 'react'
-import { AppShell, Center, ColorSchemeScript, createTheme, Loader, MantineProvider } from '@mantine/core'
-import AuthContextProvider, { AuthContext } from '@/src/context/AuthContextProvider'
+import {
+  AppShell,
+  Center,
+  ColorSchemeScript,
+  createTheme,
+  Loader,
+  MantineProvider,
+  rem
+} from '@mantine/core'
+import AuthContextProvider, {
+  AuthContext
+} from '@/src/context/AuthContextProvider'
 import { useDisclosure } from '@mantine/hooks'
 import Header from '@/src/components/Header'
 import Navbar from '@/src/components/Navbar'
@@ -10,19 +20,76 @@ import { registerLicense } from '@syncfusion/ej2-base'
 import { requireBuildEnv } from '@/src/api/utils'
 import { ToastContainer } from 'react-toastify'
 
-registerLicense(requireBuildEnv('NEXT_PUBLIC_SYNCFUSION_LICENSE_KEY', process.env.NEXT_PUBLIC_SYNCFUSION_LICENSE_KEY))
+registerLicense(requireBuildEnv('NEXT_PUBLIC_SYNCFUSION_LICENSE_KEY',
+  process.env.NEXT_PUBLIC_SYNCFUSION_LICENSE_KEY))
 
 const theme = createTheme({
   fontFamily: 'Open Sans, sans-serif',
-  primaryColor: 'blue'
+  primaryColor: 'blue',
+  colors: {
+    deepBlue: [
+      '#eef3ff',
+      '#dce4f5',
+      '#b9c7e2',
+      '#94a8d0',
+      '#748dc1',
+      '#5f7cb8',
+      '#5474b4',
+      '#44639f',
+      '#39588f',
+      '#2d4b81'
+    ],
+    blue: [
+      '#eef3ff',
+      '#dee2f2',
+      '#bdc2de',
+      '#98a0ca',
+      '#7a84ba',
+      '#6672b0',
+      '#5c68ac',
+      '#4c5897',
+      '#424e88',
+      '#364379'
+    ],
+    white: [
+      '#eef3ff',
+      '#dee2f2',
+      '#bdc2de',
+      '#98a0ca',
+      '#7a84ba',
+      '#6672b0',
+      '#5c68ac',
+      '#4c5897',
+      '#424e88',
+      '#364379'
+    ]
+  },
+  shadows: {
+    md: '1px 1px 3px rgba(0, 0, 0, .25)',
+    xl: '5px 5px 3px rgba(0, 0, 0, .25)'
+  },
+  headings: {
+    fontFamily: 'Roboto, sans-serif',
+    sizes: {
+      h1: { fontSize: rem(36) },
+      h2: { fontSize: rem(24) },
+      h3: { fontSize: rem(20) },
+      h4: { fontSize: rem(18) },
+      h5: { fontSize: rem(16) },
+      h6: { fontSize: rem(14) }
+    },
+    fontWeight: 'l'
+  }
 })
 
-function ContentLayout ({ children }: { children: React.ReactNode }): React.JSX.Element {
+function ContentLayout ({ children }: {
+  children: React.ReactNode
+}): React.JSX.Element {
   const authContext = useContext(AuthContext)
   const [opened, { toggle }] = useDisclosure()
   if (authContext.isAuthenticated) {
     return (
-      <div className='App' style={{ marginTop: '20px' }}>
+      <div className="App" style={{ marginTop: '20px' }}>
         <AppShell
           header={{ height: 60 }}
           navbar={{
@@ -41,11 +108,13 @@ function ContentLayout ({ children }: { children: React.ReactNode }): React.JSX.
 
           <AppShell.Footer>
             <Center>
-              <div style={{ color: '#888', fontSize: '17px' }}> built by team 8</div>
+              <div style={{ color: '#888', fontSize: '17px' }}> built by team
+                8
+              </div>
             </Center>
           </AppShell.Footer>
         </AppShell>
-        <ToastContainer />
+        <ToastContainer/>
       </div>
     )
   } else {
@@ -57,7 +126,9 @@ function ContentLayout ({ children }: { children: React.ReactNode }): React.JSX.
   }
 }
 
-export default function RootLayout ({ children }: { children: React.ReactNode }): React.JSX.Element {
+export default function RootLayout ({ children }: {
+  children: React.ReactNode
+}): React.JSX.Element {
   return (
     <html lang="en">
     <head>
