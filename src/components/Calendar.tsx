@@ -37,8 +37,9 @@ const MyScheduler = (): React.JSX.Element => {
 
   useEffect(() => {
     if (error != null) {
+      console.error(error)
       // Show the error popup
-      toast.error(`${(error)}. Please try again later.`, {
+      toast.error('An error occurred. Please try again later.', {
         theme: colorScheme
       })
       setError(null)
