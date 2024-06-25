@@ -1,6 +1,6 @@
 'use client'
 import '@mantine/core/styles.css'
-import React, { useContext } from 'react'
+import React from 'react'
 import {
   AppShell,
   Center,
@@ -10,14 +10,12 @@ import {
   MantineProvider,
   rem
 } from '@mantine/core'
-import AuthContextProvider, {
-  AuthContext
-} from '@/src/context/AuthContextProvider'
 import { useDisclosure } from '@mantine/hooks'
 import Header from '@/src/components/Header'
 import Navbar from '@/src/components/Navbar'
 import { registerLicense } from '@syncfusion/ej2-base'
 import { requireBuildEnv } from '@/src/api/utils'
+import { SessionProvider, signIn, useSession } from 'next-auth/react'
 import { ToastContainer } from 'react-toastify'
 
 registerLicense(requireBuildEnv('NEXT_PUBLIC_SYNCFUSION_LICENSE_KEY',
@@ -85,9 +83,9 @@ const theme = createTheme({
 function ContentLayout ({ children }: {
   children: React.ReactNode
 }): React.JSX.Element {
-  const authContext = useContext(AuthContext)
   const [opened, { toggle }] = useDisclosure()
-  if (authContext.isAuthenticated) {
+  const session = useSession()
+  if (session.status === 'authenticated') {
     return (
       <div className="App" style={{ marginTop: '20px' }}>
         <AppShell
@@ -108,8 +106,8 @@ function ContentLayout ({ children }: {
 
           <AppShell.Footer>
             <Center>
-              <div style={{ color: '#888', fontSize: '17px' }}> built by team
-                8
+              <div style={{ color: '#888', fontSize: '17px' }}>
+                built by team 8
               </div>
             </Center>
           </AppShell.Footer>
@@ -117,13 +115,15 @@ function ContentLayout ({ children }: {
         <ToastContainer/>
       </div>
     )
-  } else {
-    return (
-      <Center style={{ height: '100vh' }}>
-        <Loader/>
-      </Center>
-    )
   }
+  if (session.status === 'unauthenticated') {
+    void signIn('keycloak')
+  }
+  return (
+    <Center style={{ height: '100vh' }}>
+      <Loader/>
+    </Center>
+  )
 }
 
 export default function RootLayout ({ children }: {
@@ -141,11 +141,11 @@ export default function RootLayout ({ children }: {
       <title>TekClinic</title>
     </head>
     <body>
-    <AuthContextProvider>
-      <MantineProvider theme={theme}>
+    <MantineProvider theme={theme}>
+      <SessionProvider refetchInterval={4 * 60}>
         <ContentLayout>{children}</ContentLayout>
-      </MantineProvider>
-    </AuthContextProvider>
+      </SessionProvider>
+    </MantineProvider>
     </body>
     </html>
   )

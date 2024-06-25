@@ -2,7 +2,7 @@
 import '@mantine/core/styles.css'
 import '@mantine/dates/styles.css'
 import 'mantine-react-table/styles.css'
-import React, { useContext, useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import {
   MRT_EditActionButtons,
   MantineReactTable,
@@ -32,9 +32,10 @@ import {
   QueryClientProvider
 } from '@tanstack/react-query'
 import { type PatientResponse } from '@/src/api/apiCalls'
-import { AuthContext } from '@/src/context/AuthContextProvider'
 import { defaultNumRows } from './const'
 import { useCreatePatient, useDeletePatient, useGetPatients, useUpdatePatient, validatePatient } from './patients-table-utils'
+
+import { useGuaranteeSession } from '@/src/utils/auth'
 
 import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
@@ -63,7 +64,7 @@ const PatientsTable = (): React.JSX.Element => {
     pageSize: 10
   })
 
-  const authContext = useContext(AuthContext)
+  const session = useGuaranteeSession()
 
   const [, setValidationErrors] = useState<
   Record<string, string | undefined>
@@ -225,7 +226,7 @@ const PatientsTable = (): React.JSX.Element => {
     isError: isLoadingPatientsError,
     isFetching: isFetchingPatients,
     isLoading: isLoadingPatients
-  } = useGetPatients({ authContext, setError, pagination, setRowCount })
+  } = useGetPatients({ session, setError, pagination, setRowCount })
   // call UPDATE hook
   const { mutateAsync: updatePatient, isPending: isUpdatingPatient } =
     useUpdatePatient()

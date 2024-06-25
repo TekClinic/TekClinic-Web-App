@@ -5,7 +5,6 @@ import 'mantine-react-table/styles.css' // make sure MRT styles were imported in
 import {
   type MRT_PaginationState
 } from 'mantine-react-table'
-import { type AuthContextValues } from '@/src/context/AuthContextProvider'
 import {
   useMutation,
   useQuery,
@@ -15,18 +14,19 @@ import {
 import { type PatientResponse, fetchEndpointResponse, fetchPatientList } from '@/src/api/apiCalls'
 import { staleTimeForRefetch } from './const'
 import type React from 'react'
+import { type Session } from 'next-auth'
 
 const fetchEndpointData = async (
   limit: number,
   offset: number,
-  authContext: AuthContextValues,
+  session: Session,
   setError: React.Dispatch<React.SetStateAction<string | null>>,
   setRowCount: React.Dispatch<React.SetStateAction<number>>): Promise<PatientResponse[]> => {
   try {
-    const patientEndpointData = await fetchEndpointResponse('patient', limit, offset, authContext, setError)
+    const patientEndpointData = await fetchEndpointResponse('patient', limit, offset, session, setError)
 
     try {
-      const patientList = await fetchPatientList(patientEndpointData.results, authContext, setError)
+      const patientList = await fetchPatientList(patientEndpointData.results, session, setError)
       setRowCount(patientEndpointData.count)
       return patientList
     } catch (error) {
@@ -40,16 +40,16 @@ const fetchEndpointData = async (
 }
 
 interface UseGetPatientsParams {
-  authContext: AuthContextValues
+  session: Session
   setError: React.Dispatch<React.SetStateAction<string | null>>
   pagination: MRT_PaginationState
   setRowCount: React.Dispatch<React.SetStateAction<number>>
 }
 
-export function useGetPatients ({ authContext, setError, pagination, setRowCount }: UseGetPatientsParams): UseQueryResult<PatientResponse[], Error> {
+export function useGetPatients ({ session, setError, pagination, setRowCount }: UseGetPatientsParams): UseQueryResult<PatientResponse[], Error> {
   return useQuery<PatientResponse[]>({
     queryKey: ['patients', pagination.pageSize, pagination.pageIndex],
-    queryFn: async () => await fetchEndpointData(pagination.pageSize, pagination.pageIndex * pagination.pageSize, authContext, setError, setRowCount),
+    queryFn: async () => await fetchEndpointData(pagination.pageSize, pagination.pageIndex * pagination.pageSize, session, setError, setRowCount),
     refetchOnWindowFocus: false,
     placeholderData: keepPreviousData, // keep previous data while fetching new data
     staleTime: staleTimeForRefetch // refetch if its been 45 seconds since last fetch of this page
