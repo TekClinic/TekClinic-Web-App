@@ -1,7 +1,7 @@
 import { getToken, type JWT } from 'next-auth/jwt'
-import { requireBuildEnv } from '@/src/api/utils'
 import { type NextRequest, NextResponse } from 'next/server'
 import { StatusCodes } from 'http-status-codes'
+import { requireEnv } from '@/src/utils/env'
 
 // handleEmptyToken is used to handle the case when the token is empty, i.e., the user is not logged in.
 const handleEmptyToken = async (): Promise<NextResponse<{ error: string }>> => {
@@ -25,7 +25,7 @@ const sendEndSessionEndpointToURL = async (token: JWT): Promise<NextResponse<{ u
   )
   const logoutParams: Record<string, string> = {
     id_token_hint: token.idToken as string,
-    post_logout_redirect_uri: requireBuildEnv('process.env.NEXTAUTH_URL', process.env.NEXTAUTH_URL)
+    post_logout_redirect_uri: requireEnv('NEXTAUTH_URL')
   }
   const endSessionParams = new URLSearchParams(logoutParams)
   const response = { url: `${endSessionEndPoint.href}/?${endSessionParams.toString()}` }

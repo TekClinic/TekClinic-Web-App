@@ -14,7 +14,7 @@ import { useDisclosure } from '@mantine/hooks'
 import Header from '@/src/components/Header'
 import Navbar from '@/src/components/Navbar'
 import { registerLicense } from '@syncfusion/ej2-base'
-import { requireBuildEnv } from '@/src/api/utils'
+import { requireBuildEnv } from '@/src/utils/env'
 import { SessionProvider, signIn, useSession } from 'next-auth/react'
 import { ToastContainer } from 'react-toastify'
 

@@ -10,3 +10,8 @@ export const requireBuildEnv = (name: string, value?: string): string => {
   }
   return value
 }
+
+// Function to require an environment variable to be set in the runtime.
+export const requireEnv = (name: string): string => {
+  return requireBuildEnv(name, process.env[name])
+}

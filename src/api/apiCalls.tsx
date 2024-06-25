@@ -3,7 +3,7 @@
 */
 import axios, { type AxiosResponse, type AxiosError } from 'axios'
 import type React from 'react'
-import { requireBuildEnv } from '@/src/api/utils'
+import { requireBuildEnv } from '@/src/utils/env'
 import { type Session } from 'next-auth'
 
 const API_URL = requireBuildEnv('NEXT_PUBLIC_API_URL', process.env.NEXT_PUBLIC_API_URL)
