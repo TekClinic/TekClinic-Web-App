@@ -8,6 +8,7 @@ import Header from '@/src/components/Header'
 import Navbar from '@/src/components/Navbar'
 import { registerLicense } from '@syncfusion/ej2-base'
 import { requireBuildEnv } from '@/src/api/utils'
+import { ToastContainer } from 'react-toastify'
 
 registerLicense(requireBuildEnv('NEXT_PUBLIC_SYNCFUSION_LICENSE_KEY', process.env.NEXT_PUBLIC_SYNCFUSION_LICENSE_KEY))
 
@@ -44,6 +45,7 @@ function ContentLayout ({ children }: { children: React.ReactNode }): React.JSX.
             </Center>
           </AppShell.Footer>
         </AppShell>
+        <ToastContainer />
       </div>
     )
   } else {
