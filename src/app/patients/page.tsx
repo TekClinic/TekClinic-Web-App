@@ -2,7 +2,7 @@
 import '@mantine/core/styles.css'
 import '@mantine/dates/styles.css'
 import 'mantine-react-table/styles.css'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import {
   MantineReactTable,
   type MRT_ColumnDef,
@@ -22,8 +22,7 @@ import {
   Stack,
   Text,
   Title,
-  Tooltip,
-  useMantineColorScheme
+  Tooltip
 } from '@mantine/core'
 import { modals, ModalsProvider } from '@mantine/modals'
 import { IconEdit, IconTrash } from '@tabler/icons-react'
@@ -39,27 +38,11 @@ import {
 
 import { useGuaranteeSession } from '@/src/utils/auth'
 
-import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { type Patient } from '@/src/api/model/patient'
 
 const PatientsTable = (): React.JSX.Element => {
-  const [error, setError] = useState<string | null>(null)
-
-  const { colorScheme } = useMantineColorScheme()
-
-  useEffect(() => {
-    if (error != null) {
-      console.error(error)
-      // Show the error popup
-      toast.error('An error occurred. Please try again later.', {
-        theme: colorScheme
-      })
-      setError(null)
-    }
-  }, [error, colorScheme])
-
-  //! ! Change after backend implementation changes
+//! ! Change after backend implementation changes
   const [rowCount, setRowCount] = useState<number>(defaultNumRows)
 
   const [pagination, setPagination] = useState<MRT_PaginationState>({

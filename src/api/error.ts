@@ -2,7 +2,7 @@ import axios from 'axios'
 import { StatusCodes } from 'http-status-codes'
 
 // APIError is the base class for all errors that are thrown by the API
-class APIError extends Error {
+export class APIError extends Error {
   readonly source: unknown
 
   constructor (message: string, source: unknown) {
@@ -11,32 +11,32 @@ class APIError extends Error {
   }
 }
 
-// NotFound is thrown when the requested resource is not found.
-class NotFound extends APIError {
+// InvalidRequest is thrown when the request is invalid.
+export class InvalidRequest extends APIError {
 }
 
 // Unauthenticated is thrown when the user is not authenticated.
-class Unauthenticated extends APIError {
+export class Unauthenticated extends APIError {
 }
 
 // Unauthorized is thrown when the user is authenticated but not authorized to access the resource.
-class Unauthorized extends APIError {
+export class Unauthorized extends APIError {
 }
 
-// InvalidRequest is thrown when the request is invalid.
-class InvalidRequest extends APIError {
+// NotFound is thrown when the requested resource is not found.
+export class NotFound extends APIError {
 }
 
 // InternalServerError is thrown when the server encounters an error.
-class InternalServerError extends APIError {
+export class InternalServerError extends APIError {
 }
 
 // NetworkError is thrown when the network request fails.
-class NetworkError extends APIError {
+export class NetworkError extends APIError {
 }
 
 // UnknownError is thrown when the error is not recognized.
-class UnknownError extends APIError {
+export class UnknownError extends APIError {
   constructor (message: string, source: unknown) {
     super(message, source)
     console.error(source)

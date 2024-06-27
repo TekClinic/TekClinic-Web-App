@@ -14,29 +14,16 @@ import { DateTimePickerComponent } from '@syncfusion/ej2-react-calendars'
 import './Calendar.css'
 import { useGuaranteeSession } from '@/src/utils/auth'
 
-import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
-import { useMantineColorScheme } from '@mantine/core'
 import { Appointment } from '@/src/api/model/apppointment'
+import { errorHandler } from "@/src/utils/error"
+import { useMantineColorScheme } from "@mantine/core"
 
 const MyScheduler = (): React.JSX.Element => {
   const scheduleObj = useRef<ScheduleComponent>(null)
   const session = useGuaranteeSession()
   const [appointments, setAppointments] = useState<Appointment[]>([])
-  const [error, setError] = useState<string | null>(null)
-
   const { colorScheme } = useMantineColorScheme()
-
-  useEffect(() => {
-    if (error != null) {
-      console.error(error)
-      // Show the error popup
-      toast.error('An error occurred. Please try again later.', {
-        theme: colorScheme
-      })
-      setError(null)
-    }
-  }, [error, colorScheme])
 
   const onPopupOpen = (args: any): void => {
     if (args.type === 'QuickInfo') {
@@ -72,31 +59,34 @@ const MyScheduler = (): React.JSX.Element => {
     const approvedByPatient = args.element.querySelector('#ApprovedByPatient').checked
     const visited = args.element.querySelector('#Visited').checked
 
-    // Construct the request body
-    const appointmentId = await Appointment.create({
-      patient_id: parseInt(patientId),
-      doctor_id: parseInt(doctorId),
-      start_time: startTime,
-      end_time: endTime
-    }, session)
-    scheduleObj.current?.addEvent({
-      Id: String(appointmentId),
-      PatientId: patientId,
-      DoctorId: doctorId,
-      StartTime: startTime,
-      EndTime: endTime,
-      ApprovedByPatient: approvedByPatient,
-      Visited: visited,
-      Subject: String('Appointment Id: ' + appointmentId)
-    })
-    scheduleObj.current?.eventWindow.dialogClose()
+    await errorHandler(async () => {
+      const appointmentId = await Appointment.create({
+        patient_id: parseInt(patientId),
+        doctor_id: parseInt(doctorId),
+        start_time: startTime,
+        end_time: endTime
+      }, session)
+      scheduleObj.current?.addEvent({
+        Id: String(appointmentId),
+        PatientId: patientId,
+        DoctorId: doctorId,
+        StartTime: startTime,
+        EndTime: endTime,
+        ApprovedByPatient: approvedByPatient,
+        Visited: visited,
+        Subject: String('Appointment Id: ' + appointmentId)
+      })
+      scheduleObj.current?.eventWindow.dialogClose()
+    }, colorScheme)
   }
 
   const onDeleteButtonClick = async (args: any) => {
     const appointmentId = args.element.querySelector('#Id').value
-    await Appointment.deleteById(parseInt(appointmentId), session)
-    scheduleObj.current?.deleteEvent(args.element.querySelector('#Id').value)
-    scheduleObj.current?.eventWindow.dialogClose()
+    await errorHandler(async () => {
+      await Appointment.deleteById(parseInt(appointmentId), session)
+      scheduleObj.current?.deleteEvent(args.element.querySelector('#Id').value)
+      scheduleObj.current?.eventWindow.dialogClose()
+    }, colorScheme)
   }
 
   const editorTemplate = (props: any) => {
@@ -116,7 +106,7 @@ const MyScheduler = (): React.JSX.Element => {
               name="Id"
               value={props.Id ?? ''}
               disabled
-              style={{ width: '100%' }}
+              style={{width: '100%'}}
             />
           </td>
         </tr>
@@ -124,14 +114,14 @@ const MyScheduler = (): React.JSX.Element => {
           <td className="e-textlabel">Patient Id</td>
           <td colSpan={4}>
             <input id="PatientId" className="e-field e-input" type="text" name="PatientId"
-                   defaultValue={props.PatientId ?? ''} style={{ width: '100%' }}/>
+                   defaultValue={props.PatientId ?? ''} style={{width: '100%'}}/>
           </td>
         </tr>
         <tr>
           <td className="e-textlabel">Doctor Id</td>
           <td colSpan={4}>
             <input id="DoctorId" className="e-field e-input" type="text" name="DoctorId"
-                   defaultValue={props.DoctorId ?? ''} style={{ width: '100%' }}/>
+                   defaultValue={props.DoctorId ?? ''} style={{width: '100%'}}/>
           </td>
         </tr>
         <tr>
@@ -158,7 +148,7 @@ const MyScheduler = (): React.JSX.Element => {
               type="checkbox"
               defaultChecked={props.ApprovedByPatient}
               className="e-field e-checkbox"
-              style={{ width: 'auto' }}
+              style={{width: 'auto'}}
             />
           </td>
         </tr>
@@ -170,7 +160,7 @@ const MyScheduler = (): React.JSX.Element => {
               type="checkbox"
               defaultChecked={props.Visited}
               className="e-field e-checkbox"
-              style={{ width: 'auto' }}
+              style={{width: 'auto'}}
             />
           </td>
         </tr>
@@ -187,7 +177,7 @@ const MyScheduler = (): React.JSX.Element => {
       }}>
         {(props !== undefined)
           ? ((props.Id)
-              ? <div id="right-button">
+            ? <div id="right-button">
               <button id="Delete" className="e-control e-btn e-primary" data-ripple="true"
                       style={{
                         fontSize: '16px',
@@ -196,7 +186,7 @@ const MyScheduler = (): React.JSX.Element => {
                 Delete
               </button>
             </div>
-              : <div id="right-button">
+            : <div id="right-button">
               <button id="Add" className="e-control e-btn e-primary" data-ripple="true"
                       style={{
                         fontSize: '16px',
@@ -222,13 +212,10 @@ const MyScheduler = (): React.JSX.Element => {
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        const { items: appointments } = await Appointment.get({}, session)
+      await errorHandler(async () => {
+        const {items: appointments} = await Appointment.get({}, session)
         setAppointments(appointments)
-      } catch (error) {
-        console.error('Error occurred:', error)
-        console.error('Logging out...', error)
-      }
+      }, colorScheme, fetchData)
     }
     void fetchData()
   }, [session])
