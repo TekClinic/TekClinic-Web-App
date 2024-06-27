@@ -26,6 +26,7 @@
     "add-to-calendar-button-react": "^2.6.6",
     "axios": "^1.6.7",
     "clsx": "^2.1.0",
+    "date-fns": "^3.6.0",
     "dayjs": "^1.11.10",
     "http-status-codes": "^2.3.0",
     "keycloak-js": "^18.0.1",
@@ -40,8 +41,8 @@
     "react-dom": "^18",
     "react-icons": "^5.0.1",
     "react-router-dom": "^6.22.3",
-    "sharp": "^0.33.3",
     "react-toastify": "^10.0.5",
+    "sharp": "^0.33.3",
     "tabler-icons-react": "^1.56.0"
   },
   "devDependencies": {

@@ -4,41 +4,44 @@ import '@mantine/dates/styles.css'
 import 'mantine-react-table/styles.css'
 import React, { useEffect, useMemo, useState } from 'react'
 import {
-  MRT_EditActionButtons,
   MantineReactTable,
   type MRT_ColumnDef,
+  MRT_EditActionButtons,
+  type MRT_PaginationState,
   type MRT_Row,
   type MRT_TableOptions,
-  useMantineReactTable,
-  type MRT_PaginationState
+  useMantineReactTable
 } from 'mantine-react-table'
 import {
   ActionIcon,
+  Badge,
   Button,
+  Container,
+  Divider,
   Flex,
   Stack,
   Text,
   Title,
   Tooltip,
-  Badge,
-  Divider,
-  Container,
   useMantineColorScheme
 } from '@mantine/core'
-import { ModalsProvider, modals } from '@mantine/modals'
+import { modals, ModalsProvider } from '@mantine/modals'
 import { IconEdit, IconTrash } from '@tabler/icons-react'
-import {
-  QueryClient,
-  QueryClientProvider
-} from '@tanstack/react-query'
-import { type PatientResponse } from '@/src/api/apiCalls'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { defaultNumRows } from './const'
-import { useCreatePatient, useDeletePatient, useGetPatients, useUpdatePatient, validatePatient } from './patients-table-utils'
+import {
+  useCreatePatient,
+  useDeletePatient,
+  useGetPatients,
+  useUpdatePatient,
+  validatePatient
+} from './patients-table-utils'
 
 import { useGuaranteeSession } from '@/src/utils/auth'
 
 import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
+import { type Patient } from '@/src/api/model/patient'
 
 const PatientsTable = (): React.JSX.Element => {
   const [error, setError] = useState<string | null>(null)
@@ -70,7 +73,7 @@ const PatientsTable = (): React.JSX.Element => {
   Record<string, string | undefined>
   >({})
 
-  const columns = useMemo<Array<MRT_ColumnDef<PatientResponse>>>(
+  const columns = useMemo<Array<MRT_ColumnDef<Patient>>>(
     () => [
       {
         accessorKey: 'id',
@@ -128,7 +131,10 @@ const PatientsTable = (): React.JSX.Element => {
           type: 'phone',
           require: true
         },
-        Cell: ({ cell }) => `${cell.row.original.phone_number.substring(0, 3)}-${cell.row.original.phone_number.substring(3, 6)}-${cell.row.original.phone_number.substring(6, 10)}`
+        Cell: ({ cell }) => {
+          const phone = cell.row.original.phone_number
+          return phone != null ? `${phone.substring(0, 3)}-${phone.substring(3, 6)}-${phone.substring(6, 10)}` : '-'
+        }
       },
       {
         accessorKey: 'languages',
@@ -159,8 +165,7 @@ const PatientsTable = (): React.JSX.Element => {
         },
         Cell: ({ cell }) => {
           const date = new Date(cell.row.original.birth_date)
-          const formattedDate = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`
-          return formattedDate
+          return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`
         }
       },
       {
@@ -226,7 +231,7 @@ const PatientsTable = (): React.JSX.Element => {
     isError: isLoadingPatientsError,
     isFetching: isFetchingPatients,
     isLoading: isLoadingPatients
-  } = useGetPatients({ session, setError, pagination, setRowCount })
+  } = useGetPatients({ session, pagination, setRowCount })
   // call UPDATE hook
   const { mutateAsync: updatePatient, isPending: isUpdatingPatient } =
     useUpdatePatient()
@@ -236,7 +241,7 @@ const PatientsTable = (): React.JSX.Element => {
 
   // CREATE action
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
-  const handleCreatePatient: MRT_TableOptions<PatientResponse>['onCreatingRowSave'] = async ({
+  const handleCreatePatient: MRT_TableOptions<Patient>['onCreatingRowSave'] = async ({
     values,
     exitCreatingMode
   }) => {
@@ -251,7 +256,7 @@ const PatientsTable = (): React.JSX.Element => {
   }
 
   // UPDATE action
-  const handleSavePatient: MRT_TableOptions<PatientResponse>['onEditingRowSave'] = async ({
+  const handleSavePatient: MRT_TableOptions<Patient>['onEditingRowSave'] = async ({
     values,
     table
   }) => {
@@ -266,7 +271,7 @@ const PatientsTable = (): React.JSX.Element => {
   }
 
   // DELETE action
-  const openDeleteConfirmModal = (row: MRT_Row<PatientResponse>): void => {
+  const openDeleteConfirmModal = (row: MRT_Row<Patient>): void => {
     modals.openConfirmModal({
       title: 'Are you sure you want to delete this user?',
       children: (

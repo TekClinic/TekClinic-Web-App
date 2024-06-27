@@ -11,45 +11,32 @@ import {
   useQueryClient,
   keepPreviousData, type UseQueryResult, type UseMutationResult
 } from '@tanstack/react-query'
-import { type PatientResponse, fetchEndpointResponse, fetchPatientList } from '@/src/api/apiCalls'
 import { staleTimeForRefetch } from './const'
 import type React from 'react'
 import { type Session } from 'next-auth'
+import { Patient } from '@/src/api/model/patient'
 
 const fetchEndpointData = async (
   limit: number,
-  offset: number,
+  skip: number,
   session: Session,
-  setError: React.Dispatch<React.SetStateAction<string | null>>,
-  setRowCount: React.Dispatch<React.SetStateAction<number>>): Promise<PatientResponse[]> => {
-  try {
-    const patientEndpointData = await fetchEndpointResponse('patient', limit, offset, session, setError)
-
-    try {
-      const patientList = await fetchPatientList(patientEndpointData.results, session, setError)
-      setRowCount(patientEndpointData.count)
-      return patientList
-    } catch (error) {
-      console.error('Error occurred:', error)
-      return await new Promise((resolve) => [])
-    }
-  } catch (error) {
-    console.error('Error occurred:', error)
-    return await new Promise((resolve) => [])
-  }
+  setRowCount: React.Dispatch<React.SetStateAction<number>>
+): Promise<Patient[]> => {
+  const { items: patients, count } = await Patient.get({ limit, skip }, session)
+  setRowCount(count)
+  return patients
 }
 
 interface UseGetPatientsParams {
   session: Session
-  setError: React.Dispatch<React.SetStateAction<string | null>>
   pagination: MRT_PaginationState
   setRowCount: React.Dispatch<React.SetStateAction<number>>
 }
 
-export function useGetPatients ({ session, setError, pagination, setRowCount }: UseGetPatientsParams): UseQueryResult<PatientResponse[], Error> {
-  return useQuery<PatientResponse[]>({
+export function useGetPatients ({ session, pagination, setRowCount }: UseGetPatientsParams): UseQueryResult<Patient[], Error> {
+  return useQuery<Patient[]>({
     queryKey: ['patients', pagination.pageSize, pagination.pageIndex],
-    queryFn: async () => await fetchEndpointData(pagination.pageSize, pagination.pageIndex * pagination.pageSize, session, setError, setRowCount),
+    queryFn: async () => await fetchEndpointData(pagination.pageSize, pagination.pageIndex * pagination.pageSize, session, setRowCount),
     refetchOnWindowFocus: false,
     placeholderData: keepPreviousData, // keep previous data while fetching new data
     staleTime: staleTimeForRefetch // refetch if its been 45 seconds since last fetch of this page
@@ -57,15 +44,15 @@ export function useGetPatients ({ session, setError, pagination, setRowCount }: 
 }
 
 // CREATE hook (post new user to api)
-export function useCreatePatient (): UseMutationResult<void, Error, PatientResponse, void> {
+export function useCreatePatient (): UseMutationResult<void, Error, Patient, void> {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async (patient: PatientResponse) => {
+    mutationFn: async (patient: Patient) => {
       await new Promise((resolve) => setTimeout(resolve, 1000)) // fake api call
       await Promise.resolve()
     },
     // client side optimistic update
-    onMutate: (newPatientInfo: PatientResponse) => {
+    onMutate: (newPatientInfo: Patient) => {
       queryClient.setQueryData(
         ['patients'],
         (prevPatients: any) =>
@@ -75,7 +62,7 @@ export function useCreatePatient (): UseMutationResult<void, Error, PatientRespo
               ...newPatientInfo,
               id: (Math.random() * 1000 + 1)
             }
-          ] as PatientResponse[]
+          ] as Patient[]
       )
     }
     // onSettled: () => queryClient.invalidateQueries({ queryKey: ['users'] }), //refetch users after mutation, disabled for demo
@@ -83,18 +70,18 @@ export function useCreatePatient (): UseMutationResult<void, Error, PatientRespo
 }
 
 // UPDATE hook (put user in api)
-export function useUpdatePatient (): UseMutationResult<void, Error, PatientResponse, void> {
+export function useUpdatePatient (): UseMutationResult<void, Error, Patient, void> {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async (patient: PatientResponse) => {
+    mutationFn: async (patient: Patient) => {
       // send api update request here
       await new Promise((resolve) => setTimeout(resolve, 1000)) // fake api call
       await Promise.resolve()
     },
     // client side optimistic update
-    onMutate: (newPatientInfo: PatientResponse) => {
+    onMutate: (newPatientInfo: Patient) => {
       queryClient.setQueryData(['patients'], (prevPatients: any) =>
-        prevPatients?.map((prevPatient: PatientResponse) =>
+        prevPatients?.map((prevPatient: Patient) =>
           prevPatient.id === newPatientInfo.id ? newPatientInfo : prevPatient
         )
       )
@@ -115,7 +102,7 @@ export function useDeletePatient (): UseMutationResult<void, Error, number, void
     // client side optimistic update
     onMutate: (patientId: number) => {
       queryClient.setQueryData(['patients'], (prevPatients: any) =>
-        prevPatients?.filter((patient: PatientResponse) => patient.id !== patientId)
+        prevPatients?.filter((patient: Patient) => patient.id !== patientId)
       )
     }
     // onSettled: () => queryClient.invalidateQueries({ queryKey: ['users'] }), //refetch users after mutation, disabled for demo
@@ -124,7 +111,7 @@ export function useDeletePatient (): UseMutationResult<void, Error, number, void
 
 const validateRequired = (value: string): boolean => !(value.length === 0)
 
-export function validatePatient (patient: PatientResponse): { name: string } {
+export function validatePatient (patient: Patient): { name: string } {
   return {
     name: !validateRequired(patient.name)
       ? 'Name is Required'
