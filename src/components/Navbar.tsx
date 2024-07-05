@@ -14,15 +14,15 @@ const Navbar = (): React.JSX.Element => {
         <NavLink
           label={<div style={{ fontSize: '14px' }}>Home</div>}
           style={{ margin: '5px' }}
-          leftSection={<Home2 size="20px"/>}
+          leftSection={<Home2 size="20px" />}
         />
       </Link>
 
-      <Link href="/patients">
+      <Link href="/patients-2">
         <NavLink
           label={<div style={{ fontSize: '14px' }}>Patients</div>}
           style={{ margin: '5px' }}
-          leftSection={<Man size="20px"/>}
+          leftSection={<Man size="20px" />}
         />
       </Link>
 
@@ -30,11 +30,11 @@ const Navbar = (): React.JSX.Element => {
         <NavLink
           label={<div style={{ fontSize: '14px' }}>Appointments</div>}
           style={{ margin: '5px' }}
-          leftSection={<CalendarEvent size="20px"/>}
+          leftSection={<CalendarEvent size="20px" />}
         />
       </Link>
 
-      <div style={{ flexGrow: 1 }}/>
+      <div style={{ flexGrow: 1 }} />
 
       <div style={{ textAlign: 'center', padding: '10px', fontSize: '15px' }}>
         <h4 style={{ textAlign: 'left', fontSize: '15px', fontWeight: '300', color: 'rgb(100, 140, 200)' }}>logged in
@@ -44,7 +44,7 @@ const Navbar = (): React.JSX.Element => {
           /* eslint-disable-next-line @typescript-eslint/no-misused-promises */
           onClick={async () => { await federatedLogout() }}
           style={{ margin: '5px' }}
-          leftSection={<Logout size="20px"/>}
+          leftSection={<Logout size="20px" />}
         />
 
       </div>

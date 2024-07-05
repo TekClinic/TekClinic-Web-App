@@ -7,6 +7,7 @@ import {
 } from '@/src/api/scheme'
 import {
   createAPIResource,
+  deleteAPIResource,
   formatPaginationParams,
   getAPIResource,
   getAPIResourceList,
@@ -36,7 +37,7 @@ export class Patient {
   readonly referred_by?: string
   readonly special_note?: string
 
-  constructor (scheme: PatientScheme) {
+  constructor(scheme: PatientScheme) {
     this.id = scheme.id
     this.active = scheme.active
     this.age = scheme.age
@@ -51,7 +52,7 @@ export class Patient {
     this.special_note = scheme.special_note
   }
 
-  static fromScheme (
+  static fromScheme(
     scheme: PatientScheme
   ): Patient {
     return new Patient(scheme)
@@ -99,4 +100,20 @@ export class Patient {
       },
       session)
   }
+
+  // deleteById deletes an Patient by ID.
+  static deleteById = async (
+    id: number,
+    session: Session
+  ): Promise<void> => {
+    await deleteAPIResource(Patient, id, session)
+  }
+
+  // delete deletes the Patient.
+  delete = async (
+    session: Session
+  ): Promise<void> => {
+    await Patient.deleteById(this.id, session)
+  }
 }
+
