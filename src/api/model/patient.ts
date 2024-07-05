@@ -106,7 +106,8 @@ export class Patient {
     id: number,
     session: Session
   ): Promise<void> => {
-    await deleteAPIResource(Patient, id, session)
+    throw new Error('Not implemented')
+    //await deleteAPIResource(Patient, id, session)
   }
 
   // delete deletes the Patient.

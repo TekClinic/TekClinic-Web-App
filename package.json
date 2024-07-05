@@ -12,6 +12,7 @@
     "@bitnoi.se/react-scheduler": "^0.1.5",
     "@mantine/core": "^7.7.1",
     "@mantine/dates": "^7.7.1",
+    "@mantine/form": "^7.11.1",
     "@mantine/hooks": "^7.7.1",
     "@mantine/modals": "^7.7.1",
     "@syncfusion/ej2-base": "^25.1.35",
@@ -44,7 +45,8 @@
     "react-router-dom": "^6.22.3",
     "react-toastify": "^10.0.5",
     "sharp": "^0.33.3",
-    "tabler-icons-react": "^1.56.0"
+    "tabler-icons-react": "^1.56.0",
+    "validator": "^13.12.0"
   },
   "devDependencies": {
     "@types/globalize": "^1.5.5",
