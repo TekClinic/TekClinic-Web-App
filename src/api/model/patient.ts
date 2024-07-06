@@ -11,7 +11,7 @@ import {
   formatPaginationParams,
   getAPIResource,
   getAPIResourceList,
-  type PaginationParams
+  type PaginationParams, toE164
 } from '@/src/api/common'
 import { type Session } from 'next-auth'
 import { format } from 'date-fns'
@@ -37,7 +37,7 @@ export class Patient {
   readonly referred_by?: string
   readonly special_note?: string
 
-  constructor(scheme: PatientScheme) {
+  constructor (scheme: PatientScheme) {
     this.id = scheme.id
     this.active = scheme.active
     this.age = scheme.age
@@ -52,7 +52,7 @@ export class Patient {
     this.special_note = scheme.special_note
   }
 
-  static fromScheme(
+  static fromScheme (
     scheme: PatientScheme
   ): Patient {
     return new Patient(scheme)
@@ -92,12 +92,22 @@ export class Patient {
     },
     session: Session
   ): Promise<number> => {
+    const data = {
+      ...props,
+      birth_date: format(props.birth_date, 'yyyy-MM-dd')
+    }
+    if (data.phone_number != null) {
+      data.phone_number = toE164(data.phone_number)
+    }
+    if (data.emergency_contacts != null) {
+      data.emergency_contacts = data.emergency_contacts.map((contact) => ({
+        ...contact,
+        phone: toE164(contact.phone)
+      }))
+    }
     return await createAPIResource<PatientBaseScheme>(
       Patient,
-      {
-        ...props,
-        birth_date: format(props.birth_date, 'yyyy-MM-dd')
-      },
+      data,
       session)
   }
 
@@ -116,4 +126,3 @@ export class Patient {
     await Patient.deleteById(this.id, session)
   }
 }
-

@@ -3,6 +3,7 @@ import axios from 'axios'
 import { requireBuildEnv } from '@/src/utils/env'
 import { type IdHolder, type NamedAPIResource, type NamedAPIResourceList, type PatientIdHolder } from '@/src/api/scheme'
 import { wrapError } from '@/src/api/error'
+import { phone } from 'phone'
 
 // url of the API
 const API_URL = requireBuildEnv('NEXT_PUBLIC_API_URL', process.env.NEXT_PUBLIC_API_URL)
@@ -236,4 +237,14 @@ export const clearAPIResourceField = async (
   const url = `${API_URL}/${resourceClass.__name__}/${id}/${field}`
   const response = await apiDELETE<PatientIdHolder>(url, session)
   return response.patient_id
+}
+
+// toE164 converts a phone number to E.164 format.
+export const toE164 = (phoneNumber: string): string => {
+  const addDefaultCountryCode = !phoneNumber.startsWith('+')
+  const result = phone(phoneNumber, {country: addDefaultCountryCode ? 'ISR' : undefined})
+  if (result.isValid) {
+    return result.phoneNumber
+  }
+  return phoneNumber
 }
