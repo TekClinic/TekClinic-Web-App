@@ -7,18 +7,22 @@ import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-quer
 import { useGuaranteeSession } from '@/src/utils/auth'
 import { Patient } from '@/src/api/model/patient'
 import { modals, ModalsProvider } from '@mantine/modals'
-import { ActionIcon, Box, Button, Group, Text } from '@mantine/core'
+import { ActionIcon, Box, Button, Group, Text, useComputedColorScheme } from '@mantine/core'
 import { IconEye, IconTrash } from '@tabler/icons-react'
 import { IceCream } from 'tabler-icons-react'
 import CreatePatientModal from './create-patient-modal'
-import { pageSize } from '@/src/app/patients/const'
+import { defaultPageSize } from '@/src/app/patients/const'
+import { toast } from 'react-toastify'
+import { getToastOptions } from '@/src/utils/toast'
 
 const queryClient = new QueryClient()
 
 const PaginationExample = (): React.JSX.Element => {
+  const computedColorScheme = useComputedColorScheme()
   const [page, setPage] = useState(1)
   const session = useGuaranteeSession()
   const [createModalOpened, setCreateModalOpened] = useState(false)
+  const [pageSize, setPageSize] = useState(defaultPageSize)
 
   const {
     data,
@@ -177,7 +181,12 @@ const PaginationExample = (): React.JSX.Element => {
       // eslint-disable-next-line @typescript-eslint/no-misused-promises
       onConfirm: async () => {
         console.log('Deleting patient: ')
-        await patient.delete(session)
+        await toast.promise(patient.delete(session),
+          {
+            pending: 'Deleting patient ' + patient.name + '...',
+            success: 'Patient ' + patient.name + ' was deleted successfully.',
+            error: 'Error deleting patient...'
+          }, getToastOptions(computedColorScheme))
         await refetch()
       }
     })
@@ -204,6 +213,15 @@ const PaginationExample = (): React.JSX.Element => {
         recordsPerPage={pageSize}
         noRecordsText=""
         noRecordsIcon={<IceCream size={0}/>}
+        recordsPerPageLabel='Patients per page'
+        recordsPerPageOptions={[1, 2, 5, 10, 20]}
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises
+        onRecordsPerPageChange={async (value) => {
+          setPageSize(value)
+          setPage(1)
+          await refetch()
+          // NOT WORKING YET
+        }}
         // 👇 uncomment the next line to use a custom pagination size
         // paginationSize="md"
         // 👇 uncomment the next line to use a custom loading text

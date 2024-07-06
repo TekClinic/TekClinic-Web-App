@@ -1,5 +1,15 @@
 import React, { type Dispatch, type SetStateAction, useState } from 'react'
-import { ActionIcon, Button, Group, Modal, MultiSelect, Select, Textarea, TextInput } from '@mantine/core'
+import {
+  ActionIcon,
+  Button,
+  Group,
+  Modal,
+  MultiSelect,
+  Select,
+  Textarea,
+  TextInput,
+  useComputedColorScheme
+} from '@mantine/core'
 import { DateInput } from '@mantine/dates'
 import { useForm } from '@mantine/form'
 import { IconPlus, IconTrash } from '@tabler/icons-react'
@@ -23,6 +33,8 @@ import {
   minNameLength,
   otherIDType
 } from '@/src/app/patients/const'
+import { toast } from 'react-toastify'
+import { getToastOptions } from '@/src/utils/toast'
 
 interface CreatePatientModalProps {
   opened: boolean
@@ -44,6 +56,7 @@ const CreatePatientModal: React.FC<CreatePatientModalProps> =
     refetch
   }) => {
     const [showOtherIdType, setShowOtherIdType] = useState<boolean>(false)
+    const computedColorScheme = useComputedColorScheme()
 
     const form = useForm({
       mode: 'uncontrolled',
@@ -143,11 +156,18 @@ const CreatePatientModal: React.FC<CreatePatientModalProps> =
             // unreachable state due to the validation
             throw new Error('Birth date is required')
           }
-          await Patient.create({
+          const data = {
             ...values,
             personal_id: personalId,
             birth_date: birthDate
-          }, session)
+          }
+          await toast.promise(Patient.create(data, session),
+            {
+              pending: 'Creating patient ' + data.name + '...',
+              success: 'Patient ' + data.name + ' was created successfully.',
+              error: 'Error while creating patient...'
+            }, getToastOptions(computedColorScheme))
+
           setModalOpened(false)
 
           form.reset()
