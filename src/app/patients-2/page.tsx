@@ -24,6 +24,7 @@ function PaginationExample() {
     const [page, setPage] = useState(1);
     const session = useGuaranteeSession();
     const [createModalOpened, setCreateModalOpened] = useState(false);
+    const [patientCreated, setPatientCreated] = useState(false);
 
     const { data, isFetching, refetch } = useQuery({
         queryKey: ['patients', page, PAGE_SIZE],
@@ -37,6 +38,18 @@ function PaginationExample() {
         return patients;
     }
 
+    // useEffect(() => {
+    //     if (!createModalOpened) {
+    //         refetch();
+    //     }
+    // }, [createModalOpened]);
+
+    useEffect(() => {
+        if (patientCreated) {
+            refetch();
+            setPatientCreated(false);
+        }
+    }, [patientCreated]);
 
     const columns: DataTableProps<Patient>['columns'] = [
         { accessor: 'id', width: 100 },
@@ -115,10 +128,9 @@ function PaginationExample() {
             confirmProps: { color: 'red' },
             onCancel: () => console.log('Cancel'),
             onConfirm: async () => {
-                const curr_patient: Patient = await Patient.getById(patient.id, session);
-                console.log('Deleting patient: ', curr_patient);
-
-                //patient.delete(session);
+                console.log('Deleting patient: ');
+                patient.delete(session);
+                refetch();
             },
         });
     }
@@ -128,7 +140,8 @@ function PaginationExample() {
 
         <Box>
             <Button onClick={() => { setCreateModalOpened(true) }} size="sm" m="la">Add Patient</Button>
-            <PatientFormModal opened={createModalOpened} onClose={() => { setCreateModalOpened(false) }} session={session} />
+            <PatientFormModal opened={createModalOpened} onClose={() => { setCreateModalOpened(false) }} refetch={refetch} setModalOpened={setCreateModalOpened}
+                setPatientCreated={setPatientCreated} session={session} />
             <DataTable
                 height={300}
                 withTableBorder
