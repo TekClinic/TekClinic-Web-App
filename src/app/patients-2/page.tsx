@@ -6,23 +6,22 @@ import React, { useState } from 'react'
 import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query'
 import { useGuaranteeSession } from '@/src/utils/auth'
 import { Patient } from '@/src/api/model/patient'
-import { modals, ModalsProvider } from '@mantine/modals'
-import { ActionIcon, Box, Button, Group, Text, useComputedColorScheme } from '@mantine/core'
+import { ModalsProvider } from '@mantine/modals'
+import { ActionIcon, Box, Button, Group, useComputedColorScheme } from '@mantine/core'
 import { IconEye, IconTrash } from '@tabler/icons-react'
 import { IceCream } from 'tabler-icons-react'
 import CreatePatientModal from './create-patient-modal'
-import { defaultPageSize } from '@/src/app/patients/const'
-import { toast } from 'react-toastify'
-import { getToastOptions } from '@/src/utils/toast'
+import { defaultPageSize, pageSizeOptions } from '@/src/app/patients/const'
+import { showDeleteModal } from '@/src/app/patients-2/delete-patient-modal'
 
 const queryClient = new QueryClient()
 
 const PaginationExample = (): React.JSX.Element => {
-  const computedColorScheme = useComputedColorScheme()
   const [page, setPage] = useState(1)
   const session = useGuaranteeSession()
   const [createModalOpened, setCreateModalOpened] = useState(false)
   const [pageSize, setPageSize] = useState(defaultPageSize)
+  const computedColorScheme = useComputedColorScheme()
 
   const {
     data,
@@ -35,17 +34,9 @@ const PaginationExample = (): React.JSX.Element => {
         skip: pageSize * (page - 1),
         limit: pageSize
       }, session)
-      // console.log('skip and limit: ', PAGE_SIZE * (page - 1), PAGE_SIZE);
       return await patients
     }
-    // enabled: false,
   })
-
-  // useEffect(() => {
-  //     if (!createModalOpened) {
-  //         refetch();
-  //     }
-  // }, [createModalOpened]);
 
   const columns: DataTableProps<Patient>['columns'] = [
     {
@@ -114,44 +105,15 @@ const PaginationExample = (): React.JSX.Element => {
             size="sm"
             variant="subtle"
             color="green"
-
-            // TODO: Implement view patient
-            // onClick={() => showModal({
-            //   patient,
-            //   action: 'view'
-            // })}
+            onClick={() => { console.log('Viewing patient: ', patient) }}
           >
             <IconEye size={23}/>
           </ActionIcon>
-          {/* <ActionIcon
-                        size="sm"
-                        variant="subtle"
-                        color="green"
-                        onClick={() => {
-                            const params: PatientScheme = {
-                                name: 'New Patient 10', personal_id: { id: '123456', type: 'SSN' }, birth_date: String(new Date()),
-                                active: false,
-                                age: 0,
-                                gender: 'unspecified',
-                                languages: [],
-                                emergency_contacts: []
-                            };
-                            const new_patient = Patient.fromScheme(params);
-                            //console.log('Added patient: ', new_patient);
-                            Patient.create(params, session);
-                            refetch();
-
-                        }}
-                    >
-                        <IceCream size={23} />
-                    </ActionIcon> */}
           <ActionIcon
             size="sm"
             variant="subtle"
             color="red"
-            onClick={() => {
-              showDeleteModal(patient)
-            }}
+            onClick={() => { showDeleteModal(patient, session, refetch, computedColorScheme, data?.count, pageSize, setPage) }}
           >
             <IconTrash size={23}/>
           </ActionIcon>
@@ -159,38 +121,6 @@ const PaginationExample = (): React.JSX.Element => {
       )
     }
   ]
-
-  const showDeleteModal = (patient: Patient): void => {
-    modals.openConfirmModal({
-      title: 'Please confirm deletion of patient: ' + patient.name + '\n with id: ' + patient.id,
-      centered: true,
-      children: (
-        <Text size="sm">
-          Clicking on Delete will permanently delete the patient.
-          Clicking on Cancel will close this dialog and cancel the deletion.
-        </Text>
-      ),
-      labels: {
-        confirm: 'Delete',
-        cancel: 'Cancel'
-      },
-      confirmProps: { color: 'red' },
-      onCancel: () => {
-        console.log('Cancel')
-      },
-      // eslint-disable-next-line @typescript-eslint/no-misused-promises
-      onConfirm: async () => {
-        console.log('Deleting patient: ')
-        await toast.promise(patient.delete(session),
-          {
-            pending: 'Deleting patient ' + patient.name + '...',
-            success: 'Patient ' + patient.name + ' was deleted successfully.',
-            error: 'Error deleting patient...'
-          }, getToastOptions(computedColorScheme))
-        await refetch()
-      }
-    })
-  }
 
   return (
 
@@ -214,26 +144,12 @@ const PaginationExample = (): React.JSX.Element => {
         noRecordsText=""
         noRecordsIcon={<IceCream size={0}/>}
         recordsPerPageLabel='Patients per page'
-        recordsPerPageOptions={[1, 2, 5, 10, 20]}
-        // eslint-disable-next-line @typescript-eslint/no-misused-promises
-        onRecordsPerPageChange={async (value) => {
-          setPageSize(value)
-          setPage(1)
-          await refetch()
-          // NOT WORKING YET
-        }}
-        // 👇 uncomment the next line to use a custom pagination size
-        // paginationSize="md"
-        // 👇 uncomment the next line to use a custom loading text
-        // loadingText="Loading..."
-        // 👇 uncomment the next line to display a custom text when no records were found
-        // noRecordsText="No records found"
-        // 👇 uncomment the next line to use a custom pagination text
-        // paginationText={({ from, to, totalRecords }) => `Records ${from} - ${to} of ${totalRecords}`}
-        // 👇 uncomment the next lines to use custom pagination colors
-        // paginationActiveBackgroundColor="green"
-        // paginationActiveTextColor="#e6e348"
-
+        recordsPerPageOptions={pageSizeOptions}
+        onRecordsPerPageChange=
+          {(pageSize) => {
+            setPageSize(pageSize)
+            setPage(1)
+          }}
       />
     </Box>
   )
