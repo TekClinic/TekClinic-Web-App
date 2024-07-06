@@ -15,7 +15,7 @@ import './Calendar.css'
 import { useGuaranteeSession } from '@/src/utils/auth'
 
 import 'react-toastify/dist/ReactToastify.css'
-import { Appointment } from '@/src/api/model/apppointment'
+import { Appointment } from '@/src/api/model/appointment'
 import { errorHandler } from "@/src/utils/error"
 import { useMantineColorScheme } from "@mantine/core"
 
@@ -23,7 +23,7 @@ const MyScheduler = (): React.JSX.Element => {
   const scheduleObj = useRef<ScheduleComponent>(null)
   const session = useGuaranteeSession()
   const [appointments, setAppointments] = useState<Appointment[]>([])
-  const { colorScheme } = useMantineColorScheme()
+  const {colorScheme} = useMantineColorScheme()
 
   const onPopupOpen = (args: any): void => {
     if (args.type === 'QuickInfo') {
@@ -37,11 +37,24 @@ const MyScheduler = (): React.JSX.Element => {
       setTimeout(() => {
         const AddButton = args.element.querySelector('#Add')
         const DeleteButton = args.element.querySelector('#Delete')
+        const AssignButton = args.element.querySelector('#Assign')
+        const CancelButton = args.element.querySelector('#Cancel')
         if (AddButton) {
           AddButton.onclick = () => {
             void onAddButtonClick(args)
           }
         }
+        if (AssignButton) {
+          AssignButton.onclick = () => {
+            void onAssignButtonClick(args)
+          }
+        }
+        if (CancelButton) {
+          CancelButton.onclick = () => {
+            void onCancelButtonClick(args)
+          }
+        }
+        // TODO: remove in production
         if (DeleteButton) {
           DeleteButton.onclick = () => {
             void onDeleteButtonClick(args)
@@ -85,6 +98,61 @@ const MyScheduler = (): React.JSX.Element => {
     await errorHandler(async () => {
       await Appointment.deleteById(parseInt(appointmentId), session)
       scheduleObj.current?.deleteEvent(args.element.querySelector('#Id').value)
+      scheduleObj.current?.eventWindow.dialogClose()
+    }, colorScheme)
+  }
+
+  const onAssignButtonClick = async (args: any): Promise<void> => {
+    const id = args.element.querySelector('#Id').value
+    const patientId = args.element.querySelector('#PatientId').value
+    const doctorId = args.element.querySelector('#DoctorId').value
+    const startTime = args.element.querySelector('#StartTime').ej2_instances[0].value
+    const endTime = args.element.querySelector('#EndTime').ej2_instances[0].value
+    const approvedByPatient = args.element.querySelector('#ApprovedByPatient').checked
+    const visited = args.element.querySelector('#Visited').checked
+
+    await errorHandler(async () => {
+      const responsePatientId = await Appointment.assignPatient(
+        parseInt(id),
+        {
+          patient_id: parseInt(patientId)
+        }, session)
+
+      scheduleObj.current?.deleteEvent(args.element.querySelector('#Id').value)
+      scheduleObj.current?.addEvent({
+        Id: String(id),
+        PatientId: responsePatientId,
+        DoctorId: doctorId,
+        StartTime: startTime,
+        EndTime: endTime,
+        ApprovedByPatient: approvedByPatient,
+        Visited: visited,
+        Subject: String('Appointment Id: ' + id)
+      })
+      scheduleObj.current?.eventWindow.dialogClose()
+    }, colorScheme)
+  }
+
+  const onCancelButtonClick = async (args: any): Promise<void> => {
+    const id = args.element.querySelector('#Id').value
+    const doctorId = args.element.querySelector('#DoctorId').value
+    const startTime = args.element.querySelector('#StartTime').ej2_instances[0].value
+    const endTime = args.element.querySelector('#EndTime').ej2_instances[0].value
+    const approvedByPatient = args.element.querySelector('#ApprovedByPatient').checked
+    const visited = args.element.querySelector('#Visited').checked
+
+    await errorHandler(async () => {
+      const appointmentId = await Appointment.cancelAppointment(parseInt(id), session)
+      scheduleObj.current?.deleteEvent(args.element.querySelector('#Id').value)
+      scheduleObj.current?.addEvent({
+        Id: String(appointmentId),
+        DoctorId: doctorId,
+        StartTime: startTime,
+        EndTime: endTime,
+        ApprovedByPatient: approvedByPatient,
+        Visited: visited,
+        Subject: String('Appointment Id: ' + appointmentId)
+      })
       scheduleObj.current?.eventWindow.dialogClose()
     }, colorScheme)
   }
@@ -175,29 +243,66 @@ const MyScheduler = (): React.JSX.Element => {
         display: 'flex',
         justifyContent: 'center'
       }}>
-        {(props !== undefined)
-          ? ((props.Id)
-            ? <div id="right-button">
+        {props && props.Id && (props.PatientId == undefined || !props.PatientId || props.PatientId == '' || props.PatientId == 'undefined') ? (
+          <>
+            <div id="right-button">
+              <button id="Assign" className="e-control e-btn e-primary" data-ripple="true"
+                      style={{
+                        fontSize: '16px',
+                        padding: '10px 20px',
+                        textTransform: 'none'
+                      }}>
+                Assign Patient
+              </button>
+            </div>
+            <div id="right-button">
               <button id="Delete" className="e-control e-btn e-primary" data-ripple="true"
                       style={{
                         fontSize: '16px',
-                        padding: '10px 20px'
+                        padding: '10px 20px',
+                        textTransform: 'none'
                       }}>
                 Delete
               </button>
             </div>
-            : <div id="right-button">
-              <button id="Add" className="e-control e-btn e-primary" data-ripple="true"
+          </>
+        ) : props && props.Id ? (
+          <>
+            <div id="right-button">
+              <button id="Cancel" className="e-control e-btn e-primary" data-ripple="true"
                       style={{
                         fontSize: '16px',
-                        padding: '10px 20px'
+                        padding: '10px 20px',
+                        textTransform: 'none'
                       }}>
-                Add
+                Cancel Appointment
               </button>
-            </div>)
-          : <div></div>}
+            </div>
+            <div id="right-button">
+              <button id="Delete" className="e-control e-btn e-primary" data-ripple="true"
+                      style={{
+                        fontSize: '16px',
+                        padding: '10px 20px',
+                        textTransform: 'none'
+                      }}>
+                Delete
+              </button>
+            </div>
+          </>
+        ) : (
+          <div id="right-button">
+            <button id="Add" className="e-control e-btn e-primary" data-ripple="true"
+                    style={{
+                      fontSize: '16px',
+                      padding: '10px 20px',
+                      textTransform: 'none'
+                    }}>
+              Add
+            </button>
+          </div>
+        )}
       </div>
-    )
+    );
   }
 
   const editorHeaderTemplate = (props: any) => {

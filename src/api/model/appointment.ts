@@ -1,15 +1,13 @@
+import { type AppointmentBaseScheme, type AppointmentScheme, type PatientIdHolder } from '@/src/api/scheme'
 import {
-  type AppointmentBaseScheme,
-  type AppointmentScheme,
-  type PatientIdHolder
-} from '@/src/api/scheme'
-import {
+  clearAPIResourceField,
   createAPIResource,
-  deleteAPIResource, formatPaginationParams,
+  deleteAPIResource,
+  formatPaginationParams,
   getAPIResource,
   getAPIResourceList,
-  putAPIResource,
-  type PaginationParams
+  type PaginationParams,
+  putAPIResourceField
 } from '@/src/api/common'
 import { type Session } from 'next-auth'
 import { format } from 'date-fns'
@@ -113,15 +111,39 @@ export class Appointment {
     await Appointment.deleteById(this.id, session)
   }
 
+  // assignPatient assigns a patient to the appointment.
   static assignPatient = async (
     id: number,
     patient: PatientIdHolder,
     session: Session
   ): Promise<number> => {
-    return await putAPIResource<PatientIdHolder>(
+    return await putAPIResourceField<PatientIdHolder>(
       Appointment,
       id,
       patient,
+      'patient',
+      session)
+  }
+
+  assignPatient = async (
+    patient: PatientIdHolder,
+    session: Session
+  ): Promise<number> => {
+    return await Appointment.assignPatient(
+      this.id,
+      patient,
+      session)
+  }
+
+  // cancelAppointment cancels an appointment for a patient.
+  static cancelAppointment = async (
+    id: number,
+    session: Session
+  ): Promise<number> => {
+    return await clearAPIResourceField(
+      Appointment,
+      id,
+      'patient',
       session)
   }
 }

@@ -18,7 +18,7 @@ interface ApiResourceClass {
 // Scheme is the data scheme according to the API.
 // fromScheme is a static method that creates an instance of the resource from the scheme.
 interface FetchableAPIResourceClass<Scheme> extends ApiResourceClass {
-  new(...args: any[]): any
+  new (...args: any[]): any
 
   fromScheme: (scheme: Scheme) => InstanceType<this>
 }
@@ -55,7 +55,7 @@ const authHeader = (
 // T is the response data type.
 // url is the API endpoint.
 // session is the session object from next-auth.
-export const apiGET = async <T>(
+export const apiGET = async <T> (
   url: string,
   session: Session
 ): Promise<T> => {
@@ -74,7 +74,7 @@ export const apiGET = async <T>(
 // url is the API endpoint.
 // session is the session object from next-auth.
 // data is the request data.
-export const apiPOST = async <T, V>(
+export const apiPOST = async <T, V> (
   url: string,
   session: Session,
   data: V
@@ -93,7 +93,7 @@ export const apiPOST = async <T, V>(
 // T is the response data type.
 // url is the API endpoint.
 // session is the session object from next-auth.
-export const apiDELETE = async <T>(
+export const apiDELETE = async <T> (
   url: string,
   session: Session
 ): Promise<T> => {
@@ -112,7 +112,7 @@ export const apiDELETE = async <T>(
 // url is the API endpoint.
 // session is the session object from next-auth.
 // data is the request data.
-export const apiPUT = async <T, V>(
+export const apiPUT = async <T, V> (
   url: string,
   session: Session,
   data: V
@@ -133,7 +133,7 @@ export const apiPUT = async <T, V>(
 // id is the ID of the resource.
 // session is the session object from next-auth.
 // Returns the resource instance.
-export const getAPIResource = async <Scheme>(
+export const getAPIResource = async <Scheme> (
   resourceClass: FetchableAPIResourceClass<Scheme>,
   id: number,
   session: Session
@@ -148,7 +148,7 @@ export const getAPIResource = async <Scheme>(
 // params is the query parameters for the API endpoint.
 // session is the session object from next-auth.
 // Returns the list of resources and the total count of resources.
-export const getAPIResourceList = async <Scheme>(
+export const getAPIResourceList = async <Scheme> (
   resourceClass: FetchableAPIResourceClass<Scheme>,
   params: Record<string, string>,
   session: Session
@@ -180,7 +180,7 @@ export const getAPIResourceList = async <Scheme>(
 // data is the new resource data.
 // session is the session object from next-auth.
 // Returns the ID of the new resource.
-export const createAPIResource = async <Scheme>(
+export const createAPIResource = async <Scheme> (
   resourceClass: ApiResourceClass,
   data: Scheme,
   session: Session
@@ -210,13 +210,30 @@ export const deleteAPIResource = async (
 // data is the updated resource data.
 // session is the session object from next-auth.
 // Returns the updated resource instance.
-export const putAPIResource = async <Scheme>(
+export const putAPIResourceField = async <Scheme> (
   resourceClass: ApiResourceClass,
   id: number,
   data: Scheme,
+  field: string,
   session: Session
 ): Promise<number> => {
-  const url = `${API_URL}/${resourceClass.__name__}/${id}/patient`
+  const url = `${API_URL}/${resourceClass.__name__}/${id}/${field}`
   const response = await apiPUT<PatientIdHolder, Scheme>(url, session, data)
+  return response.patient_id
+}
+
+// cancelAPIResponse cancels the assignment of a patient to an appointment in the API.
+// resourceClass is the class object of the resource representing appointments.
+// id is the ID of the appointment to cancel the patient assignment (integer, $int32).
+// session is the session object containing authorization information from next-auth.
+// Returns a Promise resolving to the ID of the previously assigned patient.
+export const clearAPIResourceField = async (
+  resourceClass: ApiResourceClass,
+  id: number,
+  field: string,
+  session: Session
+): Promise<number> => {
+  const url = `${API_URL}/${resourceClass.__name__}/${id}/${field}`
+  const response = await apiDELETE<PatientIdHolder>(url, session)
   return response.patient_id
 }
