@@ -1,12 +1,14 @@
 import {
   type AppointmentBaseScheme,
-  type AppointmentScheme
+  type AppointmentScheme,
+  type PatientIdHolder
 } from '@/src/api/scheme'
 import {
   createAPIResource,
   deleteAPIResource, formatPaginationParams,
   getAPIResource,
   getAPIResourceList,
+  putAPIResource,
   type PaginationParams
 } from '@/src/api/common'
 import { type Session } from 'next-auth'
@@ -109,5 +111,17 @@ export class Appointment {
     session: Session
   ): Promise<void> => {
     await Appointment.deleteById(this.id, session)
+  }
+
+  static assignPatient = async (
+    id: number,
+    patient: PatientIdHolder,
+    session: Session
+  ): Promise<number> => {
+    return await putAPIResource<PatientIdHolder>(
+      Appointment,
+      id,
+      patient,
+      session)
   }
 }

@@ -1,7 +1,7 @@
 import { type Session } from 'next-auth'
 import axios from 'axios'
 import { requireBuildEnv } from '@/src/utils/env'
-import { type IdHolder, type NamedAPIResource, type NamedAPIResourceList } from '@/src/api/scheme'
+import { type IdHolder, type NamedAPIResource, type NamedAPIResourceList, type PatientIdHolder } from '@/src/api/scheme'
 import { wrapError } from '@/src/api/error'
 
 // url of the API
@@ -203,7 +203,7 @@ export const deleteAPIResource = async (
   await apiDELETE<unknown>(url, session)
 }
 
-// putAPIResource updates an existing resource in the API.
+// putAPIResource updates an existing resource in the API - for now, supports only patient_id.
 // Scheme is the data scheme according to the API.
 // resourceClass is the class object of the resource.
 // id is the ID of the resource to be updated.
@@ -211,12 +211,12 @@ export const deleteAPIResource = async (
 // session is the session object from next-auth.
 // Returns the updated resource instance.
 export const putAPIResource = async <Scheme>(
-  resourceClass: FetchableAPIResourceClass<Scheme>,
+  resourceClass: ApiResourceClass,
   id: number,
   data: Scheme,
   session: Session
-): Promise<InstanceType<FetchableAPIResourceClass<Scheme>>> => {
-  const url = `${API_URL}/${resourceClass.__name__}/${id}`
-  const updatedResource = await apiPUT<Scheme, Scheme>(url, session, data)
-  return resourceClass.fromScheme(updatedResource)
+): Promise<number> => {
+  const url = `${API_URL}/${resourceClass.__name__}/${id}/patient`
+  const response = await apiPUT<PatientIdHolder, Scheme>(url, session, data)
+  return response.patient_id
 }
