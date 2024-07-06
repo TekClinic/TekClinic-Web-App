@@ -107,6 +107,26 @@ export const apiDELETE = async <T>(
   }
 }
 
+// apiPUT makes API PUT requests. Wraps error handling and response data extraction.
+// T is the response data type, V is the request data type.
+// url is the API endpoint.
+// session is the session object from next-auth.
+// data is the request data.
+export const apiPUT = async <T, V>(
+  url: string,
+  session: Session,
+  data: V
+): Promise<T> => {
+  try {
+    const response = await axios.put<T>(url, data, {
+      headers: authHeader(session)
+    })
+    return response.data
+  } catch (error) {
+    throw wrapError(error)
+  }
+}
+
 // getAPIResource fetches a single resource from the API.
 // Scheme is the data scheme according to the API.
 // resourceClass is the class object of the resource.
@@ -181,4 +201,22 @@ export const deleteAPIResource = async (
 ): Promise<void> => {
   const url = `${API_URL}/${resourceClass.__name__}/${id}`
   await apiDELETE<unknown>(url, session)
+}
+
+// putAPIResource updates an existing resource in the API.
+// Scheme is the data scheme according to the API.
+// resourceClass is the class object of the resource.
+// id is the ID of the resource to be updated.
+// data is the updated resource data.
+// session is the session object from next-auth.
+// Returns the updated resource instance.
+export const putAPIResource = async <Scheme>(
+  resourceClass: FetchableAPIResourceClass<Scheme>,
+  id: number,
+  data: Scheme,
+  session: Session
+): Promise<InstanceType<FetchableAPIResourceClass<Scheme>>> => {
+  const url = `${API_URL}/${resourceClass.__name__}/${id}`
+  const updatedResource = await apiPUT<Scheme, Scheme>(url, session, data)
+  return resourceClass.fromScheme(updatedResource)
 }
