@@ -113,7 +113,6 @@ function ContentLayout ({ children }: {
             </Center>
           </AppShell.Footer>
         </AppShell>
-        <ToastContainer/>
       </div>
     )
   }
@@ -145,6 +144,7 @@ export default function RootLayout ({ children }: {
     <MantineProvider theme={theme}>
       <SessionProvider refetchInterval={4 * 60}>
         <ContentLayout>{children}</ContentLayout>
+        <ToastContainer/>
       </SessionProvider>
     </MantineProvider>
     </body>

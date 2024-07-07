@@ -35,6 +35,7 @@ import {
 } from '@/src/app/patients/const'
 import { toast } from 'react-toastify'
 import { getToastOptions } from '@/src/utils/toast'
+import { errorHandler } from '@/src/utils/error'
 
 interface CreatePatientModalProps {
   opened: boolean
@@ -161,12 +162,17 @@ const CreatePatientModal: React.FC<CreatePatientModalProps> =
             personal_id: personalId,
             birth_date: birthDate
           }
-          await toast.promise(Patient.create(data, session),
-            {
-              pending: 'Creating patient ' + data.name + '...',
-              success: 'Patient ' + data.name + ' was created successfully.',
-              error: 'Error while creating patient...'
-            }, getToastOptions(computedColorScheme))
+          const result = await errorHandler(async () => {
+            await toast.promise(Patient.create(data, session),
+              {
+                pending: 'Creating patient ' + data.name + '...',
+                success: 'Patient ' + data.name + ' was created successfully.',
+                error: 'Error while creating patient...'
+              }, getToastOptions(computedColorScheme))
+          }, computedColorScheme)
+          if (result instanceof Error) {
+            return
+          }
 
           setModalOpened(false)
 

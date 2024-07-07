@@ -2,7 +2,7 @@
 
 import { DataTable, type DataTableProps } from 'mantine-datatable'
 import dayjs from 'dayjs'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query'
 import { useGuaranteeSession } from '@/src/utils/auth'
 import { Patient } from '@/src/api/model/patient'
@@ -13,6 +13,7 @@ import { IceCream } from 'tabler-icons-react'
 import CreatePatientModal from './create-patient-modal'
 import { defaultPageSize, pageSizeOptions } from '@/src/app/patients/const'
 import { showDeleteModal } from '@/src/app/patients-2/delete-patient-modal'
+import { handleUIError } from '@/src/utils/error'
 
 const queryClient = new QueryClient()
 
@@ -25,18 +26,24 @@ const PaginationExample = (): React.JSX.Element => {
 
   const {
     data,
-    isFetching,
-    refetch
+    isLoading,
+    refetch,
+    error
   } = useQuery({
     queryKey: ['patients', page, pageSize],
     queryFn: async () => {
-      const patients = Patient.get({
+      return await Patient.get({
         skip: pageSize * (page - 1),
         limit: pageSize
       }, session)
-      return await patients
     }
   })
+
+  useEffect(() => {
+    if (error != null) {
+      handleUIError(error, computedColorScheme, () => { void refetch() })
+    }
+  }, [computedColorScheme, error, refetch])
 
   const columns: DataTableProps<Patient>['columns'] = [
     {
@@ -123,7 +130,6 @@ const PaginationExample = (): React.JSX.Element => {
   ]
 
   return (
-
     <Box>
       <Button onClick={() => {
         setCreateModalOpened(true)
@@ -135,7 +141,7 @@ const PaginationExample = (): React.JSX.Element => {
         height={300}
         withTableBorder
         columns={columns}
-        fetching={isFetching}
+        fetching={isLoading}
         records={data?.items}
         page={page}
         onPageChange={setPage}

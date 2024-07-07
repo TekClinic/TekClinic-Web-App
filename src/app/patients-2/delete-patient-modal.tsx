@@ -3,9 +3,10 @@ import { modals } from '@mantine/modals'
 import { type QueryObserverResult, type RefetchOptions } from '@tanstack/react-query'
 import { type Session } from 'next-auth'
 import { toast } from 'react-toastify'
-import { Text } from '@mantine/core'
+import { type MantineColorScheme, Text } from '@mantine/core'
 import React, { type Dispatch, type SetStateAction } from 'react'
 import { getToastOptions } from '@/src/utils/toast'
+import { errorHandler } from '@/src/utils/error'
 
 export const showDeleteModal = (
   patient: Patient,
@@ -14,7 +15,7 @@ export const showDeleteModal = (
     items: Patient[]
     count: number
   }, Error>>,
-  computedColorScheme: string,
+  computedColorScheme: MantineColorScheme,
   numberOfPatients?: number,
   pageSize?: number,
   setPage?: Dispatch<SetStateAction<number>>
@@ -35,12 +36,19 @@ export const showDeleteModal = (
     confirmProps: { color: 'red' },
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     onConfirm: async () => {
-      await toast.promise(patient.delete(session),
-        {
-          pending: `Deleting patient ${patient.name}...`,
-          success: `Patient ${patient.name} was deleted succesfully.`,
-          error: 'Error deleting patient...'
-        }, getToastOptions(computedColorScheme))
+      const result = await errorHandler(async () => {
+        await toast.promise(patient.delete(session),
+          {
+            pending: `Deleting patient ${patient.name}...`,
+            success: `Patient ${patient.name} was deleted successfully.`,
+            error: 'Error deleting patient...'
+          }, getToastOptions(computedColorScheme))
+      }, computedColorScheme)
+
+      if (result instanceof Error) {
+        return
+      }
+
       if (numberOfPatients != null && pageSize != null && setPage != null) {
         // calculate the last page after deletion
         const lastPage = Math.max(1, (Math.ceil((numberOfPatients - 1) / pageSize)))
