@@ -1,372 +1,248 @@
 'use client'
-import '@mantine/core/styles.css'
-import '@mantine/dates/styles.css'
-import 'mantine-react-table/styles.css'
-import React, { useMemo, useState } from 'react'
-import {
-  MantineReactTable,
-  type MRT_ColumnDef,
-  MRT_EditActionButtons,
-  type MRT_PaginationState,
-  type MRT_Row,
-  type MRT_TableOptions,
-  useMantineReactTable
-} from 'mantine-react-table'
-import {
-  ActionIcon,
-  Badge,
-  Button,
-  Container,
-  Divider,
-  Flex,
-  Stack,
-  Text,
-  Title,
-  Tooltip
-} from '@mantine/core'
-import { modals, ModalsProvider } from '@mantine/modals'
-import { IconEdit, IconTrash } from '@tabler/icons-react'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { defaultNumRows } from './const'
-import {
-  useCreatePatient,
-  useDeletePatient,
-  useGetPatients,
-  useUpdatePatient,
-  validatePatient
-} from './patients-table-utils'
 
+import classes from './styles.module.css'
+
+import { DataTable, useDataTableColumns } from 'mantine-datatable'
+import dayjs from 'dayjs'
+import React, { useEffect, useState } from 'react'
+import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query'
 import { useGuaranteeSession } from '@/src/utils/auth'
-
-import 'react-toastify/dist/ReactToastify.css'
-import { type Patient } from '@/src/api/model/patient'
-
-const PatientsTable = (): React.JSX.Element => {
-//! ! Change after backend implementation changes
-  const [rowCount, setRowCount] = useState<number>(defaultNumRows)
-
-  const [pagination, setPagination] = useState<MRT_PaginationState>({
-    pageIndex: 0,
-    pageSize: 10
-  })
-
-  const session = useGuaranteeSession()
-
-  const [, setValidationErrors] = useState<
-  Record<string, string | undefined>
-  >({})
-
-  const columns = useMemo<Array<MRT_ColumnDef<Patient>>>(
-    () => [
-      {
-        accessorKey: 'id',
-        header: 'Id',
-        enableEditing: false,
-        minSize: 40,
-        maxSize: 45
-      },
-      {
-        accessorKey: 'name',
-        header: 'Name',
-        mantineEditTextInputProps: {
-          type: 'text',
-          required: true
-        }
-      },
-      {
-        accessorKey: 'personalId',
-        header: 'Personal ID',
-        enableEditing: true,
-        mantineEditTextInputProps: {
-          type: 'text',
-          require: true
-        },
-        Cell: ({ cell }) => `${cell.row.original.personal_id.id}`
-      },
-      {
-        accessorKey: 'personalIdType',
-        header: 'Personal ID Type',
-        enableEditing: true,
-        mantineEditTextInputProps: {
-          type: 'text',
-          require: true
-        },
-        Cell: ({ cell }) => `${cell.row.original.personal_id.type}`
-      },
-      {
-        accessorKey: 'gender',
-        header: 'Gender',
-        enableEditing: true,
-        mantineEditTextInputProps: {
-          type: 'select',
-          options: [
-            { value: 'male', label: 'Male' },
-            { value: 'female', label: 'Female' }
-          ],
-          require: true
-        }
-      },
-      {
-        accessorKey: 'phoneNumber',
-        header: 'Phone Number',
-        enableEditing: true,
-        mantineEditTextInputProps: {
-          type: 'phone',
-          require: true
-        },
-        Cell: ({ cell }) => {
-          const phone = cell.row.original.phone_number
-          return phone != null ? `${phone.substring(0, 3)}-${phone.substring(3, 6)}-${phone.substring(6, 10)}` : '-'
-        }
-      },
-      {
-        accessorKey: 'languages',
-        header: 'Languages',
-        enableEditing: true,
-        mantineEditTextInputProps: {
-          type: 'list',
-          require: true
-        },
-        Cell: ({ cell }) => (
-          <Container>
-            {cell.row.original.languages.map((language) =>
-              <Flex key={language} direction="column" style={{ margin: '2px' }}>
-                <Badge variant="gradient" gradient={{ from: 'blue', to: 'cyan', deg: 90 }}>
-                  {language}
-                </Badge>
-              </Flex>)
-            }
-          </Container >)
-      },
-      {
-        accessorKey: 'birthdate',
-        header: 'Birth Date',
-        enableEditing: true,
-        mantineEditTextInputProps: {
-          type: 'date',
-          require: true
-        },
-        Cell: ({ cell }) => {
-          const date = new Date(cell.row.original.birth_date)
-          return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`
-        }
-      },
-      {
-        accessorKey: 'age',
-        header: 'Age',
-        enableEditing: true,
-        mantineEditTextInputProps: {
-          type: 'number',
-          require: true
-        }
-      },
-      {
-        accessorKey: 'refferedBy',
-        header: 'Referred By',
-        enableEditing: true,
-        mantineEditTextInputProps: {
-          type: 'text',
-          require: false
-        },
-        Cell: ({ cell }) => cell.row.original.referred_by
-      },
-      {
-        accessorKey: 'emergencyContacts',
-        header: 'Emergency Contacts',
-        enableEditing: true,
-        mantineEditTextInputProps: {
-          type: 'list',
-          require: false
-        },
-        Cell: ({ cell }) =>
-          <Container style={{ textAlign: 'left' }}>
-            {
-              cell.row.original.emergency_contacts.map((contact, index) =>
-                <Container key={index} >
-                  <Badge key={contact.name} variant="gradient" gradient={{ from: '#DBDBDB', to: '#CCCCCC', deg: 90 }} style={{ color: 'black' }}>
-                    {contact.name} ({contact.closeness}) {contact.phone.substring(0, 3)}-{contact.phone.substring(3, 6)}-{contact.phone.substring(6, 10)}
-                  </Badge>
-                  {index !== cell.row.original.emergency_contacts.length - 1 && <Divider my='xs' size="xs" />}
-                </Container>)
-            }
-          </Container>
-      },
-      {
-        accessorKey: 'specialNotes',
-        header: 'Special Notes',
-        enableEditing: true,
-        mantineEditTextInputProps: {
-          type: 'text',
-          require: false
-        },
-        Cell: ({ cell }) => cell.row.original.special_note
-      }
-    ],
-    []
-  )
-
-  // call CREATE hook
-  const { mutateAsync: createPatient, isPending: isCreatingPatient } =
-    useCreatePatient()
-  // call READ hook
-  const {
-    data: fetchedPatients = [],
-    isError: isLoadingPatientsError,
-    isFetching: isFetchingPatients,
-    isLoading: isLoadingPatients
-  } = useGetPatients({ session, pagination, setRowCount })
-  // call UPDATE hook
-  const { mutateAsync: updatePatient, isPending: isUpdatingPatient } =
-    useUpdatePatient()
-  // call DELETE hook
-  const { mutateAsync: deletePatient, isPending: isDeletingPatient } =
-    useDeletePatient()
-
-  // CREATE action
-  // eslint-disable-next-line @typescript-eslint/no-misused-promises
-  const handleCreatePatient: MRT_TableOptions<Patient>['onCreatingRowSave'] = async ({
-    values,
-    exitCreatingMode
-  }) => {
-    const newValidationErrors = validatePatient(values)
-    if (Object.values(newValidationErrors).some((error) => error)) {
-      setValidationErrors(newValidationErrors)
-      return
-    }
-    setValidationErrors({})
-    await createPatient(values)
-    exitCreatingMode()
-  }
-
-  // UPDATE action
-  const handleSavePatient: MRT_TableOptions<Patient>['onEditingRowSave'] = async ({
-    values,
-    table
-  }) => {
-    const newValidationErrors = validatePatient(values)
-    if (Object.values(newValidationErrors).some((error) => error)) {
-      setValidationErrors(newValidationErrors)
-      return
-    }
-    setValidationErrors({})
-    await updatePatient(values)
-    table.setEditingRow(null)
-  }
-
-  // DELETE action
-  const openDeleteConfirmModal = (row: MRT_Row<Patient>): void => {
-    modals.openConfirmModal({
-      title: 'Are you sure you want to delete this user?',
-      children: (
-        <Text>
-          Are you sure you want to delete {row.original.name}? This action cannot be undone.
-        </Text>
-      ),
-      labels: { confirm: 'Delete', cancel: 'Cancel' },
-      confirmProps: { color: 'red' },
-      // eslint-disable-next-line @typescript-eslint/no-misused-promises
-      onConfirm: async () => { await deletePatient(row.original.id) }
-    })
-  }
-
-  const table = useMantineReactTable({
-    columns,
-    data: fetchedPatients,
-    createDisplayMode: 'modal',
-    editDisplayMode: 'modal',
-    enableFilters: false,
-    enableSorting: false,
-    mantineToolbarAlertBannerProps: isLoadingPatientsError
-      ? {
-          color: 'red',
-          children: 'Error loading data'
-        }
-      : undefined,
-
-    mantinePaginationProps: {
-      rowsPerPageOptions: ['5', '10', '15', '25', '50', '100', '200', '1000']
-    },
-    onCreatingRowCancel: () => { setValidationErrors({}) },
-    onCreatingRowSave: handleCreatePatient,
-    onEditingRowCancel: () => { setValidationErrors({}) },
-    onEditingRowSave: handleSavePatient,
-    renderCreateRowModalContent: ({ table, row, internalEditComponents }) => (
-      <Stack>
-        <Title order={3}>Create New User</Title>
-        {internalEditComponents}
-        <Flex justify="flex-end" mt="xl">
-          <MRT_EditActionButtons variant="text" table={table} row={row} />
-        </Flex>
-      </Stack>
-    ),
-    renderEditRowModalContent: ({ table, row, internalEditComponents }) => (
-      <Stack>
-        <Title order={3}>Edit User</Title>
-        {internalEditComponents}
-        <Flex justify="flex-end" mt="xl">
-          <MRT_EditActionButtons variant="text" table={table} row={row} />
-        </Flex>
-      </Stack>
-    ),
-    defaultColumn: {
-      minSize: 20,
-      maxSize: 60
-    },
-    //! ! for the future: remove this comment and add support for editing rows and deleting rows
-    enableEditing: true,
-    renderRowActions: ({ row, table }) => (
-      <Flex gap="md">
-        <Tooltip label="Edit">
-          <ActionIcon variant="gradient" gradient={{ from: 'blue', to: 'cyan', deg: -45 }} onClick={() => { table.setEditingRow(row) }} >
-            <IconEdit />
-          </ActionIcon>
-        </Tooltip>
-        <Tooltip label="Delete">
-          <ActionIcon variant="gradient" gradient={{ from: '#df1b1b', to: '#ce2525', deg: -45 }} onClick={() => { openDeleteConfirmModal(row) }}>
-            <IconTrash />
-          </ActionIcon>
-        </Tooltip>
-      </Flex>
-    ),
-    renderTopToolbarCustomActions: ({ table }) => (
-      <Button
-        variant="gradient" gradient={{ from: 'blue', to: 'cyan', deg: -45 }}
-        onClick={() => {
-          table.setCreatingRow(true)
-        }}
-      >
-        Create New Patient
-      </Button>
-    ),
-    enablePagination: true,
-    manualPagination: true,
-    paginationDisplayMode: 'pages',
-    onPaginationChange: setPagination,
-    rowCount,
-    state: {
-      isLoading: isLoadingPatients,
-      isSaving: isCreatingPatient || isUpdatingPatient || isDeletingPatient,
-      showAlertBanner: isLoadingPatientsError,
-      showProgressBars: isFetchingPatients,
-      pagination
-    }
-  })
-
-  return <MantineReactTable table={table} />
-}
+import { Patient } from '@/src/api/model/patient'
+import { ModalsProvider } from '@mantine/modals'
+import { ActionIcon, Badge, Box, Button, Flex, Group, useComputedColorScheme } from '@mantine/core'
+import {
+  IconArrowAutofitWidth,
+  IconColumnRemove,
+  IconColumns3,
+  IconMoodSad,
+  IconTrash
+} from '@tabler/icons-react'
+import CreatePatientModal from './create-patient-modal'
+import { defaultPageSize, pageSizeOptions, storeColumnKey } from '@/src/app/patients/const'
+import { showDeleteModal } from '@/src/app/patients/delete-patient-modal'
+import { handleUIError } from '@/src/utils/error'
+import { useContextMenu } from 'mantine-contextmenu'
 
 const queryClient = new QueryClient()
 
-const PatientsTablePage = (): React.JSX.Element => {
+const PaginationExample = (): React.JSX.Element => {
+  const [page, setPage] = useState(1)
+  const [createModalOpened, setCreateModalOpened] = useState(false)
+  const [pageSize, setPageSize] = useState(defaultPageSize)
+  const session = useGuaranteeSession()
+  const computedColorScheme = useComputedColorScheme()
+  const { showContextMenu } = useContextMenu()
+
+  const {
+    data,
+    isLoading,
+    refetch,
+    error
+  } = useQuery({
+    queryKey: ['patients', page, pageSize],
+    queryFn: async () => {
+      return await Patient.get({
+        skip: pageSize * (page - 1),
+        limit: pageSize
+      }, session)
+    }
+  })
+
+  useEffect(() => {
+    if (error != null) {
+      handleUIError(error, computedColorScheme, () => {
+        void refetch()
+      })
+    }
+  }, [computedColorScheme, error, refetch])
+
+  const {
+    effectiveColumns, resetColumnsOrder, resetColumnsToggle, resetColumnsWidth
+  } = useDataTableColumns<Patient>({
+    key: storeColumnKey,
+    columns: [
+      {
+        title: '#',
+        accessor: 'id',
+        toggleable: false,
+        draggable: false,
+        resizable: false
+      },
+      {
+        accessor: 'name'
+      },
+      {
+        accessor: 'active',
+        render: (patient) => patient.active ? 'Active' : 'Inactive'
+      },
+      {
+        accessor: 'age'
+      },
+      {
+        accessor: 'personal_id',
+        render: (patient) => `${patient.personal_id.id} (${patient.personal_id.type})`
+      },
+      {
+        accessor: 'gender',
+        render: (patient) => {
+          let color = 'gray'
+          if (patient.gender === 'male') {
+            color = 'blue'
+          } else if (patient.gender === 'female') {
+            color = 'pink'
+          }
+          return <Badge color={color}>{patient.gender}</Badge>
+        }
+      },
+      {
+        accessor: 'phone_number'
+      },
+      {
+        accessor: 'languages',
+        render: (patient) => (
+          <Flex style={{ margin: '2px' }} direction='column' gap='10px'>
+            {patient.languages.map((language) => (
+                <Badge key={language} variant="gradient" gradient={{
+                  from: 'blue',
+                  to: 'cyan',
+                  deg: 90
+                }}>
+                  {language}
+                </Badge>
+            )
+            )}
+          </Flex>
+        )
+      },
+      {
+        accessor: 'birth_date',
+        render: (patient) => dayjs(patient.birth_date).format('YYYY-MM-DD')
+      },
+      {
+        accessor: 'emergency_contacts',
+        render: (patient) => (
+          <Flex style={{ margin: '2px' }} direction='column' gap='10px'>
+            {patient.emergency_contacts.map((contact, index) => (
+                <Badge key={index} variant="gradient" gradient={{
+                  from: '#DBDBDB',
+                  to: '#CCCCCC',
+                  deg: 90
+                }} style={{ color: 'black' }}>
+                  {contact.name} ({contact.closeness}) {contact.phone}
+                </Badge>
+            )
+            )}
+          </Flex>
+        )
+      },
+      {
+        accessor: 'referred_by'
+      },
+      {
+        accessor: 'special_note'
+      },
+      {
+        title: '',
+        accessor: 'actions',
+        textAlign: 'right',
+        render: (patient) => (
+          <Group gap={4} justify="right" wrap="nowrap">
+            <ActionIcon
+              size="sm"
+              variant="subtle"
+              color="red"
+              onClick={() => {
+                showDeleteModal(patient, session, refetch, computedColorScheme, data?.count, pageSize, setPage)
+              }}
+            >
+              <IconTrash size={23}/>
+            </ActionIcon>
+          </Group>
+        ),
+        toggleable: false,
+        draggable: false,
+        resizable: false
+      }
+    ]
+  })
+
   return (
-    <Flex direction="column" style={{ margin: '20px' }}>
-      <QueryClientProvider client={queryClient}>
-        <ModalsProvider>
-          <PatientsTable />
-        </ModalsProvider>
-      </QueryClientProvider>
-    </Flex>
+    <Box>
+      <Box style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '10px' }}>
+        <Button onClick={() => {
+          setCreateModalOpened(true)
+        }} size="sm" m="la">Add Patient</Button>
+      </Box>
+      <CreatePatientModal opened={createModalOpened} onClose={() => {
+        setCreateModalOpened(false)
+      }} refetch={refetch} setModalOpened={setCreateModalOpened} session={session}/>
+      <DataTable
+        striped
+        highlightOnHover
+        withTableBorder
+        pinLastColumn
+
+        storeColumnsKey={storeColumnKey}
+        minHeight={180}
+
+        columns={effectiveColumns}
+        fetching={isLoading}
+        records={data?.items}
+
+        page={page}
+        onPageChange={setPage}
+        totalRecords={data?.count}
+        recordsPerPage={pageSize}
+        recordsPerPageLabel='Patients per page'
+        recordsPerPageOptions={pageSizeOptions}
+        onRecordsPerPageChange=
+          {(pageSize) => {
+            setPageSize(pageSize)
+            setPage(1)
+          }}
+
+        noRecordsIcon={
+          <Box p={4} mb={4} className={classes.noRecordsBox}>
+            <IconMoodSad size={36} strokeWidth={1.5}/>
+          </Box>
+        }
+        noRecordsText="No records found"
+
+        onRowContextMenu={({ event }) => {
+          showContextMenu([
+            {
+              key: 'reset-toggled-columns',
+              icon: <IconColumnRemove size={16} />,
+              onClick: resetColumnsToggle
+            },
+            {
+              key: 'reset-columns-order',
+              icon: <IconColumns3 size={16} />,
+              onClick: resetColumnsOrder
+            },
+            {
+              key: 'reset-columns-width',
+              icon: <IconArrowAutofitWidth size={16} />,
+              onClick: resetColumnsWidth
+            }
+          ])(event)
+        }}
+        defaultColumnProps={{
+          toggleable: true,
+          draggable: true,
+          resizable: true
+        }}
+      />
+    </Box>
   )
 }
 
-export default PatientsTablePage
+const PatientsPage = (): React.JSX.Element => (
+  <QueryClientProvider client={queryClient}>
+    <ModalsProvider>
+      <PaginationExample/>
+    </ModalsProvider>
+  </QueryClientProvider>
+)
+
+export default PatientsPage

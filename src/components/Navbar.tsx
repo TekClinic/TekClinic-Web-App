@@ -18,7 +18,7 @@ const Navbar = (): React.JSX.Element => {
         />
       </Link>
 
-      <Link href="/patients-2">
+      <Link href="/patients">
         <NavLink
           label={<div style={{ fontSize: '14px' }}>Patients</div>}
           style={{ margin: '5px' }}

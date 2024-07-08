@@ -1,6 +1,10 @@
 'use client'
-import '@mantine/core/styles.css'
-import '@mantine/dates/styles.css'
+import '@mantine/core/styles.layer.css'
+import '@mantine/dates/styles.layer.css'
+import 'mantine-contextmenu/styles.layer.css'
+import 'mantine-datatable/styles.layer.css'
+import 'react-toastify/dist/ReactToastify.css'
+
 import React from 'react'
 import {
   AppShell,
@@ -18,6 +22,7 @@ import { registerLicense } from '@syncfusion/ej2-base'
 import { requireBuildEnv } from '@/src/utils/env'
 import { SessionProvider, signIn, useSession } from 'next-auth/react'
 import { ToastContainer } from 'react-toastify'
+import { ContextMenuProvider } from 'mantine-contextmenu'
 
 registerLicense(requireBuildEnv('NEXT_PUBLIC_SYNCFUSION_LICENSE_KEY',
   process.env.NEXT_PUBLIC_SYNCFUSION_LICENSE_KEY))
@@ -143,7 +148,9 @@ export default function RootLayout ({ children }: {
     <body>
     <MantineProvider theme={theme}>
       <SessionProvider refetchInterval={4 * 60}>
-        <ContentLayout>{children}</ContentLayout>
+        <ContextMenuProvider>
+          <ContentLayout>{children}</ContentLayout>
+        </ContextMenuProvider>
         <ToastContainer/>
       </SessionProvider>
     </MantineProvider>

@@ -19,4 +19,6 @@ export const israeliIDType = 'Israeli ID'
 export const staleTimeForRefetch = 1000 * 45 // 45 seconds
 export const defaultNumRows = 20
 export const defaultPageSize = 5
-export const pageSizeOptions = [2, 5, 10, 20, 50, 100]
+export const pageSizeOptions = [2, 5, 10, 20, 50]
+
+export const storeColumnKey = 'patients-columns'

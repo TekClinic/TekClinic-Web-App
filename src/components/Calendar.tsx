@@ -14,7 +14,6 @@ import { DateTimePickerComponent } from '@syncfusion/ej2-react-calendars'
 import './Calendar.css'
 import { useGuaranteeSession } from '@/src/utils/auth'
 
-import 'react-toastify/dist/ReactToastify.css'
 import { Appointment } from '@/src/api/model/appointment'
 import { errorHandler } from "@/src/utils/error"
 import { useMantineColorScheme } from "@mantine/core"
