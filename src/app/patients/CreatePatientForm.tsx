@@ -1,24 +1,19 @@
-import React, { type Dispatch, type SetStateAction, useState } from 'react'
+import React, { useState } from 'react'
 import {
   ActionIcon,
   Button,
-  Group,
-  Modal,
-  MultiSelect,
+  Group, MultiSelect,
   Select,
   Textarea,
-  TextInput,
-  useComputedColorScheme
+  TextInput
 } from '@mantine/core'
 import { DateInput } from '@mantine/dates'
 import { useForm } from '@mantine/form'
 import { IconPlus, IconTrash } from '@tabler/icons-react'
 import { Patient } from '@/src/api/model/patient'
-import { type Session } from 'next-auth'
 import { type EmergencyContact, type Gender, type PersonalId } from '@/src/api/scheme'
 import validator from 'validator'
 import { phone } from 'phone'
-import { type QueryObserverResult, type RefetchOptions } from '@tanstack/react-query'
 import {
   israeliIDType,
   maxClosenessLength,
@@ -36,28 +31,17 @@ import {
 import { toast } from 'react-toastify'
 import { getToastOptions } from '@/src/utils/toast'
 import { errorHandler } from '@/src/utils/error'
+import { type CreateModalProps } from '@/src/components/CustomTable'
 
-interface CreatePatientModalProps {
-  opened: boolean
-  onClose: () => void
-  session: Session
-  refetch: (options?: RefetchOptions) => Promise<QueryObserverResult<{
-    items: Patient[]
-    count: number
-  }, Error>>
-  setModalOpened: Dispatch<SetStateAction<boolean>>
-}
+type CreatePatientFormProps = CreateModalProps
 
-const CreatePatientModal: React.FC<CreatePatientModalProps> =
+const CreatePatientForm: React.FC<CreatePatientFormProps> =
   ({
-    opened,
-    onClose,
     session,
-    setModalOpened,
-    refetch
+    computedColorScheme,
+    onSuccess
   }) => {
     const [showOtherIdType, setShowOtherIdType] = useState<boolean>(false)
-    const computedColorScheme = useComputedColorScheme()
 
     const form = useForm({
       mode: 'uncontrolled',
@@ -145,9 +129,8 @@ const CreatePatientModal: React.FC<CreatePatientModalProps> =
     })
 
     return (
-      <Modal opened={opened} onClose={onClose} title="Patient Information Form">
-        {/* eslint-disable-next-line @typescript-eslint/no-misused-promises */}
-        <form onSubmit={form.onSubmit(async (values) => {
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises
+        <form onSubmit={form.onSubmit(async (values): Promise<void> => {
           const personalId: PersonalId = {
             id: values.personal_id.id,
             type: values.personal_id.type === otherIDType ? values.personal_id.other : values.personal_id.type
@@ -165,8 +148,8 @@ const CreatePatientModal: React.FC<CreatePatientModalProps> =
           const result = await errorHandler(async () => {
             await toast.promise(Patient.create(data, session),
               {
-                pending: 'Creating patient ' + data.name + '...',
-                success: 'Patient ' + data.name + ' was created successfully.',
+                pending: `Creating patient ${data.name}...`,
+                success: `Patient ${data.name} was created successfully.`,
                 error: 'Error while creating patient...'
               }, getToastOptions(computedColorScheme))
           }, computedColorScheme)
@@ -174,10 +157,7 @@ const CreatePatientModal: React.FC<CreatePatientModalProps> =
             return
           }
 
-          setModalOpened(false)
-
-          form.reset()
-          await refetch()
+          await onSuccess()
         })}>
           <TextInput
             withAsterisk
@@ -310,7 +290,6 @@ const CreatePatientModal: React.FC<CreatePatientModalProps> =
             <Button type="submit">Submit</Button>
           </Group>
         </form>
-      </Modal>
     )
   }
 
@@ -352,4 +331,4 @@ const nameValidator = (value: string, required: boolean = false): string | null 
   return null
 }
 
-export default CreatePatientModal
+export default CreatePatientForm
