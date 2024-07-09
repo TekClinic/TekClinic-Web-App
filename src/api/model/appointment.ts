@@ -6,7 +6,7 @@ import {
   formatPaginationParams,
   getAPIResource,
   getAPIResourceList,
-  type PaginationParams,
+  type PaginationParams, type PaginationResult,
   putAPIResourceField
 } from '@/src/api/common'
 import { type Session } from 'next-auth'
@@ -59,10 +59,7 @@ export class Appointment {
   static get = async (
     params: AppointmentParams,
     session: Session
-  ): Promise<{
-    items: Appointment[]
-    count: number
-  }> => {
+  ): Promise<PaginationResult<Appointment>> => {
     const formattedParams = formatPaginationParams(params)
     if (params.date != null) {
       formattedParams.date = format(params.date, 'yyyy-MM-dd')

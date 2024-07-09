@@ -24,6 +24,12 @@ interface FetchableAPIResourceClass<Scheme> extends ApiResourceClass {
   fromScheme: (scheme: Scheme) => InstanceType<this>
 }
 
+// PaginationResult represents the result of a paginated API query.
+export interface PaginationResult<T> {
+  items: T[]
+  count: number
+}
+
 // Base interface for pagination query parameters.
 export interface PaginationParams {
   skip?: number
@@ -153,10 +159,7 @@ export const getAPIResourceList = async <Scheme> (
   resourceClass: FetchableAPIResourceClass<Scheme>,
   params: Record<string, string>,
   session: Session
-): Promise<{
-  items: Array<InstanceType<FetchableAPIResourceClass<Scheme>>>
-  count: number
-}> => {
+): Promise<PaginationResult<InstanceType<FetchableAPIResourceClass<Scheme>>>> => {
   const urlParams = new URLSearchParams(params)
   const url = `${API_URL}/${resourceClass.__name__}?${urlParams.toString()}`
 

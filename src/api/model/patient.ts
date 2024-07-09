@@ -11,7 +11,7 @@ import {
   formatPaginationParams,
   getAPIResource,
   getAPIResourceList,
-  type PaginationParams, toE164
+  type PaginationParams, type PaginationResult, toE164
 } from '@/src/api/common'
 import { type Session } from 'next-auth'
 import { format } from 'date-fns'
@@ -70,10 +70,7 @@ export class Patient {
   static get = async (
     params: PatientParams,
     session: Session
-  ): Promise<{
-    items: Patient[]
-    count: number
-  }> => {
+  ): Promise<PaginationResult<Patient>> => {
     return await getAPIResourceList(Patient, formatPaginationParams(params), session)
   }
 

@@ -1,5 +1,11 @@
 import { type DoctorScheme, type Gender } from '@/src/api/scheme'
-import { formatPaginationParams, getAPIResource, getAPIResourceList, type PaginationParams } from '@/src/api/common'
+import {
+  formatPaginationParams,
+  getAPIResource,
+  getAPIResourceList,
+  type PaginationParams,
+  type PaginationResult
+} from '@/src/api/common'
 import { type Session } from 'next-auth'
 
 // Doctor query parameters.
@@ -46,10 +52,7 @@ export class Doctor {
   static get = async (
     params: DoctorParams,
     session: Session
-  ): Promise<{
-    items: Doctor[]
-    count: number
-  }> => {
+  ): Promise<PaginationResult<Doctor>> => {
     return await getAPIResourceList(Doctor, formatPaginationParams(params), session)
   }
 }
