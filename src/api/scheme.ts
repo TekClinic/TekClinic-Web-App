@@ -44,14 +44,19 @@ export interface EmergencyContact {
   phone: string
 }
 
-export interface DoctorScheme {
+export interface DoctorBaseScheme {
+  name: string
+  gender?: Gender
+  phone_number: string
+  specialities?: string[]
+  special_note?: string
+}
+
+export interface DoctorScheme extends DoctorBaseScheme {
   id: number
   active: boolean
-  name: string
   gender: Gender
-  phone_number: string
   specialities: string[]
-  special_note?: string
 }
 
 export interface AppointmentBaseScheme {

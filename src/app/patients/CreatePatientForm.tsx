@@ -13,25 +13,22 @@ import { IconPlus, IconTrash } from '@tabler/icons-react'
 import { Patient } from '@/src/api/model/patient'
 import { type EmergencyContact, type Gender, type PersonalId } from '@/src/api/scheme'
 import validator from 'validator'
-import { phone } from 'phone'
 import {
-  israeliIDType,
+  israeliIDType, languageOptions,
   maxClosenessLength,
   maxIDLength,
   maxIDTypeLength,
   maxLanguages,
-  maxNameLength,
-  maxSpecialNoteLength,
   minClosenessLength,
   minIDLength,
   minIDTypeLength,
-  minNameLength,
   otherIDType
 } from '@/src/app/patients/const'
 import { toast } from 'react-toastify'
 import { getToastOptions } from '@/src/utils/toast'
 import { errorHandler } from '@/src/utils/error'
 import { type CreateModalProps } from '@/src/components/CustomTable'
+import { israeliIDValidator, nameValidator, phoneValidator, specialNoteValidator } from '@/src/utils/validation'
 
 type CreatePatientFormProps = CreateModalProps
 
@@ -69,9 +66,7 @@ const CreatePatientForm: React.FC<CreatePatientFormProps> =
               return 'Personal ID number is required'
             }
             if (values.personal_id.type === israeliIDType) {
-              if (!isValidIsraeliID(value)) {
-                return 'Invalid Israeli ID'
-              }
+              return israeliIDValidator(value)
             } else if (!validator.isLength(value, {
               min: minIDLength,
               max: maxIDLength
@@ -91,12 +86,6 @@ const CreatePatientForm: React.FC<CreatePatientFormProps> =
           }
         },
         phone_number: (value) => phoneValidator(value),
-        languages: (value) => {
-          if (value.length > maxLanguages) {
-            return `Languages must be less than ${maxLanguages}`
-          }
-          return null
-        },
         birth_date: (value) => {
           if (value == null) {
             return 'Birth date is required'
@@ -117,14 +106,7 @@ const CreatePatientForm: React.FC<CreatePatientFormProps> =
           phone: (value) => phoneValidator(value, true)
         },
         referred_by: (value) => nameValidator(value),
-        special_note: (value) => {
-          if (!validator.isLength(value, {
-            max: maxSpecialNoteLength
-          })) {
-            return `Special note must be less than ${maxSpecialNoteLength} characters`
-          }
-          return null
-        }
+        special_note: specialNoteValidator
       }
     })
 
@@ -217,7 +199,8 @@ const CreatePatientForm: React.FC<CreatePatientFormProps> =
 
           <MultiSelect
             label="Languages"
-            data={['Hebrew', 'Spanish', 'English', 'Russian', 'Arabic', 'French']}
+            maxValues={maxLanguages}
+            data={languageOptions}
             placeholder="Select languages"
             key={form.key('languages')}
             {...form.getInputProps('languages')}
@@ -292,43 +275,5 @@ const CreatePatientForm: React.FC<CreatePatientFormProps> =
         </form>
     )
   }
-
-const isValidIsraeliID = (id: string): boolean => {
-  if (id.length !== 9 || isNaN(parseInt(id))) {
-    return false
-  }
-
-  const digits = id.split('').map(Number)
-  const sum = digits.reduce((acc, digit, i) => {
-    let step = digit * ((i % 2) + 1)
-    if (step > 9) step -= 9
-    return acc + step
-  }, 0)
-
-  return sum % 10 === 0
-}
-
-const phoneValidator = (value: string, required: boolean = false): string | null => {
-  if (validator.isEmpty(value)) {
-    return required ? 'Phone number is required' : null
-  }
-  if (!(phone(value).isValid || phone(value, { country: 'ISR' }).isValid)) {
-    return 'Invalid phone number'
-  }
-  return null
-}
-
-const nameValidator = (value: string, required: boolean = false): string | null => {
-  if (validator.isEmpty(value)) {
-    return required ? 'Name is required' : null
-  }
-  if (!validator.isLength(value, {
-    min: minNameLength,
-    max: maxNameLength
-  })) {
-    return `Name must be between ${minNameLength} and ${maxNameLength} characters`
-  }
-  return null
-}
 
 export default CreatePatientForm

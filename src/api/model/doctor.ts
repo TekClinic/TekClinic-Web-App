@@ -1,10 +1,12 @@
-import { type DoctorScheme, type Gender } from '@/src/api/scheme'
+import { type DoctorBaseScheme, type DoctorScheme, type Gender } from '@/src/api/scheme'
 import {
+  createAPIResource,
+  deleteAPIResource,
   formatPaginationParams,
   getAPIResource,
   getAPIResourceList,
   type PaginationParams,
-  type PaginationResult
+  type PaginationResult, toE164
 } from '@/src/api/common'
 import { type Session } from 'next-auth'
 
@@ -54,5 +56,41 @@ export class Doctor {
     session: Session
   ): Promise<PaginationResult<Doctor>> => {
     return await getAPIResourceList(Doctor, formatPaginationParams(params), session)
+  }
+
+  // create creates a new doctor.
+  static create = async (
+    props: {
+      name: string
+      gender?: Gender
+      phone_number: string
+      specialities?: string[]
+      special_note?: string
+    },
+    session: Session
+  ): Promise<number> => {
+    const data = {
+      ...props,
+      phone_number: toE164(props.phone_number)
+    }
+    return await createAPIResource<DoctorBaseScheme>(
+      Doctor,
+      data,
+      session)
+  }
+
+  // deleteById deletes an Doctor by ID.
+  static deleteById = async (
+    id: number,
+    session: Session
+  ): Promise<void> => {
+    await deleteAPIResource(Doctor, id, session)
+  }
+
+  // delete deletes the Doctor.
+  delete = async (
+    session: Session
+  ): Promise<void> => {
+    await Doctor.deleteById(this.id, session)
   }
 }

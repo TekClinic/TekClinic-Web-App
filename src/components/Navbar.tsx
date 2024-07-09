@@ -1,9 +1,10 @@
 import { AppShell, NavLink } from '@mantine/core'
 import React from 'react'
-import { CalendarEvent, Home2, Logout, Man } from 'tabler-icons-react'
+import { CalendarEvent, Home2, Logout } from 'tabler-icons-react'
 import Link from 'next/link'
 import { federatedLogout, useGuaranteeSession } from '@/src/utils/auth'
 import './NavBar.css'
+import { FaUserDoctor, FaUserGroup } from 'react-icons/fa6'
 
 const Navbar = (): React.JSX.Element => {
   const session = useGuaranteeSession()
@@ -22,7 +23,15 @@ const Navbar = (): React.JSX.Element => {
         <NavLink
           label={<div style={{ fontSize: '14px' }}>Patients</div>}
           style={{ margin: '5px' }}
-          leftSection={<Man size="20px" />}
+          leftSection={<FaUserGroup size="20px" />}
+        />
+      </Link>
+
+      <Link href="/doctors">
+        <NavLink
+          label={<div style={{ fontSize: '14px' }}>Doctors</div>}
+          style={{ margin: '5px' }}
+          leftSection={<FaUserDoctor size="20px" />}
         />
       </Link>
 
