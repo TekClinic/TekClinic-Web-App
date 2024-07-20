@@ -10,50 +10,65 @@ const Navbar = (): React.JSX.Element => {
   const session = useGuaranteeSession()
 
   return (
-    <AppShell.Navbar p="md" style={{ gap: '10px', fontSize: '15px' }}>
-      <Link href="/">
-        <NavLink
-          label={<div style={{ fontSize: '14px' }}>Home</div>}
-          style={{ margin: '5px' }}
-          leftSection={<Home2 size="20px" />}
-        />
-      </Link>
+    <AppShell.Navbar p="md" style={{
+      gap: '10px',
+      fontSize: '15px'
+    }}>
+      <NavLink
+        href='/'
+        component={Link}
+        label={<div style={{ fontSize: '14px' }}>Home</div>}
+        style={{ margin: '5px' }}
+        leftSection={<Home2 size="20px"/>}
+      />
 
-      <Link href="/patients">
-        <NavLink
-          label={<div style={{ fontSize: '14px' }}>Patients</div>}
-          style={{ margin: '5px' }}
-          leftSection={<FaUserGroup size="20px" />}
-        />
-      </Link>
+      <NavLink
+        href="/patients"
+        component={Link}
+        label={<div style={{ fontSize: '14px' }}>Patients</div>}
+        style={{ margin: '5px' }}
+        leftSection={<FaUserGroup size="20px"/>}
+      />
 
-      <Link href="/doctors">
-        <NavLink
-          label={<div style={{ fontSize: '14px' }}>Doctors</div>}
-          style={{ margin: '5px' }}
-          leftSection={<FaUserDoctor size="20px" />}
-        />
-      </Link>
+      <NavLink
 
-      <Link href="/appointments">
-        <NavLink
-          label={<div style={{ fontSize: '14px' }}>Appointments</div>}
-          style={{ margin: '5px' }}
-          leftSection={<CalendarEvent size="20px" />}
-        />
-      </Link>
+        href="/doctors"
+        component={Link}
+        label={<div style={{ fontSize: '14px' }}>Doctors</div>}
+        style={{ margin: '5px' }}
+        leftSection={<FaUserDoctor size="20px"/>}
+      />
 
-      <div style={{ flexGrow: 1 }} />
+      <NavLink
+        href="/appointments"
+        component={Link}
+        label={<div style={{ fontSize: '14px' }}>Appointments</div>}
+        style={{ margin: '5px' }}
+        leftSection={<CalendarEvent size="20px"/>}
+      />
 
-      <div style={{ textAlign: 'center', padding: '10px', fontSize: '15px' }}>
-        <h4 style={{ textAlign: 'left', fontSize: '15px', fontWeight: '300', color: 'rgb(100, 140, 200)' }}>logged in
+      <div style={{ flexGrow: 1 }}/>
+
+      <div style={{
+        textAlign: 'center',
+        padding: '10px',
+        fontSize: '15px'
+      }}>
+        <h4 style={{
+          textAlign: 'left',
+          fontSize: '15px',
+          fontWeight: '300',
+          color: 'rgb(100, 140, 200)'
+        }}>logged in
           as {session?.user?.name ?? 'anonymous'}</h4>
         <NavLink
           label="Logout"
           /* eslint-disable-next-line @typescript-eslint/no-misused-promises */
-          onClick={async () => { await federatedLogout() }}
+          onClick={async () => {
+            await federatedLogout()
+          }}
           style={{ margin: '5px' }}
-          leftSection={<Logout size="20px" />}
+          leftSection={<Logout size="20px"/>}
         />
 
       </div>

@@ -23,6 +23,7 @@ import { requireBuildEnv } from '@/src/utils/env'
 import { SessionProvider, signIn, useSession } from 'next-auth/react'
 import { ToastContainer } from 'react-toastify'
 import { ContextMenuProvider } from 'mantine-contextmenu'
+import { CDN_DARK_THEME_URL, CDN_LIGHT_THEME_URL } from '@/src/app/appointments/const'
 
 registerLicense(requireBuildEnv('NEXT_PUBLIC_SYNCFUSION_LICENSE_KEY',
   process.env.NEXT_PUBLIC_SYNCFUSION_LICENSE_KEY))
@@ -139,6 +140,9 @@ export default function RootLayout ({ children }: {
     <head>
       <ColorSchemeScript/>
       <link rel="shortcut icon" href="/favicon.ico"/>
+      {/* for prefetching syncfusion css */}
+      <link rel="preload" href={CDN_LIGHT_THEME_URL} as="style"/>
+      <link rel="preload" href={CDN_DARK_THEME_URL} as="style"/>
       <meta
         name="viewport"
         content="minimum-scale=1, initial-scale=1, width=device-width, user-scalable=no"
@@ -147,7 +151,7 @@ export default function RootLayout ({ children }: {
     </head>
     <body>
     <MantineProvider theme={theme}>
-      <SessionProvider refetchInterval={4 * 60}>
+    <SessionProvider refetchInterval={4 * 60}>
         <ContextMenuProvider>
           <ContentLayout>{children}</ContentLayout>
         </ContextMenuProvider>

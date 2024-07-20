@@ -3,7 +3,6 @@
 import React from 'react'
 import Image from 'next/image'
 import clinicIntro from '@/public/clinic_intro.png'
-import './styles.css'
 import { Title, useMantineTheme, useComputedColorScheme } from '@mantine/core'
 
 export default function Home (): React.JSX.Element {

@@ -13,7 +13,6 @@ import {
 } from '@syncfusion/ej2-react-schedule'
 import './styles.css'
 import { useGuaranteeSession } from '@/src/utils/auth'
-
 import { Appointment } from '@/src/api/model/appointment'
 import { handleUIError } from '@/src/utils/error'
 import { useComputedColorScheme } from '@mantine/core'
@@ -24,7 +23,13 @@ import { getToastOptions } from '@/src/utils/toast'
 import { type ActionEventArgs, type PopupOpenEventArgs } from '@syncfusion/ej2-schedule/src/schedule/base/interface'
 import AppointmentForm, { type AppointmentFormData, isAppointment } from '@/src/app/appointments/AppointmentForm'
 import { modals, ModalsProvider } from '@mantine/modals'
-import { ACTION_DATE_NAVIGATE, ACTION_VIEW_NAVIGATE, POPUP_TYPE_EDITOR } from '@/src/app/appointments/const'
+import {
+  ACTION_DATE_NAVIGATE,
+  ACTION_VIEW_NAVIGATE,
+  CDN_DARK_THEME_URL,
+  CDN_LIGHT_THEME_URL,
+  POPUP_TYPE_EDITOR
+} from '@/src/app/appointments/const'
 
 const queryClient = new QueryClient()
 
@@ -140,6 +145,7 @@ const Calendar = (): React.JSX.Element => {
 
   return (
     <ModalsProvider>
+      <link href={computedColorScheme === 'light' ? CDN_LIGHT_THEME_URL : CDN_DARK_THEME_URL} rel="stylesheet"/>
       <ScheduleComponent
         currentView="Week" ref={scheduleObj}
         eventSettings={{
