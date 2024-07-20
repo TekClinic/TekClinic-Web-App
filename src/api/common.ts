@@ -7,6 +7,8 @@ import { phone } from 'phone'
 
 // url of the API
 const API_URL = requireBuildEnv('NEXT_PUBLIC_API_URL', process.env.NEXT_PUBLIC_API_URL)
+// maximum number of items per page in paginated API queries
+export const MAX_ITEMS_PER_PAGE = 50
 
 // Class object of API resources has to implement this interface to be used in the API functions.
 // __name__ is the name of the resource in the API. For example, if Patient's API endpoint is 'API_URL/patient',

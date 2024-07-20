@@ -31,6 +31,13 @@ export class Appointment {
   readonly approved_by_patient: boolean
   readonly visited: boolean
 
+  get subject (): string {
+    if (this.patient_id != null) {
+      return `Appointment with Dr. ${this.doctor_id} for ${this.patient_id}`
+    }
+    return `Available appointment Dr. ${this.doctor_id}`
+  }
+
   constructor (scheme: AppointmentScheme) {
     this.id = scheme.id
     this.patient_id = scheme.patient_id
@@ -130,6 +137,13 @@ export class Appointment {
       this.id,
       patient,
       session)
+  }
+
+  // clearPatient removes the patient from the appointment.
+  clearPatient = async (
+    session: Session
+  ): Promise<number> => {
+    return await Appointment.cancelAppointment(this.id, session)
   }
 
   // cancelAppointment cancels an appointment for a patient.
