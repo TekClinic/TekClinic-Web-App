@@ -7,6 +7,7 @@ import { errorHandler } from '@/src/utils/error'
 import { type CreateModalProps } from '@/src/components/CustomTable'
 import { Appointment } from '@/src/api/model/appointment'
 import { DateTimePicker } from '@mantine/dates'
+import { buildDeleteModal } from '@/src/utils/modals'
 
 export type AppointmentFormData = { start_time: Date, end_time: Date } | Appointment
 
@@ -176,6 +177,18 @@ const AppointmentForm: React.FC<AppointmentFormProps> =
           }
 
           <Group mt="md" justify="right">
+            {editMode &&
+                <Button color="red" variant="outline" onClick={() => {
+                  const deleteModal =
+                    buildDeleteModal<Appointment>('appointment', (appointment) => appointment.getSubject())
+                  deleteModal({
+                    item: data,
+                    session,
+                    computedColorScheme,
+                    onSuccess
+                  })
+                }}>Delete</Button>
+            }
             <Button type="submit">Submit</Button>
           </Group>
         </Stack>

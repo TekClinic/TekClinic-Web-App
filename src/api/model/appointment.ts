@@ -32,6 +32,10 @@ export class Appointment {
   readonly visited: boolean
 
   get subject (): string {
+    return this.getSubject()
+  }
+
+  getSubject = (): string => {
     if (this.patient_id != null) {
       return `Appointment with Dr. ${this.doctor_id} for ${this.patient_id}`
     }
