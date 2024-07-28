@@ -12,6 +12,7 @@ import { type Session } from 'next-auth'
 
 // Doctor query parameters.
 interface DoctorParams extends PaginationParams {
+  search?: string
 }
 
 // Represents a doctor from the API.
@@ -55,7 +56,11 @@ export class Doctor {
     params: DoctorParams,
     session: Session
   ): Promise<PaginationResult<Doctor>> => {
-    return await getAPIResourceList(Doctor, formatPaginationParams(params), session)
+    const formattedParams = formatPaginationParams(params)
+    if (params.search != null && params.search !== '') {
+      formattedParams.search = params.search
+    }
+    return await getAPIResourceList(Doctor, formattedParams, session)
   }
 
   // create creates a new doctor.

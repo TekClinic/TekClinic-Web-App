@@ -1,17 +1,21 @@
-import React from 'react'
-import { Button, Group, NumberInput, Stack, Switch } from '@mantine/core'
+import React, { useEffect } from 'react'
+import { Button, Group, LoadingOverlay, Select, Stack, Switch } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { toast } from 'react-toastify'
 import { getToastOptions } from '@/src/utils/toast'
-import { errorHandler } from '@/src/utils/error'
+import { errorHandler, handleUIError } from '@/src/utils/error'
 import { type CreateModalProps } from '@/src/components/CustomTable'
 import { Appointment } from '@/src/api/model/appointment'
 import { DateTimePicker } from '@mantine/dates'
 import { buildDeleteModal } from '@/src/utils/modals'
+import { Doctor } from '@/src/api/model/doctor'
+import { Patient } from '@/src/api/model/patient'
+import { useQuery } from '@tanstack/react-query'
 
 export type AppointmentFormData = { start_time: Date, end_time: Date } | Appointment
 
 interface AppointmentFormProps extends CreateModalProps {
+  onSuccess: (data?: AppointmentFormData) => Promise<void>
   data: AppointmentFormData
   quick?: boolean
 }
@@ -30,14 +34,14 @@ const AppointmentForm: React.FC<AppointmentFormProps> =
   }) => {
     const editMode = isAppointment(data)
     const initialValues = {
-      doctor_id: '' as number | '',
-      patient_id: '' as number | '',
+      doctor_id: null as string | null,
+      patient_id: null as string | null,
       start_time: data.start_time,
       end_time: data.end_time
     }
     if (editMode) {
-      initialValues.doctor_id = data.doctor_id
-      initialValues.patient_id = data.patient_id ?? ''
+      initialValues.doctor_id = data.doctor_id.toString()
+      initialValues.patient_id = data.patient_id?.toString() ?? null
     }
 
     const form = useForm({
@@ -46,20 +50,8 @@ const AppointmentForm: React.FC<AppointmentFormProps> =
       initialValues,
       validate: {
         doctor_id: (value) => {
-          if (value === '') {
+          if (value == null) {
             return 'Doctor is required'
-          }
-          if (value <= 0) {
-            return 'Doctor ID must be a positive number'
-          }
-          return null
-        },
-        patient_id: (value) => {
-          if (value === '') {
-            return null
-          }
-          if (value <= 0) {
-            return 'Patient ID must be a positive number'
           }
           return null
         },
@@ -72,12 +64,84 @@ const AppointmentForm: React.FC<AppointmentFormProps> =
       }
     })
 
+    const [doctorSearchValue, setDoctorSearchValue] = React.useState<undefined | string>(undefined)
+    const [patientSearchValue, setPatientSearchValue] = React.useState<undefined | string>(undefined)
+
+    const {
+      error: doctorError,
+      isLoading: doctorLoading,
+      refetch: refetchDoctors,
+      data: doctorOptions
+    } = useQuery({
+      queryKey: ['doctors', 'search', doctorSearchValue, initialValues.doctor_id],
+      queryFn: async () => {
+        if (doctorSearchValue == null && initialValues.doctor_id != null) {
+          const doctor = await Doctor.getById(parseInt(initialValues.doctor_id), session)
+          return [{
+            value: doctor.id.toString(),
+            label: doctor.name
+          }]
+        }
+
+        const { items: doctors } = await Doctor.get({ search: doctorSearchValue }, session)
+        return doctors.map((doctor) => ({
+          value: doctor.id.toString(),
+          label: doctor.name
+        }))
+      }
+    })
+
+    const {
+      error: patientError,
+      isLoading: patientLoading,
+      refetch: refetchPatients,
+      data: patientOptions
+    } = useQuery({
+      queryKey: ['patients', 'search', patientSearchValue, initialValues.patient_id],
+      queryFn: async () => {
+        if (patientSearchValue == null && initialValues.patient_id != null) {
+          const patient = await Patient.getById(parseInt(initialValues.patient_id), session)
+          return [{
+            value: patient.id.toString(),
+            label: patient.name
+          }]
+        }
+
+        const { items: patients } = await Patient.get({ search: patientSearchValue }, session)
+        return patients.map((patient) => ({
+          value: patient.id.toString(),
+          label: patient.name
+        }))
+      }
+    })
+
+    const initialLoading = (doctorSearchValue == null && doctorLoading) || (patientSearchValue == null && patientLoading)
+    useEffect(() => {
+      if (!initialLoading) {
+        return
+      }
+      if (doctorError != null) {
+        handleUIError(doctorError, computedColorScheme, () => {
+          void refetchDoctors()
+        })
+      }
+      if (patientError != null) {
+        handleUIError(patientError, computedColorScheme, () => {
+          void refetchPatients()
+        })
+      }
+    })
+
+    if (initialLoading) {
+      return <LoadingOverlay visible/>
+    }
+
     return (
       // eslint-disable-next-line @typescript-eslint/no-misused-promises
       <form onSubmit={form.onSubmit(async (values): Promise<void> => {
-        const doctorId = values.doctor_id
-        const patientId = (values.patient_id === '') ? undefined : values.patient_id
-        if (doctorId === '') {
+        const doctorId = (values.doctor_id == null) ? undefined : parseInt(values.doctor_id)
+        const patientId = (values.patient_id == null) ? undefined : parseInt(values.patient_id)
+        if (doctorId == null) {
           // unreachable due to validation
           return
         }
@@ -91,8 +155,8 @@ const AppointmentForm: React.FC<AppointmentFormProps> =
           if (!editMode) {
             await toast.promise(Appointment.create(formData, session),
               {
-                pending: `Creating appointment with ${values.doctor_id}...`,
-                success: `Appointment with ${values.doctor_id} was created successfully.`,
+                pending: 'Creating appointment...',
+                success: `Appointment with Dr. ${doctorSearchValue} was created successfully!`,
                 error: 'Error while creating appointment...'
               }, getToastOptions(computedColorScheme))
             return
@@ -101,15 +165,15 @@ const AppointmentForm: React.FC<AppointmentFormProps> =
             if (formData.patient_id === undefined) {
               await toast.promise(data.clearPatient(session),
                 {
-                  pending: `Unassigning ${data.patient_id}...`,
+                  pending: 'Unassigning the patient...',
                   success: 'Appointment is available now!',
                   error: 'Error while updating appointment...'
                 }, getToastOptions(computedColorScheme))
             } else {
               await toast.promise(data.assignPatient({ patient_id: formData.patient_id }, session),
                 {
-                  pending: `Assigning ${formData.patient_id}...`,
-                  success: 'Patient assigned successfully.',
+                  pending: `Assigning ${patientSearchValue}...`,
+                  success: `${patientSearchValue} assigned successfully!`,
                   error: 'Error while updating appointment...'
                 }, getToastOptions(computedColorScheme))
             }
@@ -119,23 +183,39 @@ const AppointmentForm: React.FC<AppointmentFormProps> =
           return
         }
 
-        await onSuccess()
+        await onSuccess(formData)
       })}>
         <Stack>
-          <NumberInput
+          <Select
             withAsterisk={!editMode}
             disabled={editMode}
-            label="Doctor ID"
+            clearable
+            searchable
+            comboboxProps={{ withinPortal: false }}
+            label="Doctor"
             description="Doctor performing the appointment"
-            placeholder="15"
+            placeholder="Select doctor"
+            data={doctorOptions}
+            onSearchChange={(value) => {
+              setDoctorSearchValue(value)
+            }}
+            nothingFoundMessage="No doctors found"
             key={form.key('doctor_id')}
             {...form.getInputProps('doctor_id')}
           />
 
-          <NumberInput
-            label="Patient ID"
+          <Select
+            clearable
+            searchable
+            comboboxProps={{ withinPortal: false }}
+            label="Patient"
             description="Patient receiving the appointment"
-            placeholder="10"
+            placeholder="Select patient"
+            data={patientOptions}
+            onSearchChange={(value) => {
+              setPatientSearchValue(value)
+            }}
+            nothingFoundMessage="No patients found"
             key={form.key('patient_id')}
             {...form.getInputProps('patient_id')}
           />
@@ -180,12 +260,14 @@ const AppointmentForm: React.FC<AppointmentFormProps> =
             {editMode &&
                 <Button color="red" variant="outline" onClick={() => {
                   const deleteModal =
-                    buildDeleteModal<Appointment>('appointment', (appointment) => appointment.getSubject())
+                    buildDeleteModal<Appointment>('appointment', () => 'The appointment')
                   deleteModal({
                     item: data,
                     session,
                     computedColorScheme,
-                    onSuccess
+                    onSuccess: async () => {
+                      await onSuccess(data)
+                    }
                   })
                 }}>Delete</Button>
             }

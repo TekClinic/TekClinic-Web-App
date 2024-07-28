@@ -11,6 +11,8 @@ import {
 } from '@/src/api/common'
 import { type Session } from 'next-auth'
 import { format } from 'date-fns'
+import { Doctor } from '@/src/api/model/doctor'
+import { Patient } from '@/src/api/model/patient'
 
 // Appointment query parameters.
 interface AppointmentParams extends PaginationParams {
@@ -31,15 +33,38 @@ export class Appointment {
   readonly approved_by_patient: boolean
   readonly visited: boolean
 
+  private doctor?: Doctor
+  private patient?: Patient
+
   get subject (): string {
     return this.getSubject()
   }
 
   getSubject = (): string => {
-    if (this.patient_id != null) {
-      return `Appointment with Dr. ${this.doctor_id} for ${this.patient_id}`
+    const doctorName = this.doctor?.name ?? this.doctor_id
+    const patientName = this.patient?.name ?? this.patient_id
+    if (patientName != null) {
+      return `${patientName} visits Dr. ${doctorName}`
     }
-    return `Available appointment Dr. ${this.doctor_id}`
+    return `Dr. ${doctorName} available`
+  }
+
+  loadDoctor = async (
+    session: Session
+  ): Promise<void> => {
+    if (this.doctor_id == null || this.doctor != null) {
+      return
+    }
+    this.doctor = await Doctor.getById(this.doctor_id, session)
+  }
+
+  loadPatient = async (
+    session: Session
+  ): Promise<void> => {
+    if (this.patient_id == null || this.patient != null) {
+      return
+    }
+    this.patient = await Patient.getById(this.patient_id, session)
   }
 
   constructor (scheme: AppointmentScheme) {

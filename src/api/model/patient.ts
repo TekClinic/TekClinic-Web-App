@@ -18,6 +18,7 @@ import { format } from 'date-fns'
 
 // Patient query parameters.
 interface PatientParams extends PaginationParams {
+  search?: string
 }
 
 // Represents a patient from the API.
@@ -71,7 +72,11 @@ export class Patient {
     params: PatientParams,
     session: Session
   ): Promise<PaginationResult<Patient>> => {
-    return await getAPIResourceList(Patient, formatPaginationParams(params), session)
+    const formattedParams = formatPaginationParams(params)
+    if (params.search != null && params.search !== '') {
+      formattedParams.search = params.search
+    }
+    return await getAPIResourceList(Patient, formattedParams, session)
   }
 
   // create creates a new patient.

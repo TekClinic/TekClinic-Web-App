@@ -16,7 +16,7 @@ import { useGuaranteeSession } from '@/src/utils/auth'
 import { Appointment } from '@/src/api/model/appointment'
 import { handleUIError } from '@/src/utils/error'
 import { useComputedColorScheme } from '@mantine/core'
-import { QueryClient, useQuery } from '@tanstack/react-query'
+import { useQueries } from '@tanstack/react-query'
 import { MAX_ITEMS_PER_PAGE } from '@/src/api/common'
 import { toast } from 'react-toastify'
 import { getToastOptions } from '@/src/utils/toast'
@@ -31,47 +31,57 @@ import {
   POPUP_TYPE_EDITOR
 } from '@/src/app/appointments/const'
 
-const queryClient = new QueryClient()
-
 const Calendar = (): React.JSX.Element => {
   const scheduleObj = useRef<ScheduleComponent>(null)
   const session = useGuaranteeSession()
   const computedColorScheme = useComputedColorScheme()
   const [displayedDates, setDisplayedDates] = useState<Date[]>([])
 
-  const {
-    data,
-    refetch,
-    error
-  } = useQuery({
-    queryKey: ['appointments', displayedDates],
-    queryFn: async () => {
-      const result: Appointment[] = []
-      await Promise.all(displayedDates.map(async (date) => {
+  const appointmentQueries = useQueries({
+    queries: displayedDates.map((date) => ({
+      queryKey: ['appointments', 'date', date.toDateString()],
+      queryFn: async () => {
         const {
-          items: appointments,
+          items,
           count
         } = await Appointment.get({
           date,
           limit: MAX_ITEMS_PER_PAGE
         }, session)
-        result.push(...appointments)
+        await Promise.all([
+          ...items.map(async (item) => {
+            await item.loadDoctor(session)
+          }),
+          ...items.map(async (item) => {
+            await item.loadPatient(session)
+          })
+        ])
         if (count > MAX_ITEMS_PER_PAGE) {
           toast.warning(`There are more than ${MAX_ITEMS_PER_PAGE} appointments on ${date.toDateString()}. 
           Showing only the first ${MAX_ITEMS_PER_PAGE}.`, getToastOptions(computedColorScheme))
         }
-      }))
-      return result
+        return items
+      }
+    }))
+  })
+
+  const data = appointmentQueries.reduce<Appointment[]>((acc, result) => {
+    if (result.data != null) {
+      acc.push(...result.data)
     }
-  }, queryClient)
+    return acc
+  }, [])
+  const dateToResult = new Map(displayedDates.map((date, index) => [date.toDateString(), appointmentQueries[index]]))
 
   useEffect(() => {
-    if (error != null) {
-      handleUIError(error, computedColorScheme, () => {
-        void refetch()
-      })
-    }
-  }, [computedColorScheme, error, refetch])
+    appointmentQueries.forEach((result) => {
+      if (result.error != null) {
+        handleUIError(result.error, computedColorScheme, () => {
+          void result.refetch()
+        })
+      }
+    })
+  }, [computedColorScheme, appointmentQueries])
 
   // updateDisplayedDates is a function that updates the displayed dates.
   // It is used to fetch the appointments for the displayed dates.
@@ -109,9 +119,11 @@ const Calendar = (): React.JSX.Element => {
             data={data}
             session={session}
             computedColorScheme={computedColorScheme}
-            onSuccess={async () => {
+            onSuccess={async (data) => {
               modals.close(modalId)
-              await refetch()
+              if (data != null) {
+                await dateToResult.get(data.start_time.toDateString())?.refetch()
+              }
             }}/>
       })
     }
@@ -129,9 +141,11 @@ const Calendar = (): React.JSX.Element => {
       return <AppointmentForm
         session={session} quick
         computedColorScheme={computedColorScheme}
-        onSuccess={async () => {
+        onSuccess={async (data) => {
           scheduleObj.current?.closeQuickInfoPopup()
-          await refetch()
+          if (data != null) {
+            await dateToResult.get(data.start_time.toDateString())?.refetch()
+          }
         }}
         data={{
           start_time: args.start_time,
@@ -181,5 +195,4 @@ const Calendar = (): React.JSX.Element => {
     </ModalsProvider>
   )
 }
-
 export default Calendar
