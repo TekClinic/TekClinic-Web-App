@@ -4,7 +4,7 @@ import classes from './CustomTable.module.css'
 
 import { DataTable, type DataTableColumn, useDataTableColumns } from 'mantine-datatable'
 import React, { useEffect, useState } from 'react'
-import { QueryClient, type QueryKey, useQuery, type UseQueryOptions } from '@tanstack/react-query'
+import { type QueryKey, useQuery, type UseQueryOptions } from '@tanstack/react-query'
 import { useGuaranteeSession } from '@/src/utils/auth'
 import { ModalsProvider } from '@mantine/modals'
 import { ActionIcon, Box, Button, Group, type MantineColorScheme, useComputedColorScheme } from '@mantine/core'
@@ -16,8 +16,6 @@ import { type PaginationResult } from '@/src/api/common'
 
 const defaultPageSize = 5
 const pageSizeOptions = [2, 5, 10, 20, 50]
-
-const queryClient = new QueryClient()
 
 interface BaseModalProps {
   session: Session
@@ -60,7 +58,7 @@ const CustomTable = <DataType, TData extends PaginationResult<DataType> = Pagina
     isLoading,
     refetch,
     error
-  } = useQuery<TData, Error, TData, TQueryKey>(queryOptions(session, page, pageSize), queryClient)
+  } = useQuery<TData, Error, TData, TQueryKey>(queryOptions(session, page, pageSize))
 
   useEffect(() => {
     if (error != null) {

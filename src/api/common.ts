@@ -4,9 +4,12 @@ import { requireBuildEnv } from '@/src/utils/env'
 import { type IdHolder, type NamedAPIResource, type NamedAPIResourceList, type PatientIdHolder } from '@/src/api/scheme'
 import { wrapError } from '@/src/api/error'
 import { phone } from 'phone'
+import { QueryClient } from '@tanstack/react-query'
 
 // url of the API
 const API_URL = requireBuildEnv('NEXT_PUBLIC_API_URL', process.env.NEXT_PUBLIC_API_URL)
+// time in milliseconds for the cache to be considered stale
+const STALE_TIME = 1000 * 60
 // maximum number of items per page in paginated API queries
 export const MAX_ITEMS_PER_PAGE = 50
 
@@ -147,8 +150,13 @@ export const getAPIResource = async <Scheme> (
   id: number,
   session: Session
 ): Promise<InstanceType<FetchableAPIResourceClass<Scheme>>> => {
-  const url = `${API_URL}/${resourceClass.__name__}/${id}`
-  return resourceClass.fromScheme(await apiGET<Scheme>(url, session))
+  const data = await queryClient.fetchQuery({
+    queryKey: [resourceClass.__name__, id],
+    queryFn: async () => {
+      return await apiGET<Scheme>(`${API_URL}/${resourceClass.__name__}/${id}`, session)
+    }
+  })
+  return resourceClass.fromScheme(data)
 }
 
 // getAPIResourceList fetches a list of resources from the API.
@@ -172,9 +180,16 @@ export const getAPIResourceList = async <Scheme> (
 
   return {
     items: await Promise.all(
-      resourceList.map(async (resource: NamedAPIResource) =>
-        resourceClass.fromScheme(await apiGET<Scheme>(resource.url, session))
-      )
+      resourceList.map(async (resource: NamedAPIResource) => {
+        // TODO: add id field to NamedAPIResource
+        const resourceURL = new URL(resource.url)
+        const pathParts = resourceURL.pathname.split('/')
+        const id = parseInt(pathParts.pop() ?? '')
+        if (isNaN(id)) {
+          return resourceClass.fromScheme(await apiGET<Scheme>(resource.url, session))
+        }
+        return await getAPIResource(resourceClass, id, session)
+      })
     ),
     count
   }
@@ -207,6 +222,7 @@ export const deleteAPIResource = async (
 ): Promise<void> => {
   const url = `${API_URL}/${resourceClass.__name__}/${id}`
   await apiDELETE<unknown>(url, session)
+  await queryClient.invalidateQueries({ queryKey: [resourceClass.__name__, id] })
 }
 
 // putAPIResource updates an existing resource in the API - for now, supports only patient_id.
@@ -225,6 +241,7 @@ export const putAPIResourceField = async <Scheme> (
 ): Promise<number> => {
   const url = `${API_URL}/${resourceClass.__name__}/${id}/${field}`
   const response = await apiPUT<PatientIdHolder, Scheme>(url, session, data)
+  await queryClient.invalidateQueries({ queryKey: [resourceClass.__name__, id] })
   return response.patient_id
 }
 
@@ -241,6 +258,7 @@ export const clearAPIResourceField = async (
 ): Promise<number> => {
   const url = `${API_URL}/${resourceClass.__name__}/${id}/${field}`
   const response = await apiDELETE<PatientIdHolder>(url, session)
+  await queryClient.invalidateQueries({ queryKey: [resourceClass.__name__, id] })
   return response.patient_id
 }
 
@@ -253,3 +271,12 @@ export const toE164 = (phoneNumber: string): string => {
   }
   return phoneNumber
 }
+
+// queryClient is the global React Query client.
+export const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: STALE_TIME
+    }
+  }
+})

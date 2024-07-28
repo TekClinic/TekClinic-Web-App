@@ -6,15 +6,7 @@ import 'mantine-datatable/styles.layer.css'
 import 'react-toastify/dist/ReactToastify.css'
 
 import React from 'react'
-import {
-  AppShell,
-  Center,
-  ColorSchemeScript,
-  createTheme,
-  Loader,
-  MantineProvider,
-  rem
-} from '@mantine/core'
+import { AppShell, Center, ColorSchemeScript, createTheme, Loader, MantineProvider, rem } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
 import Header from '@/src/components/Header'
 import Navbar from '@/src/components/Navbar'
@@ -24,6 +16,8 @@ import { SessionProvider, signIn, useSession } from 'next-auth/react'
 import { ToastContainer } from 'react-toastify'
 import { ContextMenuProvider } from 'mantine-contextmenu'
 import { CDN_DARK_THEME_URL, CDN_LIGHT_THEME_URL } from '@/src/app/appointments/const'
+import { QueryClientProvider } from '@tanstack/react-query'
+import { queryClient } from '@/src/api/common'
 
 registerLicense(requireBuildEnv('NEXT_PUBLIC_SYNCFUSION_LICENSE_KEY',
   process.env.NEXT_PUBLIC_SYNCFUSION_LICENSE_KEY))
@@ -100,7 +94,10 @@ function ContentLayout ({ children }: {
           navbar={{
             width: 230,
             breakpoint: 'sm',
-            collapsed: { mobile: !opened, desktop: !opened }
+            collapsed: {
+              mobile: !opened,
+              desktop: !opened
+            }
           }}
           padding="md"
         >
@@ -113,7 +110,10 @@ function ContentLayout ({ children }: {
 
           <AppShell.Footer>
             <Center>
-              <div style={{ color: '#888', fontSize: '17px' }}>
+              <div style={{
+                color: '#888',
+                fontSize: '17px'
+              }}>
                 built by team 8
               </div>
             </Center>
@@ -151,12 +151,14 @@ export default function RootLayout ({ children }: {
     </head>
     <body>
     <MantineProvider theme={theme}>
-    <SessionProvider refetchInterval={4 * 60}>
-        <ContextMenuProvider>
-          <ContentLayout>{children}</ContentLayout>
-        </ContextMenuProvider>
-        <ToastContainer/>
-      </SessionProvider>
+      <QueryClientProvider client={queryClient}>
+        <SessionProvider refetchInterval={4 * 60}>
+          <ContextMenuProvider>
+            <ContentLayout>{children}</ContentLayout>
+          </ContextMenuProvider>
+          <ToastContainer/>
+        </SessionProvider>
+      </QueryClientProvider>
     </MantineProvider>
     </body>
     </html>
