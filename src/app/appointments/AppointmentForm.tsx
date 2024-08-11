@@ -15,6 +15,7 @@ import { useQuery } from '@tanstack/react-query'
 export interface AppointmentFormData {
   start_time: Date
   end_time: Date
+  doctor_id?: number
 }
 
 interface EditAppointmentFormData extends AppointmentFormData {
@@ -41,7 +42,7 @@ const AppointmentForm: React.FC<AppointmentFormProps> =
   }) => {
     const editMode = isEditMode(data)
     const initialValues = {
-      doctor_id: null as string | null,
+      doctor_id: data?.doctor_id === 0 ? null : data?.doctor_id?.toString(),
       patient_id: null as string | null,
       start_time: data.start_time,
       end_time: data.end_time,

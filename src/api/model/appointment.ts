@@ -49,12 +49,24 @@ export class Appointment {
   }
 
   getSubject = (): string => {
-    const doctorName = this.doctor?.name ?? this.doctor_id
-    const patientName = this.patient?.name ?? this.patient_id
+    const doctorName = this.getDoctorName()
+    const patientName = this.getPatientName()
     if (patientName != null) {
       return `${patientName} visits Dr. ${doctorName}`
     }
     return `Dr. ${doctorName} available`
+  }
+
+  getDoctorName = (): string => {
+    return this.doctor?.name ?? this.doctor_id.toString()
+  }
+
+  getDoctorSpecialities = (): string[] => {
+    return this.doctor?.specialities ?? []
+  }
+
+  getPatientName = (): string | null => {
+    return this.patient?.name ?? this.patient_id?.toString() ?? null
   }
 
   loadDoctor = async (

@@ -2,10 +2,11 @@
 
 import React, { useEffect, useRef, useState } from 'react'
 import {
-  Agenda,
   Day,
   Inject,
   Month,
+  ResourceDirective,
+  ResourcesDirective,
   ScheduleComponent,
   ViewDirective,
   ViewsDirective,
@@ -15,7 +16,7 @@ import './styles.css'
 import { useGuaranteeSession } from '@/src/utils/auth'
 import { Appointment } from '@/src/api/model/appointment'
 import { handleUIError } from '@/src/utils/error'
-import { useComputedColorScheme } from '@mantine/core'
+import { Avatar, Box, Group, Pagination, Switch, Text, useComputedColorScheme } from '@mantine/core'
 import { useQueries } from '@tanstack/react-query'
 import { MAX_ITEMS_PER_PAGE } from '@/src/api/common'
 import { toast } from 'react-toastify'
@@ -28,14 +29,33 @@ import {
   ACTION_VIEW_NAVIGATE,
   CDN_DARK_THEME_URL,
   CDN_LIGHT_THEME_URL,
+  COLORS_RESOURCE,
+  DOCTOR_COLORS,
+  DOCTORS_PER_PAGE,
+  DOCTORS_RESOURCE,
   POPUP_TYPE_EDITOR
 } from '@/src/app/appointments/const'
+import { IconStethoscope } from '@tabler/icons-react'
+
+interface ResourceData {
+  id: number
+  color: string
+  text: string
+}
+
+interface DoctorResourceData extends ResourceData {
+  name: string
+  specialities: string[]
+}
 
 const Calendar = (): React.JSX.Element => {
   const scheduleObj = useRef<ScheduleComponent>(null)
   const session = useGuaranteeSession()
   const computedColorScheme = useComputedColorScheme()
   const [displayedDates, setDisplayedDates] = useState<Date[]>([])
+
+  const [separateByDoctors, setSeparateByDoctors] = useState<boolean>(false)
+  const [currentDoctorsPage, setCurrentDoctorsPage] = useState(1)
 
   const appointmentQueries = useQueries({
     queries: displayedDates.map((date) => ({
@@ -61,7 +81,8 @@ const Calendar = (): React.JSX.Element => {
           Showing only the first ${MAX_ITEMS_PER_PAGE}.`, getToastOptions(computedColorScheme))
         }
         return items
-      }
+      },
+      staleTime: 0
     }))
   })
 
@@ -90,6 +111,7 @@ const Calendar = (): React.JSX.Element => {
     if (scheduleObj?.current != null) {
       setDisplayedDates(scheduleObj.current.getCurrentViewDates())
     }
+    setCurrentDoctorsPage(1)
   }
 
   // onActionComplete is a function that is called when a schedule action is completed.
@@ -157,19 +179,96 @@ const Calendar = (): React.JSX.Element => {
     return <></>
   }
 
+  const resourceHeaderTemplate = (props: { resourceData: DoctorResourceData }): React.JSX.Element => {
+    if (props.resourceData.id === 0) {
+      return <></>
+    }
+    return (
+      <Box>
+        <Avatar color={props.resourceData.color} radius="xl">
+          <IconStethoscope size={24}/>
+        </Avatar>
+
+        <Box>
+          <Text w={500} size="lg">
+            Dr. {props.resourceData.name}
+          </Text>
+          <Text c="dimmed">{props.resourceData.specialities.join(', ')}</Text>
+        </Box>
+      </Box>
+    )
+  }
+
   const data = appointments.map((appointment: Appointment) => {
     return {
       id: appointment.id,
       subject: appointment.subject,
       start_time: appointment.start_time,
       end_time: appointment.end_time,
+      doctor_id: appointment.doctor_id,
+      color_id: appointment.doctor_id % DOCTOR_COLORS.length,
       appointment
     }
   })
 
+  // Resource handling
+
+  const colorsResourceData: ResourceData[] = DOCTOR_COLORS.map((color, index) => ({
+    id: index,
+    color,
+    // just placeholder text
+    text: 'Appointment in the Clinic'
+  }))
+
+  const doctorsMap = new Map<number, Appointment>()
+
+  appointments.forEach(appointment => doctorsMap.set(appointment.doctor_id, appointment))
+
+  const doctorsResourceData = Array.from(doctorsMap).map(([id, appointment]): DoctorResourceData => ({
+    id,
+    color: DOCTOR_COLORS[id % DOCTOR_COLORS.length],
+    // just placeholder text
+    text: 'Appointment in the Clinic',
+    name: appointment.getDoctorName(),
+    specialities: appointment.getDoctorSpecialities()
+  }))
+
+  const paginatedDoctorsResourceData = doctorsResourceData.length > 0
+    ? doctorsResourceData.slice(
+      (currentDoctorsPage - 1) * DOCTORS_PER_PAGE,
+      currentDoctorsPage * DOCTORS_PER_PAGE
+    )
+    : [{
+        id: 0,
+        text: 'No doctors',
+        color: 'transparent'
+      }]
+
   return (
     <ModalsProvider>
       <link href={computedColorScheme === 'light' ? CDN_LIGHT_THEME_URL : CDN_DARK_THEME_URL} rel="stylesheet"/>
+      <Group justify="flex-end" p={10}>
+        {separateByDoctors && doctorsResourceData.length > DOCTORS_PER_PAGE &&
+            <Pagination
+                withControls={false}
+                value={currentDoctorsPage}
+                onChange={(value) => {
+                  setCurrentDoctorsPage(value)
+                }}
+                total={Math.ceil(doctorsResourceData.length / DOCTORS_PER_PAGE)}
+            />}
+        <Switch
+          checked={separateByDoctors}
+          labelPosition="left"
+          label='Separate by Doctor'
+          onChange={(event) => {
+            if (event.currentTarget.checked) {
+              setCurrentDoctorsPage(1)
+            }
+            setSeparateByDoctors(event.currentTarget.checked)
+          }}
+        />
+      </Group>
       <ScheduleComponent
         currentView="Week" ref={scheduleObj}
         eventSettings={{
@@ -181,6 +280,7 @@ const Calendar = (): React.JSX.Element => {
             endTime: { name: 'end_time' }
           }
         }}
+        group={{ resources: separateByDoctors ? [DOCTORS_RESOURCE] : [] }}
         allowSwiping
         allowKeyboardInteraction
         rowAutoHeight
@@ -193,14 +293,34 @@ const Calendar = (): React.JSX.Element => {
         }}
         popupOpen={onPopupOpen}
         created={updateDisplayedDates}
+        resourceHeaderTemplate={separateByDoctors && resourceHeaderTemplate}
       >
+        <ResourcesDirective>
+          <ResourceDirective
+            field='doctor_id'
+            title='Doctor'
+            name={DOCTORS_RESOURCE}
+            dataSource={separateByDoctors ? paginatedDoctorsResourceData : []}
+            textField='text'
+            idField='id'
+            colorField='color'
+          />
+          <ResourceDirective
+            field='color_id'
+            title='Color'
+            name={COLORS_RESOURCE}
+            dataSource={colorsResourceData}
+            textField='text'
+            idField='id'
+            colorField='color'
+          />
+        </ResourcesDirective>
         <ViewsDirective>
           <ViewDirective option="Day"/>
           <ViewDirective option="Week"/>
           <ViewDirective option="Month"/>
-          <ViewDirective option="Agenda"/>
         </ViewsDirective>
-        <Inject services={[Day, Week, Month, Agenda]}/>
+        <Inject services={[Day, Week, Month]}/>
       </ScheduleComponent>
     </ModalsProvider>
   )
