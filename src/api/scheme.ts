@@ -33,6 +33,10 @@ export interface PatientScheme extends PatientBaseScheme {
   emergency_contacts: EmergencyContact[]
 }
 
+export interface PatientUpdateScheme extends PatientBaseScheme {
+  active: boolean
+}
+
 export interface PersonalId {
   id: string
   type: string
@@ -59,6 +63,10 @@ export interface DoctorScheme extends DoctorBaseScheme {
   specialities: string[]
 }
 
+export interface DoctorUpdateScheme extends DoctorBaseScheme {
+  active: boolean
+}
+
 export interface AppointmentBaseScheme {
   patient_id?: number
   doctor_id: number
@@ -68,6 +76,11 @@ export interface AppointmentBaseScheme {
 
 export interface AppointmentScheme extends AppointmentBaseScheme {
   id: number
+  approved_by_patient: boolean
+  visited: boolean
+}
+
+export interface AppointmentUpdateScheme extends AppointmentBaseScheme {
   approved_by_patient: boolean
   visited: boolean
 }

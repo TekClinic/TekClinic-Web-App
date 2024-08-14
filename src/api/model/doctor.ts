@@ -1,4 +1,10 @@
-import { type DoctorBaseScheme, type DoctorScheme, type Gender } from '@/src/api/scheme'
+import {
+  type DoctorBaseScheme,
+  type DoctorScheme,
+  type DoctorUpdateScheme,
+  type Gender,
+  type IdHolder
+} from '@/src/api/scheme'
 import {
   createAPIResource,
   deleteAPIResource,
@@ -6,7 +12,9 @@ import {
   getAPIResource,
   getAPIResourceList,
   type PaginationParams,
-  type PaginationResult, toE164
+  type PaginationResult,
+  putAPIResource,
+  toE164
 } from '@/src/api/common'
 import { type Session } from 'next-auth'
 
@@ -20,12 +28,12 @@ export class Doctor {
   static __name__ = 'doctors'
 
   readonly id: number
-  readonly active: boolean
-  readonly name: string
-  readonly gender: Gender
-  readonly phone_number: string
-  readonly specialities: string[]
-  readonly special_note?: string
+  active: boolean
+  name: string
+  gender: Gender
+  phone_number: string
+  specialities: string[]
+  special_note?: string
 
   constructor (scheme: DoctorScheme) {
     this.id = scheme.id
@@ -97,5 +105,20 @@ export class Doctor {
     session: Session
   ): Promise<void> => {
     await Doctor.deleteById(this.id, session)
+  }
+
+  // update updates the Doctor.
+  update = async (
+    session: Session
+  ): Promise<void> => {
+    const data: DoctorUpdateScheme = {
+      active: this.active,
+      name: this.name,
+      gender: this.gender,
+      phone_number: toE164(this.phone_number),
+      specialities: this.specialities,
+      special_note: this.special_note
+    }
+    await putAPIResource<IdHolder, DoctorUpdateScheme>(Doctor, this.id, data, session)
   }
 }

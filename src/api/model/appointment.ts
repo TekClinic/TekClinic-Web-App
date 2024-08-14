@@ -1,4 +1,10 @@
-import { type AppointmentBaseScheme, type AppointmentScheme, type PatientIdHolder } from '@/src/api/scheme'
+import {
+  type AppointmentBaseScheme,
+  type AppointmentScheme,
+  type AppointmentUpdateScheme,
+  type IdHolder,
+  type PatientIdHolder
+} from '@/src/api/scheme'
 import {
   clearAPIResourceField,
   createAPIResource,
@@ -6,7 +12,9 @@ import {
   formatPaginationParams,
   getAPIResource,
   getAPIResourceList,
-  type PaginationParams, type PaginationResult,
+  type PaginationParams,
+  type PaginationResult,
+  putAPIResource,
   putAPIResourceField
 } from '@/src/api/common'
 import { type Session } from 'next-auth'
@@ -26,12 +34,12 @@ export class Appointment {
   static __name__ = 'appointments'
 
   readonly id: number
-  readonly patient_id?: number
-  readonly doctor_id: number
-  readonly start_time: Date
-  readonly end_time: Date
-  readonly approved_by_patient: boolean
-  readonly visited: boolean
+  patient_id?: number
+  doctor_id: number
+  start_time: Date
+  end_time: Date
+  approved_by_patient: boolean
+  visited: boolean
 
   private doctor?: Doctor
   private patient?: Patient
@@ -144,18 +152,34 @@ export class Appointment {
     await Appointment.deleteById(this.id, session)
   }
 
+  // update updates the appointment.
+  update = async (
+    session: Session
+  ): Promise<void> => {
+    const data: AppointmentUpdateScheme = {
+      patient_id: this.patient_id,
+      doctor_id: this.doctor_id,
+      start_time: this.start_time.toISOString(),
+      end_time: this.end_time.toISOString(),
+      approved_by_patient: this.approved_by_patient,
+      visited: this.visited
+    }
+    await putAPIResource<IdHolder, AppointmentUpdateScheme>(Appointment, this.id, data, session)
+  }
+
   // assignPatient assigns a patient to the appointment.
   static assignPatient = async (
     id: number,
     patient: PatientIdHolder,
     session: Session
   ): Promise<number> => {
-    return await putAPIResourceField<PatientIdHolder>(
+    const response = await putAPIResourceField<PatientIdHolder, PatientIdHolder>(
       Appointment,
       id,
       patient,
       'patient',
       session)
+    return response.patient_id
   }
 
   assignPatient = async (

@@ -1,8 +1,8 @@
 import {
   type EmergencyContact,
-  type Gender,
+  type Gender, type IdHolder,
   type PatientBaseScheme,
-  type PatientScheme,
+  type PatientScheme, type PatientUpdateScheme,
   type PersonalId
 } from '@/src/api/scheme'
 import {
@@ -11,7 +11,7 @@ import {
   formatPaginationParams,
   getAPIResource,
   getAPIResourceList,
-  type PaginationParams, type PaginationResult, toE164
+  type PaginationParams, type PaginationResult, putAPIResource, toE164
 } from '@/src/api/common'
 import { type Session } from 'next-auth'
 import { format } from 'date-fns'
@@ -26,17 +26,17 @@ export class Patient {
   static __name__ = 'patients'
 
   readonly id: number
-  readonly active: boolean
+  active: boolean
   readonly age: number
-  readonly name: string
-  readonly personal_id: PersonalId
-  readonly gender: Gender
-  readonly phone_number?: string
-  readonly languages: string[]
-  readonly birth_date: Date
-  readonly emergency_contacts: EmergencyContact[]
-  readonly referred_by?: string
-  readonly special_note?: string
+  name: string
+  personal_id: PersonalId
+  gender: Gender
+  phone_number?: string
+  languages: string[]
+  birth_date: Date
+  emergency_contacts: EmergencyContact[]
+  referred_by?: string
+  special_note?: string
 
   constructor (scheme: PatientScheme) {
     this.id = scheme.id
@@ -126,5 +126,27 @@ export class Patient {
     session: Session
   ): Promise<void> => {
     await Patient.deleteById(this.id, session)
+  }
+
+  // update updates the Patient.
+  update = async (
+    session: Session
+  ): Promise<void> => {
+    const data: PatientUpdateScheme = {
+      active: this.active,
+      name: this.name,
+      personal_id: this.personal_id,
+      gender: this.gender,
+      phone_number: this.phone_number != null ? toE164(this.phone_number) : undefined,
+      languages: this.languages,
+      birth_date: format(this.birth_date, 'yyyy-MM-dd'),
+      emergency_contacts: this.emergency_contacts.map((contact) => ({
+        ...contact,
+        phone: toE164(contact.phone)
+      })),
+      referred_by: this.referred_by,
+      special_note: this.special_note
+    }
+    await putAPIResource<IdHolder, PatientUpdateScheme>(Patient, this.id, data, session)
   }
 }

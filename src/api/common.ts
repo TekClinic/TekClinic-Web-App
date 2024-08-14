@@ -219,23 +219,42 @@ export const deleteAPIResource = async (
 }
 
 // putAPIResource updates an existing resource in the API - for now, supports only patient_id.
-// Scheme is the data scheme according to the API.
+// ResponseScheme is the data scheme according to the API for the response.
+// RequestScheme is the data scheme according to the API for the request.
 // resourceClass is the class object of the resource.
 // id is the ID of the resource to be updated.
 // data is the updated resource data.
 // session is the session object from next-auth.
-// Returns the updated resource instance.
-export const putAPIResourceField = async <Scheme> (
+export const putAPIResourceField = async <ResponseScheme, RequestScheme> (
   resourceClass: ApiResourceClass,
   id: number,
-  data: Scheme,
+  data: RequestScheme,
   field: string,
   session: Session
-): Promise<number> => {
+): Promise<ResponseScheme> => {
   const url = `${API_URL}/${resourceClass.__name__}/${id}/${field}`
-  const response = await apiPUT<PatientIdHolder, Scheme>(url, session, data)
+  const response = await apiPUT<ResponseScheme, RequestScheme>(url, session, data)
   await queryClient.invalidateQueries({ queryKey: [resourceClass.__name__, id] })
-  return response.patient_id
+  return response
+}
+
+// putAPIResource updates an existing resource in the API.
+// ResponseScheme is the data scheme according to the API for the response.
+// RequestScheme is the data scheme according to the API for the request.
+// resourceClass is the class object of the resource.
+// id is the ID of the resource to be updated.
+// data is the updated resource data.
+// session is the session object from next-auth.
+export const putAPIResource = async <ResponseScheme, RequestScheme> (
+  resourceClass: ApiResourceClass,
+  id: number,
+  data: RequestScheme,
+  session: Session
+): Promise<ResponseScheme> => {
+  const url = `${API_URL}/${resourceClass.__name__}/${id}`
+  const response = await apiPUT<ResponseScheme, RequestScheme>(url, session, data)
+  await queryClient.invalidateQueries({ queryKey: [resourceClass.__name__, id] })
+  return response
 }
 
 // cancelAPIResponse cancels the assignment of a patient to an appointment in the API.
