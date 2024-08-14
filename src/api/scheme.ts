@@ -9,7 +9,7 @@ export interface NamedAPIResourceList {
 
 export interface NamedAPIResource {
   name: string
-  url: string
+  id: number
 }
 
 export interface PatientBaseScheme {

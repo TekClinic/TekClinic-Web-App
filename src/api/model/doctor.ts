@@ -17,7 +17,7 @@ interface DoctorParams extends PaginationParams {
 
 // Represents a doctor from the API.
 export class Doctor {
-  static __name__ = 'doctor'
+  static __name__ = 'doctors'
 
   readonly id: number
   readonly active: boolean

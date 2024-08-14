@@ -180,16 +180,9 @@ export const getAPIResourceList = async <Scheme> (
 
   return {
     items: await Promise.all(
-      resourceList.map(async (resource: NamedAPIResource) => {
-        // TODO: add id field to NamedAPIResource
-        const resourceURL = new URL(resource.url)
-        const pathParts = resourceURL.pathname.split('/')
-        const id = parseInt(pathParts.pop() ?? '')
-        if (isNaN(id)) {
-          return resourceClass.fromScheme(await apiGET<Scheme>(resource.url, session))
-        }
-        return await getAPIResource(resourceClass, id, session)
-      })
+      resourceList.map(async (resource: NamedAPIResource) =>
+        await getAPIResource(resourceClass, resource.id, session)
+      )
     ),
     count
   }

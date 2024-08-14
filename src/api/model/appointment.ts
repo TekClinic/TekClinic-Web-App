@@ -23,7 +23,7 @@ interface AppointmentParams extends PaginationParams {
 
 // Represents an appointment from the API.
 export class Appointment {
-  static __name__ = 'appointment'
+  static __name__ = 'appointments'
 
   readonly id: number
   readonly patient_id?: number
