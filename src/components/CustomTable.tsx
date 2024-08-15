@@ -76,40 +76,41 @@ const CustomTable = <DataType, TData extends PaginationResult<DataType> = Pagina
   } = useDataTableColumns<DataType>({
     key: storeColumnKey,
     columns: addActionColumn
-      ? [...columns,
+      ? [
+          ...columns,
           {
             title: '',
             accessor: 'actions',
             textAlign: 'right',
             render: (item) => (
             <Group gap={4} justify="right" wrap="nowrap">
-              {(showDeleteModal != null) &&
-                  <ActionIcon
-                      size="sm"
-                      variant="subtle"
-                      color="red"
-                      onClick={() => {
-                        showDeleteModal({
-                          item,
-                          session,
-                          computedColorScheme,
-                          onSuccess: async () => {
-                            if (data == null) {
-                              // unreachable condition. for type checking only
-                              return
-                            }
+              {showDeleteModal != null && (
+                <ActionIcon
+                  size="sm"
+                  variant="subtle"
+                  color="red"
+                  onClick={() => {
+                    showDeleteModal({
+                      item,
+                      session,
+                      computedColorScheme,
+                      onSuccess: async () => {
+                        if (data == null) {
+                          // unreachable condition. for type checking only
+                          return
+                        }
 
-                            // calculate the last page after deletion
-                            const lastPage = Math.max(1, (Math.ceil((data.count - 1) / pageSize)))
-                            setPage(lastPage)
-                            await refetch()
-                          }
-                        })
-                      }}
-                  >
-                      <IconTrash size={23}/>
-                  </ActionIcon>
-              }
+                        // calculate the last page after deletion
+                        const lastPage = Math.max(1, Math.ceil((data.count - 1) / pageSize))
+                        setPage(lastPage)
+                        await refetch()
+                      }
+                    })
+                  }}
+                >
+                  <IconTrash size={23}/>
+                </ActionIcon>
+              )}
             </Group>
             ),
             toggleable: false,
@@ -123,55 +124,55 @@ const CustomTable = <DataType, TData extends PaginationResult<DataType> = Pagina
   return (
     <ModalsProvider>
       <Box>
-        {(showCreateModal != null) &&
-            <Box style={{
-              display: 'flex',
-              justifyContent: 'flex-end',
-              marginBottom: '10px'
-            }}>
-                <Button onClick={() => {
-                  showCreateModal({
-                    session,
-                    computedColorScheme,
-                    onSuccess: async () => {
-                      await refetch()
-                    }
-                  })
-                }} size="sm" m="la">Add {dataName}</Button>
-            </Box>
-        }
+        {showCreateModal != null && (
+          <Box style={{
+            display: 'flex',
+            justifyContent: 'flex-end',
+            marginBottom: '10px'
+          }}>
+            <Button
+              onClick={() => {
+                showCreateModal({
+                  session,
+                  computedColorScheme,
+                  onSuccess: async () => {
+                    await refetch()
+                  }
+                })
+              }}
+              size="sm"
+              m="la"
+            >
+              Add {dataName}
+            </Button>
+          </Box>
+        )}
         <DataTable
           striped
           highlightOnHover
           withTableBorder
           pinLastColumn={addActionColumn}
-
           storeColumnsKey={storeColumnKey}
           minHeight={180}
-
           columns={effectiveColumns}
           fetching={isLoading}
           records={data?.items}
-
           page={page}
           onPageChange={setPage}
           totalRecords={data?.count}
           recordsPerPage={pageSize}
           recordsPerPageLabel={`${dataName}s per page`}
           recordsPerPageOptions={pageSizeOptions}
-          onRecordsPerPageChange=
-            {(pageSize) => {
-              setPageSize(pageSize)
-              setPage(1)
-            }}
-
+          onRecordsPerPageChange={(pageSize) => {
+            setPageSize(pageSize)
+            setPage(1)
+          }}
           noRecordsIcon={
             <Box p={4} mb={4} className={classes.noRecordsBox}>
               <IconMoodSad size={36} strokeWidth={1.5}/>
             </Box>
           }
           noRecordsText="No records found"
-
           onRowContextMenu={({ event }) => {
             showContextMenu([
               {

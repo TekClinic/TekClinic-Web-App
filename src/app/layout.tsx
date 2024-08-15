@@ -6,9 +6,21 @@ import 'mantine-datatable/styles.layer.css'
 import 'react-toastify/dist/ReactToastify.css'
 
 import React from 'react'
-import { AppShell, Center, ColorSchemeScript, createTheme, Loader, MantineProvider, rem } from '@mantine/core'
+import {
+  AppShell,
+  Burger,
+  Button,
+  Center,
+  ColorSchemeScript,
+  createTheme,
+  Flex,
+  Loader,
+  MantineProvider,
+  rem,
+  useComputedColorScheme,
+  useMantineColorScheme
+} from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
-import Header from '@/src/components/Header'
 import Navbar from '@/src/components/Navbar'
 import { registerLicense } from '@syncfusion/ej2-base'
 import { requireBuildEnv } from '@/src/utils/env'
@@ -18,6 +30,7 @@ import { ContextMenuProvider } from 'mantine-contextmenu'
 import { CDN_DARK_THEME_URL, CDN_LIGHT_THEME_URL } from '@/src/app/appointments/const'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClient } from '@/src/api/common'
+import { FaMoon, FaSun } from 'react-icons/fa'
 
 registerLicense(requireBuildEnv('NEXT_PUBLIC_SYNCFUSION_LICENSE_KEY',
   process.env.NEXT_PUBLIC_SYNCFUSION_LICENSE_KEY))
@@ -84,27 +97,57 @@ const theme = createTheme({
 function ContentLayout ({ children }: {
   children: React.ReactNode
 }): React.JSX.Element {
-  const [opened, { toggle }] = useDisclosure()
   const session = useSession()
+  const { setColorScheme } = useMantineColorScheme()
+  const computedColorScheme = useComputedColorScheme('light')
+
+  const toggleColorScheme = (): void => {
+    setColorScheme(computedColorScheme === 'dark' ? 'light' : 'dark')
+  }
+
+  const [opened, { toggle }] = useDisclosure(false)
+
   if (session.status === 'authenticated') {
     return (
       <div className="App" style={{ marginTop: '20px' }}>
         <AppShell
-          header={{ height: 60 }}
           navbar={{
-            width: 230,
-            breakpoint: 'sm',
-            collapsed: {
-              mobile: !opened,
-              desktop: !opened
-            }
+            width: opened ? 230 : 0,
+            breakpoint: 'sm'
           }}
-          padding="md"
         >
-          <Header toggle={toggle} opened={opened}/>
+          <Navbar opened={opened} toggle={toggle}/>
 
-          <Navbar/>
-          <AppShell.Main>
+          <AppShell.Header>
+            <Flex justify="space-between" align="center" style={{ padding: '10px 20px' }}>
+              <Burger opened={opened} onClick={toggle} size="sm" transitionDuration={600}/>
+              <div style={{
+                flexGrow: 1,
+                textAlign: 'center',
+                fontSize: '25px'
+              }}>
+                Tekclinic 🩺
+              </div>
+
+              <Button
+                style={{
+                  backgroundColor: 'transparent',
+                  fontSize: '17px'
+                }}
+                size="sm"
+                variant="link"
+                onClick={toggleColorScheme}
+              >
+                {computedColorScheme === 'dark' ? <FaSun style={{ color: '#ccc' }}/> : <FaMoon style={{ color: '#ccc' }}/>}
+              </Button>
+            </Flex>
+          </AppShell.Header>
+
+          <AppShell.Main style={{
+            paddingLeft: opened ? '250px' : '70px',
+            paddingTop: '70px',
+            paddingRight: opened ? '20px' : '70px'
+          }}>
             {children}
           </AppShell.Main>
 

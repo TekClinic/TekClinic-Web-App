@@ -2,3 +2,47 @@
     text-decoration: none;
     color: inherit;
 }
+
+.navbar {
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    opacity: 0;
+    transform: translateX(-100%); /* Start off-screen to the left */
+}
+
+.navbar.opened {
+    opacity: 1;
+    transform: translateX(0); /* Slide in */
+}
+
+.navbar.closed {
+    opacity: 1;
+    transform: translateX(-100%); /* Slide out */
+}
+
+.nav-link-active {
+    background-color: rgb(206, 229, 255) !important;
+    color: black !important;
+    border-radius: 7px;
+    transition: background-color 0.7s ease, color 0.7s ease;
+}
+
+.nav-link {
+    color: rgb(55, 68, 83); /* Default color */
+    border-radius: 7px;
+
+}
+
+
+.nav-link:hover {
+    background-color: rgb(237, 245, 254) !important;
+    color: rgb(55, 68, 83); /* Default color */
+    border-radius: 7px;
+    transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+
+.nav-link-active:hover {
+    background-color: rgb(149, 199, 255) !important;
+    color: darkblue !important;
+    transition: background-color 0.7s ease, color 0.7s ease;
+}
