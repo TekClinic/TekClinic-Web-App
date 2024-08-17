@@ -284,6 +284,7 @@ const Calendar = (): React.JSX.Element => {
         allowSwiping
         allowKeyboardInteraction
         rowAutoHeight
+        quickInfoOnSelectionEnd
         timeFormat="HH:mm"
         actionComplete={onActionComplete}
         actionBegin={onActionComplete}
