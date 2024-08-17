@@ -12,7 +12,14 @@ import { Doctor } from '@/src/api/model/doctor'
 import { Patient } from '@/src/api/model/patient'
 import { useQuery } from '@tanstack/react-query'
 
-export type AppointmentFormData = { start_time: Date, end_time: Date } | Appointment
+export interface AppointmentFormData {
+  start_time: Date
+  end_time: Date
+}
+
+interface EditAppointmentFormData extends AppointmentFormData {
+  appointment: Appointment
+}
 
 interface AppointmentFormProps extends CreateModalProps {
   onSuccess: (data?: AppointmentFormData) => Promise<void>
@@ -20,8 +27,8 @@ interface AppointmentFormProps extends CreateModalProps {
   quick?: boolean
 }
 
-export const isAppointment = (data: AppointmentFormData): data is Appointment => {
-  return Object.prototype.hasOwnProperty.call(data, 'id')
+export const isEditMode = (data: AppointmentFormData): data is EditAppointmentFormData => {
+  return Object.prototype.hasOwnProperty.call(data, 'appointment')
 }
 
 const AppointmentForm: React.FC<AppointmentFormProps> =
@@ -32,7 +39,7 @@ const AppointmentForm: React.FC<AppointmentFormProps> =
     data,
     quick
   }) => {
-    const editMode = isAppointment(data)
+    const editMode = isEditMode(data)
     const initialValues = {
       doctor_id: null as string | null,
       patient_id: null as string | null,
@@ -40,8 +47,8 @@ const AppointmentForm: React.FC<AppointmentFormProps> =
       end_time: data.end_time
     }
     if (editMode) {
-      initialValues.doctor_id = data.doctor_id.toString()
-      initialValues.patient_id = data.patient_id?.toString() ?? null
+      initialValues.doctor_id = data.appointment.doctor_id.toString()
+      initialValues.patient_id = data.appointment.patient_id?.toString() ?? null
     }
 
     const form = useForm({
@@ -161,16 +168,16 @@ const AppointmentForm: React.FC<AppointmentFormProps> =
               }, getToastOptions(computedColorScheme))
             return
           }
-          if (formData.patient_id !== data.patient_id) {
+          if (formData.patient_id !== data.appointment.patient_id) {
             if (formData.patient_id === undefined) {
-              await toast.promise(data.clearPatient(session),
+              await toast.promise(data.appointment.clearPatient(session),
                 {
                   pending: 'Unassigning the patient...',
                   success: 'Appointment is available now!',
                   error: 'Error while updating appointment...'
                 }, getToastOptions(computedColorScheme))
             } else {
-              await toast.promise(data.assignPatient({ patient_id: formData.patient_id }, session),
+              await toast.promise(data.appointment.assignPatient({ patient_id: formData.patient_id }, session),
                 {
                   pending: `Assigning ${patientSearchValue}...`,
                   success: `${patientSearchValue} assigned successfully!`,
@@ -245,12 +252,12 @@ const AppointmentForm: React.FC<AppointmentFormProps> =
               <>
                   <Switch
                       label="Patient confirmed the visit"
-                      checked={data.approved_by_patient}
+                      checked={data.appointment.approved_by_patient}
                       disabled
                   />
                   <Switch
                       label="Patient visited the appointment"
-                      checked={data.visited}
+                      checked={data.appointment.visited}
                       disabled
                   />
               </>
@@ -262,7 +269,7 @@ const AppointmentForm: React.FC<AppointmentFormProps> =
                   const deleteModal =
                     buildDeleteModal<Appointment>('appointment', () => 'The appointment')
                   deleteModal({
-                    item: data,
+                    item: data.appointment,
                     session,
                     computedColorScheme,
                     onSuccess: async () => {

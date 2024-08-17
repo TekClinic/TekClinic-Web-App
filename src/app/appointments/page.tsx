@@ -21,7 +21,7 @@ import { MAX_ITEMS_PER_PAGE } from '@/src/api/common'
 import { toast } from 'react-toastify'
 import { getToastOptions } from '@/src/utils/toast'
 import { type ActionEventArgs, type PopupOpenEventArgs } from '@syncfusion/ej2-schedule/src/schedule/base/interface'
-import AppointmentForm, { type AppointmentFormData, isAppointment } from '@/src/app/appointments/AppointmentForm'
+import AppointmentForm, { type AppointmentFormData, isEditMode } from '@/src/app/appointments/AppointmentForm'
 import { modals, ModalsProvider } from '@mantine/modals'
 import {
   ACTION_DATE_NAVIGATE,
@@ -65,7 +65,7 @@ const Calendar = (): React.JSX.Element => {
     }))
   })
 
-  const data = appointmentQueries.reduce<Appointment[]>((acc, result) => {
+  const appointments = appointmentQueries.reduce<Appointment[]>((acc, result) => {
     if (result.data != null) {
       acc.push(...result.data)
     }
@@ -108,7 +108,7 @@ const Calendar = (): React.JSX.Element => {
         return
       }
       const data = args.data as AppointmentFormData
-      const editMode = isAppointment(data)
+      const editMode = isEditMode(data)
 
       const modalId = 'appointment-modal'
       modals.open({
@@ -157,13 +157,23 @@ const Calendar = (): React.JSX.Element => {
     return <></>
   }
 
+  const data = appointments.map((appointment: Appointment) => {
+    return {
+      id: appointment.id,
+      subject: appointment.subject,
+      start_time: appointment.start_time,
+      end_time: appointment.end_time,
+      appointment
+    }
+  })
+
   return (
     <ModalsProvider>
       <link href={computedColorScheme === 'light' ? CDN_LIGHT_THEME_URL : CDN_DARK_THEME_URL} rel="stylesheet"/>
       <ScheduleComponent
         currentView="Week" ref={scheduleObj}
         eventSettings={{
-          dataSource: data ?? [],
+          dataSource: data,
           fields: {
             id: 'id',
             subject: { name: 'subject' },
