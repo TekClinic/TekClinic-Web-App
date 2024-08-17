@@ -44,15 +44,19 @@ const AppointmentForm: React.FC<AppointmentFormProps> =
       doctor_id: null as string | null,
       patient_id: null as string | null,
       start_time: data.start_time,
-      end_time: data.end_time
+      end_time: data.end_time,
+      approved_by_patient: false,
+      visited: false
     }
     if (editMode) {
       initialValues.doctor_id = data.appointment.doctor_id.toString()
       initialValues.patient_id = data.appointment.patient_id?.toString() ?? null
+      initialValues.approved_by_patient = data.appointment.approved_by_patient
+      initialValues.visited = data.appointment.visited
     }
 
     const form = useForm({
-      mode: 'uncontrolled',
+      mode: 'controlled',
       validateInputOnBlur: true,
       initialValues,
       validate: {
@@ -68,6 +72,16 @@ const AppointmentForm: React.FC<AppointmentFormProps> =
           }
           return null
         }
+      }
+    })
+
+    form.watch('patient_id', ({
+      previousValue,
+      value
+    }) => {
+      if (previousValue !== value) {
+        form.getInputProps('approved_by_patient').onChange(false)
+        form.setFieldValue('visited', false)
       }
     })
 
@@ -140,7 +154,7 @@ const AppointmentForm: React.FC<AppointmentFormProps> =
     })
 
     if (initialLoading) {
-      return <LoadingOverlay visible/>
+      return <LoadingOverlay visible />
     }
 
     return (
@@ -168,23 +182,21 @@ const AppointmentForm: React.FC<AppointmentFormProps> =
               }, getToastOptions(computedColorScheme))
             return
           }
-          if (formData.patient_id !== data.appointment.patient_id) {
-            if (formData.patient_id === undefined) {
-              await toast.promise(data.appointment.clearPatient(session),
-                {
-                  pending: 'Unassigning the patient...',
-                  success: 'Appointment is available now!',
-                  error: 'Error while updating appointment...'
-                }, getToastOptions(computedColorScheme))
-            } else {
-              await toast.promise(data.appointment.assignPatient({ patient_id: formData.patient_id }, session),
-                {
-                  pending: `Assigning ${patientSearchValue}...`,
-                  success: `${patientSearchValue} assigned successfully!`,
-                  error: 'Error while updating appointment...'
-                }, getToastOptions(computedColorScheme))
-            }
-          }
+
+          const appointment = data.appointment
+          appointment.doctor_id = doctorId
+          appointment.patient_id = patientId
+          appointment.start_time = formData.start_time
+          appointment.end_time = formData.end_time
+          appointment.approved_by_patient = formData.approved_by_patient
+          appointment.visited = formData.visited
+
+          await toast.promise(appointment.update(session),
+            {
+              pending: 'Updating appointment...',
+              success: 'Appointment updated successfully!',
+              error: 'Error while updating appointment...'
+            }, getToastOptions(computedColorScheme))
         }, computedColorScheme)
         if (result instanceof Error) {
           return
@@ -228,55 +240,55 @@ const AppointmentForm: React.FC<AppointmentFormProps> =
           />
 
           {(quick !== true) &&
-              <Group mt="md" justify="space-between" grow>
-                  <DateTimePicker
-                      withAsterisk={!editMode}
-                      disabled={editMode}
-                      label="Start Time"
-                      placeholder="Select start time"
-                      key={form.key('start_time')}
-                      {...form.getInputProps('start_time')}
-                  />
+            <Group mt="md" justify="space-between" grow>
+              <DateTimePicker
+                withAsterisk={!editMode}
+                disabled={editMode}
+                label="Start Time"
+                placeholder="Select start time"
+                key={form.key('start_time')}
+                {...form.getInputProps('start_time')}
+              />
 
-                  <DateTimePicker
-                      withAsterisk={!editMode}
-                      disabled={editMode}
-                      label="End Time"
-                      placeholder="Select end time"
-                      key={form.key('end_time')}
-                      {...form.getInputProps('end_time')}
-                  />
-              </Group>}
+              <DateTimePicker
+                withAsterisk={!editMode}
+                disabled={editMode}
+                label="End Time"
+                placeholder="Select end time"
+                key={form.key('end_time')}
+                {...form.getInputProps('end_time')}
+              />
+            </Group>}
 
-          {editMode &&
-              <>
-                  <Switch
-                      label="Patient confirmed the visit"
-                      checked={data.appointment.approved_by_patient}
-                      disabled
-                  />
-                  <Switch
-                      label="Patient visited the appointment"
-                      checked={data.appointment.visited}
-                      disabled
-                  />
-              </>
-          }
+          <Switch
+            disabled={form.values.patient_id == null}
+            checked={form.values.approved_by_patient}
+            label="Patient confirmed the visit"
+            key={form.key('approved_by_patient')}
+            {...form.getInputProps('approved_by_patient')}
+          />
+          <Switch
+            disabled={form.values.patient_id == null}
+            checked={form.values.visited}
+            label="Patient visited the appointment"
+            key={form.key('visited')}
+            {...form.getInputProps('visited')}
+          />
 
           <Group mt="md" justify="right">
             {editMode &&
-                <Button color="red" variant="outline" onClick={() => {
-                  const deleteModal =
-                    buildDeleteModal<Appointment>('appointment', () => 'The appointment')
-                  deleteModal({
-                    item: data.appointment,
-                    session,
-                    computedColorScheme,
-                    onSuccess: async () => {
-                      await onSuccess(data)
-                    }
-                  })
-                }}>Delete</Button>
+              <Button color="red" variant="outline" onClick={() => {
+                const deleteModal =
+                  buildDeleteModal<Appointment>('appointment', () => 'The appointment')
+                deleteModal({
+                  item: data.appointment,
+                  session,
+                  computedColorScheme,
+                  onSuccess: async () => {
+                    await onSuccess(data)
+                  }
+                })
+              }}>Delete</Button>
             }
             <Button type="submit">Submit</Button>
           </Group>
