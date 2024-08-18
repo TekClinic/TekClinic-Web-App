@@ -179,26 +179,6 @@ const Calendar = (): React.JSX.Element => {
     return <></>
   }
 
-  const resourceHeaderTemplate = (props: { resourceData: DoctorResourceData }): React.JSX.Element => {
-    if (props.resourceData.id === 0) {
-      return <></>
-    }
-    return (
-      <Box>
-        <Avatar color={props.resourceData.color} radius="xl">
-          <IconStethoscope size={24}/>
-        </Avatar>
-
-        <Box>
-          <Text w={500} size="lg">
-            Dr. {props.resourceData.name}
-          </Text>
-          <Text c="dimmed">{props.resourceData.specialities.join(', ')}</Text>
-        </Box>
-      </Box>
-    )
-  }
-
   const data = appointments.map((appointment: Appointment) => {
     return {
       id: appointment.id,
@@ -224,7 +204,7 @@ const Calendar = (): React.JSX.Element => {
 
   appointments.forEach(appointment => doctorsMap.set(appointment.doctor_id, appointment))
 
-  const doctorsResourceData = Array.from(doctorsMap).map(([id, appointment]): DoctorResourceData => ({
+  const doctorsResourceData = Array.from(doctorsMap).sort(([a], [b]) => a - b).map(([id, appointment]): DoctorResourceData => ({
     id,
     color: DOCTOR_COLORS[id % DOCTOR_COLORS.length],
     // just placeholder text
@@ -233,7 +213,7 @@ const Calendar = (): React.JSX.Element => {
     specialities: appointment.getDoctorSpecialities()
   }))
 
-  const paginatedDoctorsResourceData = doctorsResourceData.length > 0
+  const paginatedDoctorsResourceData: DoctorResourceData[] = doctorsResourceData.length > 0
     ? doctorsResourceData.slice(
       (currentDoctorsPage - 1) * DOCTORS_PER_PAGE,
       currentDoctorsPage * DOCTORS_PER_PAGE
@@ -241,7 +221,9 @@ const Calendar = (): React.JSX.Element => {
     : [{
         id: 0,
         text: 'No doctors',
-        color: 'transparent'
+        color: 'transparent',
+        name: '',
+        specialities: []
       }]
 
   return (
@@ -324,6 +306,26 @@ const Calendar = (): React.JSX.Element => {
         <Inject services={[Day, Week, Month]}/>
       </ScheduleComponent>
     </ModalsProvider>
+  )
+}
+
+const resourceHeaderTemplate = (props: { resourceData: DoctorResourceData }): React.JSX.Element => {
+  if (props.resourceData.id === 0) {
+    return <></>
+  }
+  return (
+    <Box>
+      <Avatar color={props.resourceData.color} radius="xl">
+        <IconStethoscope size={24}/>
+      </Avatar>
+
+      <Box>
+        <Text w={500} size="lg">
+          Dr. {props.resourceData.name}
+        </Text>
+        <Text c="dimmed">{props.resourceData.specialities.join(', ')}</Text>
+      </Box>
+    </Box>
   )
 }
 export default Calendar
