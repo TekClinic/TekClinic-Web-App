@@ -1,12 +1,6 @@
 import React from 'react'
-import {
-  Button,
-  Group, Select, TagsInput,
-  Textarea,
-  TextInput
-} from '@mantine/core'
+import { Button, Group, Select, TagsInput, Textarea, TextInput } from '@mantine/core'
 import { useForm } from '@mantine/form'
-import { type Gender } from '@/src/api/scheme'
 import { toast } from 'react-toastify'
 import { getToastOptions } from '@/src/utils/toast'
 import { errorHandler } from '@/src/utils/error'
@@ -27,22 +21,13 @@ const EditDoctorForm: React.FC<EditDoctorFormProps> =
     const form = useForm({
       mode: 'uncontrolled',
       validateInputOnBlur: true,
-      initialValues: (
-        initialDoctor != null
-          ? {
-              name: initialDoctor.name,
-              gender: initialDoctor.gender,
-              phone_number: initialDoctor.phone_number,
-              specialities: initialDoctor.specialities,
-              special_note: initialDoctor.special_note ?? ''
-            }
-          : {
-              name: '',
-              gender: 'unspecified' as Gender,
-              phone_number: '',
-              specialities: [] as string[],
-              special_note: ''
-            }
+      initialValues: ({
+        name: initialDoctor.name,
+        gender: initialDoctor.gender,
+        phone_number: initialDoctor.phone_number,
+        specialities: initialDoctor.specialities,
+        special_note: initialDoctor.special_note ?? ''
+      }
       ),
       validate: {
         name: (value) => nameValidator(value, true),

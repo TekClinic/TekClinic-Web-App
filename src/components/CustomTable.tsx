@@ -8,7 +8,14 @@ import { type QueryKey, useQuery, type UseQueryOptions } from '@tanstack/react-q
 import { useGuaranteeSession } from '@/src/utils/auth'
 import { ModalsProvider } from '@mantine/modals'
 import { ActionIcon, Box, Button, Group, type MantineColorScheme, useComputedColorScheme } from '@mantine/core'
-import { IconArrowAutofitWidth, IconColumnRemove, IconColumns3, IconEdit, IconMoodSad, IconTrash } from '@tabler/icons-react'
+import {
+  IconArrowAutofitWidth,
+  IconColumnRemove,
+  IconColumns3,
+  IconEdit,
+  IconMoodSad,
+  IconTrash
+} from '@tabler/icons-react'
 import { handleUIError } from '@/src/utils/error'
 import { useContextMenu } from 'mantine-contextmenu'
 import { type Session } from 'next-auth'
@@ -150,22 +157,22 @@ const CustomTable = <DataType, TData extends PaginationResult<DataType> = Pagina
               {
                 showViewModal != null && (
                   <ActionIcon
-                  size="sm"
-                  variant="subtle"
-                  color="blue"
-                  onClick={() => {
-                    showViewModal({
-                      item,
-                      session,
-                      computedColorScheme,
-                      onSuccess: async () => {
-                        await refetch()
-                      }
-                    })
-                  }}
-                >
-                  <Eye size={23}/>
-                </ActionIcon>
+                    size="sm"
+                    variant="subtle"
+                    color="blue"
+                    onClick={() => {
+                      showViewModal({
+                        item,
+                        session,
+                        computedColorScheme,
+                        onSuccess: async () => {
+                          await refetch()
+                        }
+                      })
+                    }}
+                  >
+                    <Eye size={23}/>
+                  </ActionIcon>
                 )}
 
             </Group>
@@ -224,18 +231,6 @@ const CustomTable = <DataType, TData extends PaginationResult<DataType> = Pagina
             setPageSize(pageSize)
             setPage(1)
           }}
-          // onRowClick={(item) => {
-          //   if (showViewModal != null) {
-          //     showViewModal({
-          //       item,
-          //       session,
-          //       computedColorScheme,
-          //       onSuccess: async () => {
-          //         await refetch()
-          //       }
-          //     })
-          //   }
-          // }}
           noRecordsIcon={
             <Box p={4} mb={4} className={classes.noRecordsBox}>
               <IconMoodSad size={36} strokeWidth={1.5}/>
