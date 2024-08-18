@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useContext, useEffect } from 'react'
 import { Button, Group, LoadingOverlay, Select, Stack, Switch } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { toast } from 'react-toastify'
@@ -11,11 +11,11 @@ import { buildDeleteModal } from '@/src/utils/modals'
 import { Doctor } from '@/src/api/model/doctor'
 import { Patient } from '@/src/api/model/patient'
 import { useQuery } from '@tanstack/react-query'
+import { DoctorIdContext } from '@/src/app/appointments/context'
 
 export interface AppointmentFormData {
   start_time: Date
   end_time: Date
-  doctor_id?: number
 }
 
 interface EditAppointmentFormData extends AppointmentFormData {
@@ -42,7 +42,7 @@ const AppointmentForm: React.FC<AppointmentFormProps> =
   }) => {
     const editMode = isEditMode(data)
     const initialValues = {
-      doctor_id: data?.doctor_id === 0 ? null : data?.doctor_id?.toString(),
+      doctor_id: null as string | null,
       patient_id: null as string | null,
       start_time: data.start_time,
       end_time: data.end_time,
@@ -85,6 +85,17 @@ const AppointmentForm: React.FC<AppointmentFormProps> =
         form.setFieldValue('visited', false)
       }
     })
+
+    // a way to pass the doctor id from the resource to the form
+    const resourceDoctorId = useContext(DoctorIdContext) ?? null
+    const [providedDoctorId, setProvidedDoctorId] = React.useState<number | null>(null)
+    useEffect(() => {
+      if (providedDoctorId !== resourceDoctorId) {
+        form.setFieldValue('doctor_id', resourceDoctorId?.toString() ?? null)
+        setProvidedDoctorId(resourceDoctorId)
+        setDoctorSearchValue(undefined)
+      }
+    }, [providedDoctorId, form, resourceDoctorId])
 
     const [doctorSearchValue, setDoctorSearchValue] = React.useState<undefined | string>(undefined)
     const [patientSearchValue, setPatientSearchValue] = React.useState<undefined | string>(undefined)
@@ -155,7 +166,7 @@ const AppointmentForm: React.FC<AppointmentFormProps> =
     })
 
     if (initialLoading) {
-      return <LoadingOverlay visible />
+      return <LoadingOverlay visible/>
     }
 
     return (
@@ -241,25 +252,25 @@ const AppointmentForm: React.FC<AppointmentFormProps> =
           />
 
           {(quick !== true) &&
-            <Group mt="md" justify="space-between" grow>
-              <DateTimePicker
-                withAsterisk={!editMode}
-                disabled={editMode}
-                label="Start Time"
-                placeholder="Select start time"
-                key={form.key('start_time')}
-                {...form.getInputProps('start_time')}
-              />
+              <Group mt="md" justify="space-between" grow>
+                  <DateTimePicker
+                      withAsterisk={!editMode}
+                      disabled={editMode}
+                      label="Start Time"
+                      placeholder="Select start time"
+                      key={form.key('start_time')}
+                      {...form.getInputProps('start_time')}
+                  />
 
-              <DateTimePicker
-                withAsterisk={!editMode}
-                disabled={editMode}
-                label="End Time"
-                placeholder="Select end time"
-                key={form.key('end_time')}
-                {...form.getInputProps('end_time')}
-              />
-            </Group>}
+                  <DateTimePicker
+                      withAsterisk={!editMode}
+                      disabled={editMode}
+                      label="End Time"
+                      placeholder="Select end time"
+                      key={form.key('end_time')}
+                      {...form.getInputProps('end_time')}
+                  />
+              </Group>}
 
           <Switch
             disabled={form.values.patient_id == null}
@@ -278,18 +289,18 @@ const AppointmentForm: React.FC<AppointmentFormProps> =
 
           <Group mt="md" justify="right">
             {editMode &&
-              <Button color="red" variant="outline" onClick={() => {
-                const deleteModal =
-                  buildDeleteModal<Appointment>('appointment', () => 'The appointment')
-                deleteModal({
-                  item: data.appointment,
-                  session,
-                  computedColorScheme,
-                  onSuccess: async () => {
-                    await onSuccess(data)
-                  }
-                })
-              }}>Delete</Button>
+                <Button color="red" variant="outline" onClick={() => {
+                  const deleteModal =
+                    buildDeleteModal<Appointment>('appointment', () => 'The appointment')
+                  deleteModal({
+                    item: data.appointment,
+                    session,
+                    computedColorScheme,
+                    onSuccess: async () => {
+                      await onSuccess(data)
+                    }
+                  })
+                }}>Delete</Button>
             }
             <Button type="submit">Submit</Button>
           </Group>

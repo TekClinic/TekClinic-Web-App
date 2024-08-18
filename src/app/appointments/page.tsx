@@ -36,6 +36,7 @@ import {
   POPUP_TYPE_EDITOR
 } from '@/src/app/appointments/const'
 import { IconStethoscope } from '@tabler/icons-react'
+import { DoctorIdContext } from './context'
 
 interface ResourceData {
   id: number
@@ -56,6 +57,7 @@ const Calendar = (): React.JSX.Element => {
 
   const [separateByDoctors, setSeparateByDoctors] = useState<boolean>(false)
   const [currentDoctorsPage, setCurrentDoctorsPage] = useState(1)
+  const [lastSelectedDoctorId, setLastSelectedDoctorId] = useState<number | undefined>(undefined)
 
   const appointmentQueries = useQueries({
     queries: displayedDates.map((date) => ({
@@ -129,7 +131,8 @@ const Calendar = (): React.JSX.Element => {
       if (args.data == null) {
         return
       }
-      const data = args.data as AppointmentFormData
+      const data = args.data as AppointmentFormData & { doctor_id?: number }
+      setLastSelectedDoctorId(data.doctor_id)
       const editMode = isEditMode(data)
 
       const modalId = 'appointment-modal'
@@ -148,6 +151,9 @@ const Calendar = (): React.JSX.Element => {
               }
             }}/>
       })
+    } else if (args.type === 'QuickInfo') {
+      const data = args.data as { doctor_id?: number }
+      setLastSelectedDoctorId(data.doctor_id)
     }
   }
 
@@ -227,85 +233,87 @@ const Calendar = (): React.JSX.Element => {
       }]
 
   return (
-    <ModalsProvider>
-      <link href={computedColorScheme === 'light' ? CDN_LIGHT_THEME_URL : CDN_DARK_THEME_URL} rel="stylesheet"/>
-      <Group justify="flex-end" p={10}>
-        {separateByDoctors && doctorsResourceData.length > DOCTORS_PER_PAGE &&
-            <Pagination
-                withControls={false}
-                value={currentDoctorsPage}
-                onChange={(value) => {
-                  setCurrentDoctorsPage(value)
-                }}
-                total={Math.ceil(doctorsResourceData.length / DOCTORS_PER_PAGE)}
-            />}
-        <Switch
-          checked={separateByDoctors}
-          labelPosition="left"
-          label='Separate by Doctor'
-          onChange={(event) => {
-            if (event.currentTarget.checked) {
-              setCurrentDoctorsPage(1)
+    <DoctorIdContext.Provider value={lastSelectedDoctorId}>
+      <ModalsProvider>
+        <link href={computedColorScheme === 'light' ? CDN_LIGHT_THEME_URL : CDN_DARK_THEME_URL} rel="stylesheet"/>
+        <Group justify="flex-end" p={10}>
+          {separateByDoctors && doctorsResourceData.length > DOCTORS_PER_PAGE &&
+              <Pagination
+                  withControls={false}
+                  value={currentDoctorsPage}
+                  onChange={(value) => {
+                    setCurrentDoctorsPage(value)
+                  }}
+                  total={Math.ceil(doctorsResourceData.length / DOCTORS_PER_PAGE)}
+              />}
+          <Switch
+            checked={separateByDoctors}
+            labelPosition="left"
+            label='Separate by Doctor'
+            onChange={(event) => {
+              if (event.currentTarget.checked) {
+                setCurrentDoctorsPage(1)
+              }
+              setSeparateByDoctors(event.currentTarget.checked)
+            }}
+          />
+        </Group>
+        <ScheduleComponent
+          currentView="Week" ref={scheduleObj}
+          eventSettings={{
+            dataSource: data,
+            fields: {
+              id: 'id',
+              subject: { name: 'subject' },
+              startTime: { name: 'start_time' },
+              endTime: { name: 'end_time' }
             }
-            setSeparateByDoctors(event.currentTarget.checked)
           }}
-        />
-      </Group>
-      <ScheduleComponent
-        currentView="Week" ref={scheduleObj}
-        eventSettings={{
-          dataSource: data,
-          fields: {
-            id: 'id',
-            subject: { name: 'subject' },
-            startTime: { name: 'start_time' },
-            endTime: { name: 'end_time' }
-          }
-        }}
-        group={{ resources: separateByDoctors ? [DOCTORS_RESOURCE] : [] }}
-        allowSwiping
-        allowKeyboardInteraction
-        rowAutoHeight
-        quickInfoOnSelectionEnd
-        timeFormat="HH:mm"
-        actionComplete={onActionComplete}
-        actionBegin={onActionComplete}
-        quickInfoTemplates={{
-          templateType: 'Cell',
-          content: quickInfoContent
-        }}
-        popupOpen={onPopupOpen}
-        created={updateDisplayedDates}
-        resourceHeaderTemplate={separateByDoctors && resourceHeaderTemplate}
-      >
-        <ResourcesDirective>
-          <ResourceDirective
-            field='doctor_id'
-            title='Doctor'
-            name={DOCTORS_RESOURCE}
-            dataSource={separateByDoctors ? paginatedDoctorsResourceData : []}
-            textField='text'
-            idField='id'
-            colorField='color'
-          />
-          <ResourceDirective
-            field='color_id'
-            title='Color'
-            name={COLORS_RESOURCE}
-            dataSource={colorsResourceData}
-            textField='text'
-            idField='id'
-            colorField='color'
-          />
-        </ResourcesDirective>
-        <ViewsDirective>
-          <ViewDirective option="Day"/>
-          <ViewDirective option="Week"/>
-          <ViewDirective option="Month"/>
-        </ViewsDirective>
-        <Inject services={[Day, Week, Month]}/>
-      </ScheduleComponent>
-    </ModalsProvider>
+          group={{ resources: separateByDoctors ? [DOCTORS_RESOURCE] : [] }}
+          allowSwiping
+          allowKeyboardInteraction
+          rowAutoHeight
+          quickInfoOnSelectionEnd
+          timeFormat="HH:mm"
+          actionComplete={onActionComplete}
+          actionBegin={onActionComplete}
+          quickInfoTemplates={{
+            templateType: 'Cell',
+            content: quickInfoContent
+          }}
+          popupOpen={onPopupOpen}
+          created={updateDisplayedDates}
+          resourceHeaderTemplate={separateByDoctors && resourceHeaderTemplate}
+        >
+          <ResourcesDirective>
+            <ResourceDirective
+              field='doctor_id'
+              title='Doctor'
+              name={DOCTORS_RESOURCE}
+              dataSource={separateByDoctors ? paginatedDoctorsResourceData : []}
+              textField='text'
+              idField='id'
+              colorField='color'
+            />
+            <ResourceDirective
+              field='color_id'
+              title='Color'
+              name={COLORS_RESOURCE}
+              dataSource={colorsResourceData}
+              textField='text'
+              idField='id'
+              colorField='color'
+            />
+          </ResourcesDirective>
+          <ViewsDirective>
+            <ViewDirective option="Day"/>
+            <ViewDirective option="Week"/>
+            <ViewDirective option="Month"/>
+          </ViewsDirective>
+          <Inject services={[Day, Week, Month]}/>
+        </ScheduleComponent>
+      </ModalsProvider>
+    </DoctorIdContext.Provider>
   )
 }
 
