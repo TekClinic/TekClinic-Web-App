@@ -159,7 +159,6 @@ const EditPatientForm: React.FC<EditPatientFormProps> =
           // change the fields of initialPatient to the new values
           initialPatient.name = data.name
           initialPatient.personal_id = data.personal_id
-          initialPatient.active = true
           initialPatient.birth_date = data.birth_date
           initialPatient.languages = data.languages
           initialPatient.emergency_contacts = data.emergency_contacts
@@ -312,7 +311,7 @@ const EditPatientForm: React.FC<EditPatientFormProps> =
           />
 
           <Group mt="md">
-            <Button type="submit">Submit</Button>
+            <Button type="submit">Update</Button>
           </Group>
         </form>
     )

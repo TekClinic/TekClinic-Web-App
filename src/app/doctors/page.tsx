@@ -7,6 +7,7 @@ import { buildDeleteModal } from '@/src/utils/modals'
 import { modals } from '@mantine/modals'
 import { Doctor } from '@/src/api/model/doctor'
 import CreateDoctorForm from '@/src/app/doctors/CreateDoctorForm'
+import EditDoctorForm from './EditDoctorForm'
 
 function DoctorPage(): React.JSX.Element {
   const computedColorScheme = useComputedColorScheme()
@@ -47,6 +48,30 @@ function DoctorPage(): React.JSX.Element {
       })
     }}
     
+    showEditModal={({
+      item,
+      session,
+      computedColorScheme,
+      onSuccess
+    }) => {
+      // Generate some random modal id
+      const modalId = 'edit-doctor-modal'
+      modals.open({
+        modalId,
+        title: 'Edit Doctor Information',
+        children:
+          <EditDoctorForm
+            item={item}
+            session={session}
+            computedColorScheme={computedColorScheme}
+            onSuccess={async () => {
+              modals.close(modalId)
+              await onSuccess()
+            }}
+          />
+      })
+    }}
+
     columns={[
       {
         title: '#',
