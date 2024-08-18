@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import {
   ActionIcon,
   Button,
@@ -10,7 +10,7 @@ import {
 import { DateInput } from '@mantine/dates'
 import { useForm } from '@mantine/form'
 import { IconPlus, IconTrash } from '@tabler/icons-react'
-import { Patient } from '@/src/api/model/patient'
+import { type Patient } from '@/src/api/model/patient'
 import { type EmergencyContact, type Gender, type PersonalId } from '@/src/api/scheme'
 import validator from 'validator'
 import {
@@ -27,9 +27,8 @@ import {
 import { toast } from 'react-toastify'
 import { getToastOptions } from '@/src/utils/toast'
 import { errorHandler } from '@/src/utils/error'
-import { EditModalProps, type CreateModalProps } from '@/src/components/CustomTable'
+import { type EditModalProps } from '@/src/components/CustomTable'
 import { israeliIDValidator, nameValidator, phoneValidator, specialNoteValidator } from '@/src/utils/validation'
-import { initial } from 'lodash'
 
 type EditPatientFormProps = EditModalProps<Patient>
 
@@ -38,55 +37,55 @@ const EditPatientForm: React.FC<EditPatientFormProps> =
     session,
     computedColorScheme,
     onSuccess,
-    item: initialPatient,
+    item: initialPatient
   }) => {
-    var initialType = ''
-    if (initialPatient != null && initialPatient.personal_id.type != 'ID' && initialPatient.personal_id.type != 'Passport' && initialPatient.personal_id.type != 'Drivers Licence') {
+    let initialType = ''
+    if (initialPatient !== null && initialPatient.personal_id.type !== 'ID' && initialPatient.personal_id.type !== 'Passport' && initialPatient.personal_id.type !== 'Drivers Licence') {
       initialType = 'Other'
     } else {
-      if ( initialPatient.personal_id.type === 'ID')
-      {
+      if (initialPatient.personal_id.type === 'ID') {
         initialType = israeliIDType
       } else {
         initialType = initialPatient.personal_id.type
       }
     }
-    
-    const [showOtherIdType, setShowOtherIdType] = useState<boolean>(initialType === otherIDType ? true : false)
 
+    const [showOtherIdType, setShowOtherIdType] = useState<boolean>(initialType === otherIDType)
 
     const form = useForm({
       mode: 'uncontrolled',
       validateInputOnBlur: true,
-      initialValues: (initialPatient != null ? {
-        name:  initialPatient.name ,
-        personal_id: {
-          id: initialPatient.personal_id.id,
-          type: initialType,
-          other: initialType === otherIDType ? initialPatient.personal_id.type : '',
-        },
-        gender: initialPatient.gender,
-        phone_number: initialPatient.phone_number,
-        languages: initialPatient.languages,
-        birth_date: initialPatient.birth_date,
-        referred_by: initialPatient.referred_by ? initialPatient.referred_by : '',
-        special_note: initialPatient.special_note ? initialPatient.special_note : '',
-        emergency_contacts: initialPatient.emergency_contacts
-      } : {
-      name: '',
-        personal_id: {
-          id: '',
-          type: israeliIDType,
-          other: ''
-        },
-        gender: 'unspecified' as Gender,
-        phone_number: '',
-        languages: [] as string[],
-        birth_date: null as Date | null,
-        referred_by: '',
-        special_note: '',
-        emergency_contacts: [] as EmergencyContact[]
-      }),
+      initialValues: (initialPatient != null
+        ? {
+            name: initialPatient.name,
+            personal_id: {
+              id: initialPatient.personal_id.id,
+              type: initialType,
+              other: initialType === otherIDType ? initialPatient.personal_id.type : ''
+            },
+            gender: initialPatient.gender,
+            phone_number: initialPatient.phone_number,
+            languages: initialPatient.languages,
+            birth_date: initialPatient.birth_date,
+            referred_by: initialPatient.referred_by !== null ? initialPatient.referred_by : '',
+            special_note: initialPatient.special_note !== null ? initialPatient.special_note : '',
+            emergency_contacts: initialPatient.emergency_contacts
+          }
+        : {
+            name: '',
+            personal_id: {
+              id: '',
+              type: israeliIDType,
+              other: ''
+            },
+            gender: 'unspecified' as Gender,
+            phone_number: '',
+            languages: [] as string[],
+            birth_date: null as Date | null,
+            referred_by: '',
+            special_note: '',
+            emergency_contacts: [] as EmergencyContact[]
+          }),
       validate: {
         name: (value) => nameValidator(value, true),
         personal_id: {
@@ -114,8 +113,8 @@ const EditPatientForm: React.FC<EditPatientFormProps> =
             return null
           }
         },
-        phone_number: (value) => phoneValidator(value),
-        birth_date: (value) => {
+        phone_number: (value: string) => phoneValidator(value),
+        birth_date: (value: string) => {
           if (value == null) {
             return 'Birth date is required'
           }
@@ -134,7 +133,7 @@ const EditPatientForm: React.FC<EditPatientFormProps> =
           },
           phone: (value) => phoneValidator(value, true)
         },
-        referred_by: (value) => nameValidator(value),
+        referred_by: (value: string) => nameValidator(value),
         special_note: specialNoteValidator
       }
     })
@@ -168,8 +167,7 @@ const EditPatientForm: React.FC<EditPatientFormProps> =
           initialPatient.phone_number = data.phone_number
 
           const result = await errorHandler(async () => {
-            
-          await toast.promise(initialPatient.update(session),
+            await toast.promise(initialPatient.update(session),
               {
                 pending: `Updating patient ${data.name}...`,
                 success: `Patient ${data.name} was updated successfully.`,
@@ -179,7 +177,7 @@ const EditPatientForm: React.FC<EditPatientFormProps> =
           if (result instanceof Error) {
             return
           }
-          
+
           await onSuccess()
         })}>
           <TextInput

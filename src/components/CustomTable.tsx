@@ -13,8 +13,7 @@ import { handleUIError } from '@/src/utils/error'
 import { useContextMenu } from 'mantine-contextmenu'
 import { type Session } from 'next-auth'
 import { type PaginationResult } from '@/src/api/common'
-import { Base } from '@syncfusion/ej2-base'
-import { Patient } from '../api/model/patient'
+import { Eye } from 'tabler-icons-react'
 
 const defaultPageSize = 5
 const pageSizeOptions = [2, 5, 10, 20, 50]
@@ -33,6 +32,10 @@ export interface EditModalProps<DataType> extends BaseModalProps {
   item: DataType
 }
 
+export interface ViewModalProps<DataType> extends BaseModalProps {
+  item: DataType
+}
+
 export type CreateModalProps = BaseModalProps
 
 interface CustomTableProps<DataType, TData extends PaginationResult<DataType> = PaginationResult<DataType>, TQueryKey extends QueryKey = QueryKey> {
@@ -43,6 +46,7 @@ interface CustomTableProps<DataType, TData extends PaginationResult<DataType> = 
   showDeleteModal?: (props: DeleteModalProps<DataType>) => void
   showCreateModal?: (props: CreateModalProps) => void
   showEditModal?: (props: EditModalProps<DataType>) => void
+  showViewModal?: (props: ViewModalProps<DataType>) => void
 }
 
 const CustomTable = <DataType, TData extends PaginationResult<DataType> = PaginationResult<DataType>, TQueryKey extends QueryKey = QueryKey> ({
@@ -52,7 +56,8 @@ const CustomTable = <DataType, TData extends PaginationResult<DataType> = Pagina
   columns,
   showDeleteModal,
   showCreateModal,
-  showEditModal
+  showEditModal,
+  showViewModal
 }: CustomTableProps<DataType, TData, TQueryKey>): React.ReactElement<CustomTableProps<DataType, TData, TQueryKey>> => {
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(defaultPageSize)
@@ -142,6 +147,27 @@ const CustomTable = <DataType, TData extends PaginationResult<DataType> = Pagina
                   <IconEdit size={23}/>
                 </ActionIcon>
               )}
+              {
+                showViewModal != null && (
+                  <ActionIcon
+                  size="sm"
+                  variant="subtle"
+                  color="blue"
+                  onClick={() => {
+                    showViewModal({
+                      item,
+                      session,
+                      computedColorScheme,
+                      onSuccess: async () => {
+                        await refetch()
+                      }
+                    })
+                  }}
+                >
+                  <Eye size={23}/>
+                </ActionIcon>
+                )}
+
             </Group>
             ),
             toggleable: false,
@@ -198,6 +224,18 @@ const CustomTable = <DataType, TData extends PaginationResult<DataType> = Pagina
             setPageSize(pageSize)
             setPage(1)
           }}
+          // onRowClick={(item) => {
+          //   if (showViewModal != null) {
+          //     showViewModal({
+          //       item,
+          //       session,
+          //       computedColorScheme,
+          //       onSuccess: async () => {
+          //         await refetch()
+          //       }
+          //     })
+          //   }
+          // }}
           noRecordsIcon={
             <Box p={4} mb={4} className={classes.noRecordsBox}>
               <IconMoodSad size={36} strokeWidth={1.5}/>

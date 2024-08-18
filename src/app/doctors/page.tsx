@@ -9,7 +9,7 @@ import { Doctor } from '@/src/api/model/doctor'
 import CreateDoctorForm from '@/src/app/doctors/CreateDoctorForm'
 import EditDoctorForm from './EditDoctorForm'
 
-function DoctorPage(): React.JSX.Element {
+function DoctorPage (): React.JSX.Element {
   const computedColorScheme = useComputedColorScheme()
 
   return (
@@ -47,7 +47,7 @@ function DoctorPage(): React.JSX.Element {
           />
       })
     }}
-    
+
     showEditModal={({
       item,
       session,
@@ -109,10 +109,10 @@ function DoctorPage(): React.JSX.Element {
             <Flex style={{ margin: '2px' }} direction='column' gap='10px'>
               {doctor.specialities.map((speciality) => (
                   <Badge key={speciality} variant="gradient" gradient={{
-                    from: computedColorScheme == 'light' ? '#e3e3e3' : '#3d3c3c',
-                    to: computedColorScheme == 'light' ? '#e3e3e3' : '#3d3c3c',
+                    from: computedColorScheme === 'light' ? '#e3e3e3' : '#3d3c3c',
+                    to: computedColorScheme === 'light' ? '#e3e3e3' : '#3d3c3c',
                     deg: 90
-                  }} style={{ color: computedColorScheme == 'light' ? 'black' : 'white' }}>
+                  }} style={{ color: computedColorScheme === 'light' ? 'black' : 'white' }}>
                     {speciality}
                   </Badge>
               )
@@ -125,7 +125,7 @@ function DoctorPage(): React.JSX.Element {
       }
     ]}
     />
-    )
-  }
+  )
+}
 
 export default DoctorPage

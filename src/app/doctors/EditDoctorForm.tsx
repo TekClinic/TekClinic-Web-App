@@ -10,9 +10,9 @@ import { type Gender } from '@/src/api/scheme'
 import { toast } from 'react-toastify'
 import { getToastOptions } from '@/src/utils/toast'
 import { errorHandler } from '@/src/utils/error'
-import { EditModalProps } from '@/src/components/CustomTable'
+import { type EditModalProps } from '@/src/components/CustomTable'
 import { nameValidator, phoneValidator, specialNoteValidator } from '@/src/utils/validation'
-import { Doctor } from '@/src/api/model/doctor'
+import { type Doctor } from '@/src/api/model/doctor'
 import { maxSpecialities, specialitiesOptions } from '@/src/app/doctors/const'
 
 type EditDoctorFormProps = EditModalProps<Doctor>
@@ -22,28 +22,27 @@ const EditDoctorForm: React.FC<EditDoctorFormProps> =
     session,
     computedColorScheme,
     onSuccess,
-    item: initialDoctor,
+    item: initialDoctor
   }) => {
-
-
-
     const form = useForm({
       mode: 'uncontrolled',
       validateInputOnBlur: true,
       initialValues: (
-        initialDoctor != null ? {
-        name: initialDoctor.name,
-        gender: initialDoctor.gender,
-        phone_number: initialDoctor.phone_number,
-        specialities: initialDoctor.specialities,
-        special_note: initialDoctor.special_note || ''
-        } : {
-        name: '',
-        gender: 'unspecified' as Gender,
-        phone_number: '',
-        specialities: [] as string[],
-        special_note: ''
-      }
+        initialDoctor != null
+          ? {
+              name: initialDoctor.name,
+              gender: initialDoctor.gender,
+              phone_number: initialDoctor.phone_number,
+              specialities: initialDoctor.specialities,
+              special_note: initialDoctor.special_note ?? ''
+            }
+          : {
+              name: '',
+              gender: 'unspecified' as Gender,
+              phone_number: '',
+              specialities: [] as string[],
+              special_note: ''
+            }
       ),
       validate: {
         name: (value) => nameValidator(value, true),
@@ -55,12 +54,10 @@ const EditDoctorForm: React.FC<EditDoctorFormProps> =
     return (
       // eslint-disable-next-line @typescript-eslint/no-misused-promises
       <form onSubmit={form.onSubmit(async (values): Promise<void> => {
-        
-        initialDoctor.active = initialDoctor.active,
-        initialDoctor.name = values.name,
-        initialDoctor.gender = values.gender,
-        initialDoctor.phone_number = values.phone_number,
-        initialDoctor.specialities = values.specialities,
+        initialDoctor.name = values.name
+        initialDoctor.gender = values.gender
+        initialDoctor.phone_number = values.phone_number
+        initialDoctor.specialities = values.specialities
         initialDoctor.special_note = values.special_note
 
         const result = await errorHandler(async () => {
