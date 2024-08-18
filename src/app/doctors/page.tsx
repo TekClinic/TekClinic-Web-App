@@ -1,14 +1,17 @@
 'use client'
 
 import React from 'react'
-import { Badge, Flex } from '@mantine/core'
+import { Badge, Flex, useComputedColorScheme } from '@mantine/core'
 import CustomTable from '@/src/components/CustomTable'
 import { buildDeleteModal } from '@/src/utils/modals'
 import { modals } from '@mantine/modals'
 import { Doctor } from '@/src/api/model/doctor'
 import CreateDoctorForm from '@/src/app/doctors/CreateDoctorForm'
 
-const DoctorPage = (): React.JSX.Element => (
+function DoctorPage(): React.JSX.Element {
+  const computedColorScheme = useComputedColorScheme()
+
+  return (
   <CustomTable
     dataName='Doctor'
     storeColumnKey='doctor-columns'
@@ -43,6 +46,7 @@ const DoctorPage = (): React.JSX.Element => (
           />
       })
     }}
+    
     columns={[
       {
         title: '#',
@@ -80,10 +84,10 @@ const DoctorPage = (): React.JSX.Element => (
             <Flex style={{ margin: '2px' }} direction='column' gap='10px'>
               {doctor.specialities.map((speciality) => (
                   <Badge key={speciality} variant="gradient" gradient={{
-                    from: 'blue',
-                    to: 'cyan',
+                    from: computedColorScheme == 'light' ? '#e3e3e3' : '#3d3c3c',
+                    to: computedColorScheme == 'light' ? '#e3e3e3' : '#3d3c3c',
                     deg: 90
-                  }}>
+                  }} style={{ color: computedColorScheme == 'light' ? 'black' : 'white' }}>
                     {speciality}
                   </Badge>
               )
@@ -95,7 +99,8 @@ const DoctorPage = (): React.JSX.Element => (
         accessor: 'special_note'
       }
     ]}
-  />
-)
+    />
+    )
+  }
 
 export default DoctorPage

@@ -8,11 +8,13 @@ import { type QueryKey, useQuery, type UseQueryOptions } from '@tanstack/react-q
 import { useGuaranteeSession } from '@/src/utils/auth'
 import { ModalsProvider } from '@mantine/modals'
 import { ActionIcon, Box, Button, Group, type MantineColorScheme, useComputedColorScheme } from '@mantine/core'
-import { IconArrowAutofitWidth, IconColumnRemove, IconColumns3, IconMoodSad, IconTrash } from '@tabler/icons-react'
+import { IconArrowAutofitWidth, IconColumnRemove, IconColumns3, IconEdit, IconMoodSad, IconTrash } from '@tabler/icons-react'
 import { handleUIError } from '@/src/utils/error'
 import { useContextMenu } from 'mantine-contextmenu'
 import { type Session } from 'next-auth'
 import { type PaginationResult } from '@/src/api/common'
+import { Base } from '@syncfusion/ej2-base'
+import { Patient } from '../api/model/patient'
 
 const defaultPageSize = 5
 const pageSizeOptions = [2, 5, 10, 20, 50]
@@ -27,6 +29,10 @@ export interface DeleteModalProps<DataType> extends BaseModalProps {
   item: DataType
 }
 
+export interface EditModalProps<DataType> extends BaseModalProps {
+  item: DataType
+}
+
 export type CreateModalProps = BaseModalProps
 
 interface CustomTableProps<DataType, TData extends PaginationResult<DataType> = PaginationResult<DataType>, TQueryKey extends QueryKey = QueryKey> {
@@ -36,6 +42,7 @@ interface CustomTableProps<DataType, TData extends PaginationResult<DataType> = 
   columns: Array<DataTableColumn<DataType>>
   showDeleteModal?: (props: DeleteModalProps<DataType>) => void
   showCreateModal?: (props: CreateModalProps) => void
+  showEditModal?: (props: EditModalProps<DataType>) => void
 }
 
 const CustomTable = <DataType, TData extends PaginationResult<DataType> = PaginationResult<DataType>, TQueryKey extends QueryKey = QueryKey> ({
@@ -44,7 +51,8 @@ const CustomTable = <DataType, TData extends PaginationResult<DataType> = Pagina
   queryOptions,
   columns,
   showDeleteModal,
-  showCreateModal
+  showCreateModal,
+  showEditModal
 }: CustomTableProps<DataType, TData, TQueryKey>): React.ReactElement<CustomTableProps<DataType, TData, TQueryKey>> => {
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(defaultPageSize)
@@ -109,6 +117,29 @@ const CustomTable = <DataType, TData extends PaginationResult<DataType> = Pagina
                   }}
                 >
                   <IconTrash size={23}/>
+                </ActionIcon>
+              )}
+              {showEditModal != null && (
+                <ActionIcon
+                  size="sm"
+                  variant="subtle"
+                  color="green"
+                  onClick={() => {
+                    showEditModal({
+                      item,
+                      session,
+                      computedColorScheme,
+                      onSuccess: async () => {
+                        if (data == null) {
+                          // unreachable condition. for type checking only
+                          return
+                        }
+                        await refetch()
+                      }
+                    })
+                  }}
+                >
+                  <IconEdit size={23}/>
                 </ActionIcon>
               )}
             </Group>

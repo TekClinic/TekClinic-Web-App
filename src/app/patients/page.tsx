@@ -3,13 +3,17 @@
 import dayjs from 'dayjs'
 import React from 'react'
 import { Patient } from '@/src/api/model/patient'
-import { Badge, Flex } from '@mantine/core'
+import { Badge, Flex, useComputedColorScheme } from '@mantine/core'
 import CustomTable from '@/src/components/CustomTable'
 import { buildDeleteModal } from '@/src/utils/modals'
 import { modals } from '@mantine/modals'
 import CreatePatientForm from '@/src/app/patients/CreatePatientForm'
+import EditPatientForm from './EditPatientForm'
 
-const PatientsPage = (): React.JSX.Element => (
+function PatientsPage(): React.JSX.Element {
+  const computedColorScheme = useComputedColorScheme()
+
+  return (
   <CustomTable
     dataName='Patient'
     storeColumnKey='patient-columns'
@@ -40,6 +44,26 @@ const PatientsPage = (): React.JSX.Element => (
           />
       })
     }}
+    showEditModal={
+      ({ item, session, computedColorScheme, onSuccess }) => {
+        // Generate some random modal id
+        const modalId = 'edit-patient-modal'
+        modals.open({
+          modalId,
+          title: 'Edit Patient Information',
+          children:
+            <EditPatientForm
+              item={item}
+              session={session}
+              computedColorScheme={computedColorScheme}
+              onSuccess={async () => {
+                modals.close(modalId)
+                await onSuccess()
+              }}
+            />
+        })
+      }
+    }
     columns={[
       {
         title: '#',
@@ -84,10 +108,10 @@ const PatientsPage = (): React.JSX.Element => (
             <Flex style={{ margin: '2px' }} direction='column' gap='10px'>
               {patient.languages.map((language) => (
                   <Badge key={language} variant="gradient" gradient={{
-                    from: 'blue',
-                    to: 'cyan',
+                    from: (computedColorScheme == 'light' ? '#e3e3e3' : '#3d3c3c'),
+                    to: (computedColorScheme == 'light' ? '#e3e3e3' : '#3d3c3c'),
                     deg: 90
-                  }}>
+                  }} style={{ color: computedColorScheme == 'light' ? 'black' : 'white' }}>
                     {language}
                   </Badge>
               )
@@ -107,10 +131,10 @@ const PatientsPage = (): React.JSX.Element => (
             <Flex style={{ margin: '2px' }} direction='column' gap='10px'>
               {patient.emergency_contacts.map((contact, index) => (
                   <Badge key={index} variant="gradient" gradient={{
-                    from: '#DBDBDB',
-                    to: '#CCCCCC',
+                    from: computedColorScheme == 'light' ? '#e3e3e3' : '#3d3c3c',
+                    to: computedColorScheme == 'light' ? '#e3e3e3' : '#3d3c3c',
                     deg: 90
-                  }} style={{ color: 'black' }}>
+                  }} style={{ color: computedColorScheme == 'light' ? 'black' : 'white' }}>
                     {contact.name} ({contact.closeness}) {contact.phone}
                   </Badge>
               )
@@ -126,6 +150,7 @@ const PatientsPage = (): React.JSX.Element => (
       }
     ]}
   />
-)
+  )
+}
 
 export default PatientsPage
