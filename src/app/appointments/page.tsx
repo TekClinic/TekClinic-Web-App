@@ -159,7 +159,13 @@ const Calendar = (): React.JSX.Element => {
 
   // quickInfoContent is a function that returns the content of the quick info popup.
   // It is used to replace the default quick info popup with a custom quick info popup.
-  const quickInfoContent = (args: ({ elementType: 'event' } & Appointment) | ({
+  const quickInfoContent = (args: ({
+    elementType: 'event'
+    appointment: Appointment
+    isAllDay: boolean
+    start_time: Date
+    end_time: Date
+  }) | ({
     elementType: 'cell'
     isAllDay: boolean
     start_time: Date
@@ -175,13 +181,21 @@ const Calendar = (): React.JSX.Element => {
             await dateToResult.get(data.start_time.toDateString())?.refetch()
           }
         }}
-        data={{
-          start_time: args.start_time,
-          end_time: args.end_time
+        data={args}
+      />
+    } else if (args.elementType === 'event') {
+      return <AppointmentForm
+        session={session} quick
+        computedColorScheme={computedColorScheme}
+        onSuccess={async (data) => {
+          scheduleObj.current?.closeQuickInfoPopup()
+          if (data != null) {
+            await dateToResult.get(data.start_time.toDateString())?.refetch()
+          }
         }}
+        data={args}
       />
     }
-    // TODO implement quick info
     return <></>
   }
 
@@ -270,7 +284,6 @@ const Calendar = (): React.JSX.Element => {
             }
           }}
           group={{ resources: separateByDoctors ? [DOCTORS_RESOURCE] : [] }}
-          allowSwiping
           allowKeyboardInteraction
           rowAutoHeight
           quickInfoOnSelectionEnd
@@ -278,7 +291,6 @@ const Calendar = (): React.JSX.Element => {
           actionComplete={onActionComplete}
           actionBegin={onActionComplete}
           quickInfoTemplates={{
-            templateType: 'Cell',
             content: quickInfoContent
           }}
           popupOpen={onPopupOpen}

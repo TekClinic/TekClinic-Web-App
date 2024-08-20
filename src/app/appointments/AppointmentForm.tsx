@@ -1,5 +1,5 @@
 import React, { useContext, useEffect } from 'react'
-import { Button, Group, LoadingOverlay, Select, Stack, Switch } from '@mantine/core'
+import { Badge, Button, Group, LoadingOverlay, Select, Stack, Switch } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { toast } from 'react-toastify'
 import { getToastOptions } from '@/src/utils/toast'
@@ -12,6 +12,8 @@ import { Doctor } from '@/src/api/model/doctor'
 import { Patient } from '@/src/api/model/patient'
 import { useQuery } from '@tanstack/react-query'
 import { DoctorIdContext } from '@/src/app/appointments/context'
+import { IconClock } from '@tabler/icons-react'
+import { format } from 'date-fns'
 
 export interface AppointmentFormData {
   start_time: Date
@@ -217,6 +219,11 @@ const AppointmentForm: React.FC<AppointmentFormProps> =
         await onSuccess(formData)
       })}>
         <Stack>
+          {(quick === true) &&
+              <Badge size="md" leftSection={<IconClock size={20}/>}>
+                {`${format(form.values.start_time, 'E do MMM kk:mm')}-${format(form.values.end_time, 'kk:mm')}`}
+              </Badge>
+          }
           <Select
             withAsterisk={!editMode}
             disabled={editMode}

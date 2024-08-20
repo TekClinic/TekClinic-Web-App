@@ -7,5 +7,9 @@
 }
 
 .e-quick-popup-wrapper .e-cell-popup .e-popup-content {
-    padding: 18px 12px;
+    padding: 12px 18px !important;
+}
+
+.e-quick-popup-wrapper .e-event-popup .e-popup-content {
+    padding: 12px 18px !important;
 }
