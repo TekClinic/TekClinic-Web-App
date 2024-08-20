@@ -1,8 +1,7 @@
 import { AppShell, Burger, NavLink } from '@mantine/core'
 import React, { useState } from 'react'
-import { CalendarEvent, Home2, Logout } from 'tabler-icons-react'
+import { CalendarEvent, Home2 } from 'tabler-icons-react'
 import Link from 'next/link'
-import { federatedLogout, useGuaranteeSession } from '@/src/utils/auth'
 import './NavBar.css'
 import { FaUserDoctor, FaUserGroup } from 'react-icons/fa6'
 
@@ -10,7 +9,6 @@ const Navbar: React.FC<{ opened: boolean, toggle: () => void }> = ({
   opened,
   toggle
 }) => {
-  const session = useGuaranteeSession()
   const [active, setActive] = useState(0)
 
   const navItems = [
@@ -86,31 +84,6 @@ const Navbar: React.FC<{ opened: boolean, toggle: () => void }> = ({
       ))}
 
       <div style={{ flexGrow: 1 }}/>
-
-      {/* Logout link */}
-      <div style={{
-        textAlign: 'center',
-        padding: '10px',
-        fontSize: '15px'
-      }}>
-        <h4 style={{
-          textAlign: 'left',
-          fontSize: '15px',
-          fontWeight: '300',
-          color: 'rgb(100, 140, 200)'
-        }}>
-          logged in as {session?.user?.name ?? 'anonymous'}
-        </h4>
-        <NavLink
-          label="Logout"
-          /* eslint-disable-next-line @typescript-eslint/no-misused-promises */
-          onClick={async () => {
-            await federatedLogout()
-          }}
-          style={{ margin: '5px' }}
-          leftSection={<Logout size="20px"/>}
-        />
-      </div>
     </AppShell.Navbar>
   )
 }

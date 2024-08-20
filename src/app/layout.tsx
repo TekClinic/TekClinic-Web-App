@@ -6,19 +6,17 @@ import 'mantine-datatable/styles.layer.css'
 import 'react-toastify/dist/ReactToastify.css'
 
 import React from 'react'
+
 import {
   AppShell,
   Burger,
-  Button,
   Center,
   ColorSchemeScript,
   createTheme,
   Flex,
   Loader,
   MantineProvider,
-  rem,
-  useComputedColorScheme,
-  useMantineColorScheme
+  rem
 } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
 import Navbar from '@/src/components/Navbar'
@@ -30,7 +28,7 @@ import { ContextMenuProvider } from 'mantine-contextmenu'
 import { CDN_DARK_THEME_URL, CDN_LIGHT_THEME_URL } from '@/src/app/appointments/const'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClient } from '@/src/api/common'
-import { FaMoon, FaSun } from 'react-icons/fa'
+import ActionBar from '@/src/components/ActionBar'
 
 registerLicense(requireBuildEnv('NEXT_PUBLIC_SYNCFUSION_LICENSE_KEY',
   process.env.NEXT_PUBLIC_SYNCFUSION_LICENSE_KEY))
@@ -98,12 +96,6 @@ function ContentLayout ({ children }: {
   children: React.ReactNode
 }): React.JSX.Element {
   const session = useSession()
-  const { setColorScheme } = useMantineColorScheme()
-  const computedColorScheme = useComputedColorScheme('light')
-
-  const toggleColorScheme = (): void => {
-    setColorScheme(computedColorScheme === 'dark' ? 'light' : 'dark')
-  }
 
   const [opened, { toggle }] = useDisclosure(false)
 
@@ -129,17 +121,7 @@ function ContentLayout ({ children }: {
                 Tekclinic 🩺
               </div>
 
-              <Button
-                style={{
-                  backgroundColor: 'transparent',
-                  fontSize: '17px'
-                }}
-                size="sm"
-                variant="link"
-                onClick={toggleColorScheme}
-              >
-                {computedColorScheme === 'dark' ? <FaSun style={{ color: '#ccc' }}/> : <FaMoon style={{ color: '#ccc' }}/>}
-              </Button>
+              <ActionBar/>
             </Flex>
           </AppShell.Header>
 
