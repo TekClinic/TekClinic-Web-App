@@ -1,6 +1,6 @@
 # TekClinic
 
-For setup, go to [setup](setup.md)
+For setup, go to [setup](setup.md).
 
 TekClinic is a web platform for clinic management that is made to serve “New Spirit” - a community clinic at the Keranot
 House in Haifa.
@@ -10,7 +10,7 @@ The platform includes tools to efficiently manage patients, doctors, and appoint
 The platform is built and maintained by students of the Yearly Software Engineering Project (02340311 + 02340312) in the
 Computer Science faculty of the Technion.
 
-## Developers:
+## Developers
 
 ### First Iteration
 
@@ -23,6 +23,20 @@ Computer Science faculty of the Technion.
 - [@nikolro](https://github.com/nikolro)
 - [@Tal-Dahan](https://github.com/Tal-Dahan)
 - [@DanaMel8](https://github.com/DanaMel8)
+
+**Supervisor**:
+[@vMaroon](https://github.com/vMaroon)
+
+### Second Iteration
+
+**Students**:
+
+- [@yonatan-reicher](https://github.com/yonatan-reicher)
+- [@UriKH](https://github.com/UriKH)
+- Daria
+- Matan Biton
+- Erel Hadad
+- Ron Velitzky
 
 **Supervisor**:
 [@vMaroon](https://github.com/vMaroon)
