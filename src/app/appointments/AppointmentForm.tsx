@@ -228,7 +228,6 @@ const AppointmentForm: React.FC<AppointmentFormProps> =
           {/* ----- Doctor select button ----- */}
           <Select
             withAsterisk={!editMode}
-            disabled={editMode}
             clearable
             searchable
             comboboxProps={{ withinPortal: false }}
