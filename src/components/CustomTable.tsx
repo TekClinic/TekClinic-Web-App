@@ -28,6 +28,7 @@ const pageSizeOptions = [2, 5, 10, 20, 50]
 interface BaseModalProps {
   session: Session
   computedColorScheme: MantineColorScheme
+  /** Await this function when successfully finished with the modal. */
   onSuccess: () => Promise<void>
 }
 
