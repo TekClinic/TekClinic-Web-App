@@ -219,14 +219,15 @@ const AppointmentForm: React.FC<AppointmentFormProps> =
         await onSuccess(formData)
       })}>
         <Stack>
+          {/* ----- Date and time appointment badge ----- */}
           {(quick === true) &&
               <Badge size="md" leftSection={<IconClock size={20}/>}>
                 {`${format(form.values.start_time, 'E do MMM kk:mm')}-${format(form.values.end_time, 'kk:mm')}`}
               </Badge>
           }
+          {/* ----- Doctor select button ----- */}
           <Select
             withAsterisk={!editMode}
-            disabled={editMode}
             clearable
             searchable
             comboboxProps={{ withinPortal: false }}
@@ -241,7 +242,7 @@ const AppointmentForm: React.FC<AppointmentFormProps> =
             key={form.key('doctor_id')}
             {...form.getInputProps('doctor_id')}
           />
-
+          {/* ----- Patient select button ----- */}
           <Select
             clearable
             searchable
@@ -257,12 +258,11 @@ const AppointmentForm: React.FC<AppointmentFormProps> =
             key={form.key('patient_id')}
             {...form.getInputProps('patient_id')}
           />
-
+          {/* ----- Date and time picking ----- */}
           {(quick !== true) &&
               <Group mt="md" justify="space-between" grow>
                   <DateTimePicker
                       withAsterisk={!editMode}
-                      disabled={editMode}
                       label="Start Time"
                       placeholder="Select start time"
                       key={form.key('start_time')}
@@ -271,14 +271,13 @@ const AppointmentForm: React.FC<AppointmentFormProps> =
 
                   <DateTimePicker
                       withAsterisk={!editMode}
-                      disabled={editMode}
                       label="End Time"
                       placeholder="Select end time"
                       key={form.key('end_time')}
                       {...form.getInputProps('end_time')}
                   />
               </Group>}
-
+          {/* ----- "confirm" and "done" buttons ----- */}
           <Switch
             disabled={form.values.patient_id == null}
             checked={form.values.approved_by_patient}
@@ -293,7 +292,7 @@ const AppointmentForm: React.FC<AppointmentFormProps> =
             key={form.key('visited')}
             {...form.getInputProps('visited')}
           />
-
+          {/* ----- Delete appointment button ----- */}
           <Group mt="md" justify="right">
             {editMode &&
                 <Button color="red" variant="outline" onClick={() => {
