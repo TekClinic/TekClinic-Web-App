@@ -1,18 +1,31 @@
 # Installation & Setup
 
-1. Download [Node.js](https://nodejs.org/en)
+## Prerequisites
 
-2. Try to run the command `npm` in the terminal. If it says `command not found`, make sure npm is added to the path- [click here](https://phoenixnap.com/kb/npm-command-not-found) and follow the tutorial.
+- **Node.js** 
+  You can download it on [nodejs.org](https://nodejs.org/en).
+  Try to run the command `npm` in the terminal.
+  If it says `command not found`, make sure npm is added to the path-
+  [click here](https://phoenixnap.com/kb/npm-command-not-found) and follow the
+  tutorial.
 
-3. Clone the GitHub repo with `git clone "https://github.com/TekClinic/TekClinic-Web-App"`
+- **`.env.local` file**  
+  This file holds sensitive API keys. Do not upload it anywhere!
+  Copy it from someone else on the team.
 
-4. Run `npm install` and wait until the installation is over
+## Setup
 
-5. Create a `.env.local` file in the root directory (where the `package.json` file is) and add the following content:
-```env
-NEXT_PUBLIC_API_URL=http://localhost:3000
-NEXT_PUBLIC_API_KEY=YOUR_API_KEY
-NEXT_PUBLIC_SYNCFUSION_LICENSE_KEY=a
-```
+1. Clone the GitHub repo with `git clone "https://github.com/TekClinic/TekClinic-Web-App"`
 
-6. Run `npm run dev` to start the website locally, it should run at `http://localhost:3000/`
+2. Run `npm install` and wait until the installation is over
+
+3. Copy `.env.local` file in the root directory (where the `package.json`
+   file is).
+
+4. Open the setup repo and start all the services.
+
+5. Run `npm run dev` to start the website locally, it should run at
+   `http://localhost:3000/`.
+   This command starts the website in development mode, allowing you to see
+   changes you make to the code in real-time (How cool is that?).
+
