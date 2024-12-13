@@ -7,7 +7,7 @@ import React, { useEffect, useState } from 'react'
 import { type QueryKey, useQuery, type UseQueryOptions } from '@tanstack/react-query'
 import { useGuaranteeSession } from '@/src/utils/auth'
 import { ModalsProvider } from '@mantine/modals'
-import { ActionIcon, Box, Button, Group, type MantineColorScheme, useComputedColorScheme } from '@mantine/core'
+import { ActionIcon, Box, Button, Group, type MantineColorScheme, Tooltip, useComputedColorScheme } from '@mantine/core'
 import {
   IconArrowAutofitWidth,
   IconColumnRemove,
@@ -24,6 +24,37 @@ import { Eye } from 'tabler-icons-react'
 
 const defaultPageSize = 5
 const pageSizeOptions = [2, 5, 10, 20, 50]
+
+interface PatientRowActionIconProps {
+  icon: React.ReactElement
+  color: string
+  tooltip: string
+  onClick: () => void
+}
+
+/**
+ * Creates an action icon (small button) for a row that does something with
+ * that row.
+ * This is for creating the delete, edit, and view buttons in the table.
+ */
+function PatientRowActionIcon ({ icon, color, tooltip, onClick }: PatientRowActionIconProps): React.ReactElement {
+  return (
+    <Tooltip
+      label={tooltip}
+      position="left"
+      withArrow
+    >
+      <ActionIcon
+        size="sm"
+        variant="subtle"
+        color={color}
+        onClick={onClick}
+      >
+        {icon}
+      </ActionIcon>
+    </Tooltip>
+  )
+}
 
 interface BaseModalProps {
   session: Session
@@ -105,10 +136,10 @@ const CustomTable = <DataType, TData extends PaginationResult<DataType> = Pagina
             render: (item) => (
             <Group gap={4} justify="right" wrap="nowrap">
               {showDeleteModal != null && (
-                <ActionIcon
-                  size="sm"
-                  variant="subtle"
+                <PatientRowActionIcon
+                  icon={<IconTrash size={23}/>}
                   color="red"
+                  tooltip="Delete"
                   onClick={() => {
                     showDeleteModal({
                       item,
@@ -127,15 +158,13 @@ const CustomTable = <DataType, TData extends PaginationResult<DataType> = Pagina
                       }
                     })
                   }}
-                >
-                  <IconTrash size={23}/>
-                </ActionIcon>
+                />
               )}
               {showEditModal != null && (
-                <ActionIcon
-                  size="sm"
-                  variant="subtle"
+                <PatientRowActionIcon
+                  icon={<IconEdit size={23}/>}
                   color="green"
+                  tooltip="Edit"
                   onClick={() => {
                     showEditModal({
                       item,
@@ -150,16 +179,14 @@ const CustomTable = <DataType, TData extends PaginationResult<DataType> = Pagina
                       }
                     })
                   }}
-                >
-                  <IconEdit size={23}/>
-                </ActionIcon>
+                />
               )}
               {
                 showViewModal != null && (
-                  <ActionIcon
-                    size="sm"
-                    variant="subtle"
+                  <PatientRowActionIcon
+                    icon={<Eye size={23}/>}
                     color="blue"
+                    tooltip="View"
                     onClick={() => {
                       showViewModal({
                         item,
@@ -170,11 +197,8 @@ const CustomTable = <DataType, TData extends PaginationResult<DataType> = Pagina
                         }
                       })
                     }}
-                  >
-                    <Eye size={23}/>
-                  </ActionIcon>
+                  />
                 )}
-
             </Group>
             ),
             toggleable: false,
