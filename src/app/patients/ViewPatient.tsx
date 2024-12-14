@@ -81,15 +81,6 @@ const ViewPatientAppointments: React.FC<{ patientId: number, session: Session }>
     {appointments.map(appointment =>
       <ViewAppointment appointment={appointment} session={session} key={appointment.id} />
     )}
-    {appointments.map(appointment =>
-      <ViewAppointment appointment={appointment} session={session} key={appointment.id} />
-    )}
-    {appointments.map(appointment =>
-      <ViewAppointment appointment={appointment} session={session} key={appointment.id} />
-    )}
-    {appointments.map(appointment =>
-      <ViewAppointment appointment={appointment} session={session} key={appointment.id} />
-    )}
   </Box>
 }
 
