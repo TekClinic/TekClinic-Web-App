@@ -84,7 +84,7 @@ function PatientsPage (): React.JSX.Element {
           const modalId = 'view-patient-modal'
           modals.open({
             modalId,
-            title: 'Patient Information',
+            title: `Patient ${patient.name}`,
             centered: true,
             children:
               <ViewPatient
