@@ -76,6 +76,7 @@ function PatientsPage (): React.JSX.Element {
       }
       showViewModal={
         ({
+          session,
           item: patient,
           computedColorScheme
         }) => {
@@ -87,6 +88,7 @@ function PatientsPage (): React.JSX.Element {
             centered: true,
             children:
               <ViewPatient
+                session={session}
                 computedColorScheme={computedColorScheme}
                 patient={patient}
               />
