@@ -57,6 +57,7 @@ export class Appointment {
     return `Dr. ${doctorName} available`
   }
 
+  /** If the doctor is loaded, returns the doctor's name, otherwise returns the doctor ID. */
   getDoctorName = (): string => {
     return this.doctor?.name ?? this.doctor_id.toString()
   }
