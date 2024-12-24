@@ -17,7 +17,7 @@ const Header = ({
     <AppShell.Header>
       <Flex justify="space-between" align="center" style={{ padding: '10px 20px' }}>
         <Burger opened={opened} onClick={toggle} visibleFrom="sm" size="sm"/>
-        <div style={{ fontSize: '25px' }}>Tekclinic 🩺</div>
+        <div style={{ fontSize: '25px' }}>TekClinic 🩺</div>
         <Button style={{
           backgroundColor: 'transparent',
           fontSize: '17px'

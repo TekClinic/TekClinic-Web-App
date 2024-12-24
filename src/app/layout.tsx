@@ -119,7 +119,7 @@ function ContentLayout ({ children }: {
                 textAlign: 'center',
                 fontSize: '25px'
               }}>
-                Tekclinic 🩺
+                TekClinic 🩺
               </div>
 
               <ActionBar/>
