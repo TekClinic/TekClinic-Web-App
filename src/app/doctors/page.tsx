@@ -3,6 +3,7 @@
 import React from 'react'
 import { Avatar, Badge, Box, Flex, Group, Stack, Text, useComputedColorScheme } from '@mantine/core'
 import CustomTable from '@/src/components/CustomTable'
+import PhoneNumber from '@/src/components/PhoneNumber'
 import { buildDeleteModal } from '@/src/utils/modals'
 import { modals } from '@mantine/modals'
 import { Doctor } from '@/src/api/model/doctor'
@@ -92,7 +93,7 @@ function DoctorPage (): React.JSX.Element {
                     <Text><strong>Name:</strong> {doctor.name}</Text>
                     <Text><strong>Active:</strong> {doctor.active}</Text>
                     <Text><strong>Gender:</strong> {doctor.gender}</Text>
-                    {doctor.phone_number !== null && <Text><strong>Phone:</strong> {doctor.phone_number}</Text>}
+                    {doctor.phone_number !== null && <Text><strong>Phone:</strong> <PhoneNumber number={doctor.phone_number}/></Text>}
                     <Text><strong>Specialities:</strong></Text>
 
                     {doctor.specialities.map((spec) => (
@@ -142,7 +143,10 @@ function DoctorPage (): React.JSX.Element {
           }
         },
         {
-          accessor: 'phone_number'
+          accessor: 'phone_number',
+          render: (doctor: Doctor) => {
+            return doctor.phone_number == null ? '' : <PhoneNumber number={doctor.phone_number} />
+          }
         },
         {
           accessor: 'specialities',

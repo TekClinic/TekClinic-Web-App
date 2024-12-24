@@ -6,6 +6,7 @@ import male_avatar from '@/public/male-patient.webp'
 import female_avatar from '@/public/female-patient.webp'
 import unknown_avatar from '@/public/unknown-patient.webp'
 import { Appointment } from '@/src/api/model/appointment'
+import PhoneNumber from '@/src/components/PhoneNumber'
 
 async function loadPatientAppointments (patientId: number, session: Session): Promise<Appointment[]> {
   const { items: appointments } = await Appointment.get({
@@ -113,7 +114,7 @@ const ViewPatient: React.FC<ViewPatientProps> =
           <Text><strong>Name:</strong> {patient.name}</Text>
           <Text><strong>Age:</strong> {patient.age}</Text>
           <Text><strong>Gender:</strong> {patient.gender}</Text>
-          {patient.phone_number !== null && <Text><strong>Phone:</strong> {patient.phone_number}</Text>}
+          {patient.phone_number !== null && <Text><strong>Phone:</strong> <PhoneNumber number={patient.phone_number}/></Text>}
           <Text><strong>Birth Date:</strong> {patient.birth_date.toLocaleDateString()}</Text>
 
           <Text><strong>Languages:</strong></Text>

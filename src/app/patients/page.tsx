@@ -5,6 +5,7 @@ import React from 'react'
 import { Patient } from '@/src/api/model/patient'
 import { Badge, Flex, useComputedColorScheme } from '@mantine/core'
 import CustomTable from '@/src/components/CustomTable'
+import PhoneNumber from '@/src/components/PhoneNumber'
 import { buildDeleteModal } from '@/src/utils/modals'
 import { modals } from '@mantine/modals'
 import CreatePatientForm from './CreatePatientForm'
@@ -130,7 +131,10 @@ function PatientsPage (): React.JSX.Element {
           }
         },
         {
-          accessor: 'phone_number'
+          accessor: 'phone_number',
+          render: (patient: Patient) => {
+            return patient.phone_number == null ? '' : <PhoneNumber number={patient.phone_number} />
+          }
         },
         {
           accessor: 'languages',
