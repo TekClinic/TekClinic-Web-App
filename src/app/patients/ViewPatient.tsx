@@ -52,7 +52,7 @@ const ViewAppointment: React.FC<{ appointment: Appointment, session: Session }> 
     c="black"
   >
     <Group>
-      <AppointmentDate date={startTime} /> <AppointmentTime date={startTime} />-<AppointmentTime date={endTime} />: 
+      <AppointmentDate date={startTime} /> <AppointmentTime date={startTime} />-<AppointmentTime date={endTime} />:
       <Text m="auto">
         {doctorName ?? (error ? 'Could not load doctor' : 'Loading name...')}
       </Text>
