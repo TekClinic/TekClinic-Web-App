@@ -1,15 +1,15 @@
 import React from 'react'
 import { Text, Tooltip, useMantineTheme } from '@mantine/core'
 
-function phoneNumberWithDashes(phoneNumber: string): string {
+function phoneNumberWithDashes (phoneNumber: string): string {
   const lastFour = phoneNumber.slice(-4)
   const middleThree = phoneNumber.slice(-7, -4)
   const first = phoneNumber.slice(0, -7)
   return `${first}-${middleThree}-${lastFour}`
 }
 
-function copyToClipboard(text: string): void {
-  navigator.clipboard.writeText(text)
+async function copyToClipboard (text: string): Promise<void> {
+  await navigator.clipboard.writeText(text)
 }
 
 interface PhoneNumberProps {
@@ -21,11 +21,12 @@ interface PhoneNumberProps {
  * the phone number to copy it to clipboard.
  */
 const PhoneNumber: React.FC<PhoneNumberProps> = ({ number }) => {
-  const [copied, setCopied] = React.useState(false)
+  type Error = string
+  const [copied, setCopied] = React.useState<boolean | Error>(false)
   const theme = useMantineTheme()
 
   return <Tooltip
-    label={copied ? 'Copied!' : 'Copy to clipboard'}
+    label={copied === true ? 'Copied!' : copied === false ? 'Copy to clipboard' : copied}
     position='top'
     withArrow
   >
@@ -33,13 +34,14 @@ const PhoneNumber: React.FC<PhoneNumberProps> = ({ number }) => {
       style={{
         color: theme.colors.cyan[8],
         cursor: 'pointer',
-        textDecoration: 'underline',
+        textDecoration: 'underline'
       }}
       component='span'
       onClick={() => {
-        copyToClipboard(number);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
+        copyToClipboard(number)
+          .then(() => { setCopied(true) })
+          .catch(() => { setCopied('Error!') })
+        setTimeout(() => { setCopied(false) }, 2000)
       }}
     >
       {phoneNumberWithDashes(number)}

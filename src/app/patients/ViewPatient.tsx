@@ -114,7 +114,7 @@ const ViewPatient: React.FC<ViewPatientProps> =
           <Text><strong>Name:</strong> {patient.name}</Text>
           <Text><strong>Age:</strong> {patient.age}</Text>
           <Text><strong>Gender:</strong> {patient.gender}</Text>
-          {patient.phone_number !== null && <Text><strong>Phone:</strong> <PhoneNumber number={patient.phone_number}/></Text>}
+          {patient.phone_number !== undefined && <Text><strong>Phone:</strong> <PhoneNumber number={patient.phone_number}/></Text>}
           <Text><strong>Birth Date:</strong> {patient.birth_date.toLocaleDateString()}</Text>
 
           <Text><strong>Languages:</strong></Text>

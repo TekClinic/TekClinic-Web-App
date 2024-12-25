@@ -22,18 +22,37 @@ import { type Session } from 'next-auth'
 import { type PaginationResult } from '@/src/api/common'
 import { Eye, Search } from 'tabler-icons-react'
 
-/** This function extracts the string content from a React component. */
-const extractString = (obj: any): string => {
-    if (typeof obj === 'string') return obj;
-    else if (obj?.props?.children) {
-        if (Array.isArray(obj.props.children)) {
-            return obj.props.children
-                .map((child: any) => extractString(child))
-                .join('');
-        }
-        return extractString(obj.props.children);
-    } else return '';
-};
+/**
+ * Get text content from a React element.
+ *
+ * This does not add whitespace for readability: `<p>Hello <em>world</em>!</p>`
+ * yields `Hello world!` as expected, but `<p>Hello</p><p>world</p>` returns
+ * `Helloworld`, just like https://mdn.io/Node/textContent does.
+ */
+function textContent (elem: React.ReactNode): string {
+  // type ReactNode = string | number | bigint | boolean
+  //                | React.ReactElement<any, string | React.JSXElementConstructor<any>>
+  //                | Iterable<React.ReactNode>
+  //                | React.ReactPortal | Promise<...> | null | undefined
+  if (elem === null || elem === undefined) {
+    return ''
+  }
+  if (typeof elem === 'string' ||
+      typeof elem === 'number' ||
+      typeof elem === 'bigint' ||
+      typeof elem === 'boolean') {
+    return elem.toString()
+  }
+  if (elem instanceof Promise) {
+    throw new Error('textContent does not support promises')
+  }
+  if ('props' in elem) {
+    return textContent(elem.props.children as React.ReactNode)
+  }
+  // elem is `Iterable<React.ReactNode>`
+  const array = Array.from(elem)
+  return array.map(textContent).join('')
+}
 
 const defaultPageSize = 5
 const pageSizeOptions = [2, 5, 10, 20, 50]
@@ -203,12 +222,12 @@ const CustomTable = <DataType, TData extends PaginationResult<DataType> = Pagina
   const dataToShow = data?.items.filter(item => {
     return columns.some(column => {
       // Check if the rendered content of the column includes the search text
-      const renderedText = 
-        column.render != null ? 
-        extractString(column.render(item, 0)) :
-        item[column.accessor] != undefined ?
-        item[column.accessor].toString() :
-        ''
+      const renderedText =
+        column.render != null
+          ? textContent(column.render(item, 0))
+          : (item as any)[column.accessor] !== undefined
+              ? (item as any)[column.accessor].toString()
+              : ''
       return renderedText.toLowerCase().includes(searchText)
     })
   })
