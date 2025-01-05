@@ -17,6 +17,11 @@ import {
 } from '@/src/api/common'
 import { type Session } from 'next-auth'
 
+/** Task query parameters. */
+interface TaskParams extends PaginationParams {
+  search?: string
+}
+
 export class Task {
   static __name__ = 'tasks'
 
@@ -44,6 +49,14 @@ export class Task {
 
   static getById = async (id: number, session: Session): Promise<Task> => {
     return await getAPIResource(Task, id, session)
+  }
+
+  static get = async (params: TaskParams, session: Session): Promise<PaginationResult<Task>> => {
+    const formattedParams = formatPaginationParams(params)
+    if (params.search != null && params.search !== '') {
+      formattedParams.search = params.search
+    }
+    return await getAPIResourceList(Task, formattedParams, session)
   }
 
   static create = async (props: TaskBaseScheme, session: Session): Promise<number> => {

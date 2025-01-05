@@ -2,44 +2,47 @@
 
 import dayjs from 'dayjs'
 import React from 'react'
-import { Patient } from '@/src/api/model/patient'
+import { Task } from '@/src/api/model/task'
 import { Badge, Flex, useComputedColorScheme } from '@mantine/core'
 import CustomTable from '@/src/components/CustomTable'
 import { buildDeleteModal } from '@/src/utils/modals'
 import { modals } from '@mantine/modals'
-import CreatePatientForm from './CreatePatientForm'
-import EditPatientForm from './EditPatientForm'
-import ViewPatient from './ViewPatient'
+/*
+import CreateTaskForm from './CreateTaskForm'
+import EditTaskForm from './EditTaskForm'
+import ViewTask from './ViewTask'
+*/
 
-function PatientsPage (): React.JSX.Element {
+function TasksPage (): React.JSX.Element {
   const computedColorScheme = useComputedColorScheme()
 
   return (
     <CustomTable
-      dataName='Patient'
-      storeColumnKey='patient-columns'
+      dataName='Task'
+      storeColumnKey='task-columns'
       queryOptions={(session, page, pageSize) => ({
-        queryKey: ['patients', page, pageSize],
+        queryKey: ['tasks', page, pageSize],
         queryFn: async () => {
-          return await Patient.get({
+          return await Task.get({
             skip: pageSize * (page - 1),
             limit: pageSize
           }, session)
         }
       })}
-      showDeleteModal={buildDeleteModal('patient', (patient) => patient.name)}
+      /*
+      showDeleteModal={buildDeleteModal('task', (task) => task.name)}
       showCreateModal={({
         session,
         computedColorScheme,
         onSuccess
       }) => {
         // Generate some random modal id
-        const modalId = 'create-patient-modal'
+        const modalId = 'create-task-modal'
         modals.open({
           modalId,
-          title: 'Patient Information',
+          title: 'Task Information',
           children:
-            <CreatePatientForm
+            <CreateTaskForm
               session={session}
               computedColorScheme={computedColorScheme}
               onSuccess={async () => {
@@ -57,12 +60,12 @@ function PatientsPage (): React.JSX.Element {
           onSuccess
         }) => {
           // Generate some random modal id
-          const modalId = 'edit-patient-modal'
+          const modalId = 'edit-task-modal'
           modals.open({
             modalId,
-            title: 'Edit Patient Information',
+            title: 'Edit Task Information',
             children:
-              <EditPatientForm
+              <EditTaskForm
                 item={item}
                 session={session}
                 computedColorScheme={computedColorScheme}
@@ -77,24 +80,25 @@ function PatientsPage (): React.JSX.Element {
       showViewModal={
         ({
           session,
-          item: patient,
+          item: task,
           computedColorScheme
         }) => {
           // Generate some random modal id
-          const modalId = 'view-patient-modal'
+          const modalId = 'view-task-modal'
           modals.open({
             modalId,
-            title: `Patient ${patient.name}`,
+            title: `Task ${task.name}`,
             centered: true,
             children:
-              <ViewPatient
+              <ViewTask
                 session={session}
                 computedColorScheme={computedColorScheme}
-                patient={patient}
+                task={task}
               />
           })
         }
       }
+      */
       columns={[
         {
           title: '#',
@@ -104,84 +108,12 @@ function PatientsPage (): React.JSX.Element {
           resizable: false
         },
         {
-          accessor: 'name'
-        },
-        {
-          accessor: 'active',
-          render: (patient: Patient) => patient.active ? 'Active' : 'Inactive'
-        },
-        {
-          accessor: 'age'
-        },
-        {
-          accessor: 'personal_id',
-          render: (patient: Patient) => `${patient.personal_id.id} (${patient.personal_id.type})`
-        },
-        {
-          accessor: 'gender',
-          render: (patient: Patient) => {
-            let color = 'gray'
-            if (patient.gender === 'male') {
-              color = 'blue'
-            } else if (patient.gender === 'female') {
-              color = 'pink'
-            }
-            return <Badge color={color}>{patient.gender}</Badge>
-          }
-        },
-        {
-          accessor: 'phone_number'
-        },
-        {
-          accessor: 'languages',
-          render:
-            (patient: Patient) => (
-              <Flex style={{ margin: '2px' }} direction='column' gap='10px'>
-                {patient.languages.map((language) => (
-                    <Badge key={language} variant="gradient" gradient={{
-                      from: (computedColorScheme === 'light' ? '#e3e3e3' : '#3d3c3c'),
-                      to: (computedColorScheme === 'light' ? '#e3e3e3' : '#3d3c3c'),
-                      deg: 90
-                    }} style={{ color: computedColorScheme === 'light' ? 'black' : 'white' }}>
-                      {language}
-                    </Badge>
-                )
-                )}
-              </Flex>
-            )
-        },
-        {
-          accessor: 'birth_date',
-          render:
-            (patient: Patient) => dayjs(patient.birth_date).format('YYYY-MM-DD')
-        },
-        {
-          accessor: 'emergency_contacts',
-          render:
-            (patient: Patient) => (
-              <Flex style={{ margin: '2px' }} direction='column' gap='10px'>
-                {patient.emergency_contacts.map((contact, index) => (
-                    <Badge key={index} variant="gradient" gradient={{
-                      from: computedColorScheme === 'light' ? '#e3e3e3' : '#3d3c3c',
-                      to: computedColorScheme === 'light' ? '#e3e3e3' : '#3d3c3c',
-                      deg: 90
-                    }} style={{ color: computedColorScheme === 'light' ? 'black' : 'white' }}>
-                      {contact.name} ({contact.closeness}) {contact.phone}
-                    </Badge>
-                )
-                )}
-              </Flex>
-            )
-        },
-        {
-          accessor: 'referred_by'
-        },
-        {
-          accessor: 'special_note'
+          title: 'Title',
+          accessor: 'title'
         }
       ]}
     />
   )
 }
 
-export default PatientsPage
+export default TasksPage
