@@ -1,5 +1,12 @@
 // Definition of the data scheme according to the API
 
+/*
+ * Every object such as Patient, Doctor, Appointment, Task, etc. has a base
+ * scheme, regular scheme and an update scheme. The base scheme is used for
+ * creating new objects and the regular scheme is for reading, and the update
+ * scheme is for updating.
+ */
+
 export interface NamedAPIResourceList {
   count: number
   next: null | string
@@ -83,6 +90,23 @@ export interface AppointmentScheme extends AppointmentBaseScheme {
 export interface AppointmentUpdateScheme extends AppointmentBaseScheme {
   approved_by_patient: boolean
   visited: boolean
+}
+
+export interface TaskBaseScheme {
+  patient_id: number
+  expertise: string | null
+  title: string
+  description: string
+}
+
+export interface TaskScheme extends TaskBaseScheme {
+  id: number
+  created_at: string
+  complete: boolean
+}
+
+export interface TaskUpdateScheme extends TaskBaseScheme {
+  // TODO:
 }
 
 export interface IdHolder {
