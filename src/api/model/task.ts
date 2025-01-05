@@ -6,12 +6,10 @@ import {
 } from '@/src/api/scheme'
 import {
   createAPIResource,
-  deleteAPIResource,
   formatPaginationParams,
   getAPIResource,
   getAPIResourceList,
   putAPIResource,
-  toE164,
   type PaginationParams,
   type PaginationResult
 } from '@/src/api/common'
@@ -63,7 +61,7 @@ export class Task {
     return await createAPIResource<TaskBaseScheme>(Task, props, session)
   }
 
-  update = async (session: Session) => {
+  update = async (session: Session): Promise<void> => {
     const data: TaskUpdateScheme = {
       patient_id: this.patient_id,
       expertise: this.expertise,

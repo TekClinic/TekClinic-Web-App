@@ -1,20 +1,19 @@
 'use client'
 
-import dayjs from 'dayjs'
 import React from 'react'
 import { Task } from '@/src/api/model/task'
-import { Badge, Flex, useComputedColorScheme } from '@mantine/core'
 import CustomTable from '@/src/components/CustomTable'
+/*
+import { useComputedColorScheme } from '@mantine/core'
 import { buildDeleteModal } from '@/src/utils/modals'
 import { modals } from '@mantine/modals'
-/*
 import CreateTaskForm from './CreateTaskForm'
 import EditTaskForm from './EditTaskForm'
 import ViewTask from './ViewTask'
 */
 
 function TasksPage (): React.JSX.Element {
-  const computedColorScheme = useComputedColorScheme()
+  // const computedColorScheme = useComputedColorScheme()
 
   return (
     <CustomTable
