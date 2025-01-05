@@ -274,7 +274,7 @@ export const clearAPIResourceField = async (
   return response.patient_id
 }
 
-// toE164 converts a phone number to E.164 format.
+/** toE164 converts a phone number to E.164 format. */
 export const toE164 = (phoneNumber: string): string => {
   const addDefaultCountryCode = !phoneNumber.startsWith('+')
   const result = phone(phoneNumber, { country: addDefaultCountryCode ? 'ISR' : undefined })
