@@ -32,6 +32,12 @@ const Navbar: React.FC<{ opened: boolean, toggle: () => void }> = ({
       href: '/appointments',
       label: 'Appointments',
       icon: <CalendarEvent size="20px"/>
+    },
+    {
+      href: '/tasks',
+      label: 'Tasks',
+      // TODO: Change this icon!
+      icon: <CalendarEvent size="20px"/>
     }
   ]
 
