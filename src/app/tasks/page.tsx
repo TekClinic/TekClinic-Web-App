@@ -1,118 +1,75 @@
 'use client'
 
-import React from 'react'
-import { Task } from '@/src/api/model/task'
-import CustomTable from '@/src/components/CustomTable'
-/*
-import { useComputedColorScheme } from '@mantine/core'
-import { buildDeleteModal } from '@/src/utils/modals'
+import React, { useState } from 'react'
 import { modals } from '@mantine/modals'
+import CustomTable from '@/src/components/CustomTable'
 import CreateTaskForm from './CreateTaskForm'
-import EditTaskForm from './EditTaskForm'
-import ViewTask from './ViewTask'
-*/
 
-function TasksPage (): React.JSX.Element {
-  // const computedColorScheme = useComputedColorScheme()
+interface TaskInMemory {
+  id: number
+  title: string
+}
+
+export default function TasksPage (): JSX.Element {
+  const [tasks, setTasks] = useState<TaskInMemory[]>([])
+  const [nextId, setNextId] = useState(1)
+
+  const handleShowCreateModal = ({
+    session,
+    computedColorScheme,
+    onSuccess
+  }: {
+    session: any
+    computedColorScheme: any
+    onSuccess: () => Promise<void>
+  }): void => {
+    const modalId = 'create-task-modal'
+    modals.open({
+      modalId,
+      title: 'Add Task',
+      children: (
+        <CreateTaskForm
+          onFinish={(title) => {
+            setTasks((prev) => [
+              ...prev,
+              { id: nextId, title }
+            ])
+            setNextId((prev) => prev + 1)
+
+            modals.close(modalId)
+
+            // We’re calling a function returning a Promise<void>, so we can do:
+            void onSuccess()
+          }}
+        />
+      )
+    })
+  }
 
   return (
-    <CustomTable
-      dataName='Task'
-      storeColumnKey='task-columns'
+    <CustomTable<TaskInMemory>
+      dataName="Task"
+      storeColumnKey="task-columns"
       queryOptions={(session, page, pageSize) => ({
         queryKey: ['tasks', page, pageSize],
         queryFn: async () => {
-          return await Task.get({
-            skip: pageSize * (page - 1),
-            limit: pageSize
-          }, session)
+          return {
+            items: tasks,
+            count: tasks.length
+          }
         }
       })}
-      /*
-      showDeleteModal={buildDeleteModal('task', (task) => task.name)}
-      showCreateModal={({
-        session,
-        computedColorScheme,
-        onSuccess
-      }) => {
-        // Generate some random modal id
-        const modalId = 'create-task-modal'
-        modals.open({
-          modalId,
-          title: 'Task Information',
-          children:
-            <CreateTaskForm
-              session={session}
-              computedColorScheme={computedColorScheme}
-              onSuccess={async () => {
-                modals.close(modalId)
-                await onSuccess()
-              }}
-            />
-        })
-      }}
-      showEditModal={
-        ({
-          item,
-          session,
-          computedColorScheme,
-          onSuccess
-        }) => {
-          // Generate some random modal id
-          const modalId = 'edit-task-modal'
-          modals.open({
-            modalId,
-            title: 'Edit Task Information',
-            children:
-              <EditTaskForm
-                item={item}
-                session={session}
-                computedColorScheme={computedColorScheme}
-                onSuccess={async () => {
-                  modals.close(modalId)
-                  await onSuccess()
-                }}
-              />
-          })
-        }
-      }
-      showViewModal={
-        ({
-          session,
-          item: task,
-          computedColorScheme
-        }) => {
-          // Generate some random modal id
-          const modalId = 'view-task-modal'
-          modals.open({
-            modalId,
-            title: `Task ${task.name}`,
-            centered: true,
-            children:
-              <ViewTask
-                session={session}
-                computedColorScheme={computedColorScheme}
-                task={task}
-              />
-          })
-        }
-      }
-      */
       columns={[
         {
           title: '#',
-          accessor: 'id',
-          toggleable: false,
-          draggable: false,
-          resizable: false
+          accessor: 'id'
         },
         {
           title: 'Title',
           accessor: 'title'
         }
       ]}
+      showCreateModal={handleShowCreateModal}
     />
   )
 }
-
-export default TasksPage
