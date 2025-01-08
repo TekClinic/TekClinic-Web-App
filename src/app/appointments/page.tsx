@@ -150,7 +150,7 @@ const Calendar = (): React.JSX.Element => {
               if (data != null) {
                 await dateToResult.get(data.start_time.toDateString())?.refetch()
               }
-            }}/>
+            }} />
       })
     } else if (args.type === 'QuickInfo') {
       const data = args.data as { doctor_id?: number }
@@ -203,7 +203,7 @@ const Calendar = (): React.JSX.Element => {
   const data = appointments.map((appointment: Appointment) => {
     return {
       id: appointment.id,
-      subject: appointment.subject,
+      subject: appointment.approved_by_patient ? (appointment.subject + "✅") : appointment.subject,
       start_time: appointment.start_time,
       end_time: appointment.end_time,
       doctor_id: appointment.doctor_id,
@@ -240,27 +240,27 @@ const Calendar = (): React.JSX.Element => {
       currentDoctorsPage * DOCTORS_PER_PAGE
     )
     : [{
-        id: 0,
-        text: 'No doctors',
-        color: 'transparent',
-        name: '',
-        specialities: []
-      }]
+      id: 0,
+      text: 'No doctors',
+      color: 'transparent',
+      name: '',
+      specialities: []
+    }]
 
   return (
     <DoctorIdContext.Provider value={lastSelectedDoctorId}>
       <ModalsProvider>
-        <link href={computedColorScheme === 'light' ? CDN_LIGHT_THEME_URL : CDN_DARK_THEME_URL} rel="stylesheet"/>
+        <link href={computedColorScheme === 'light' ? CDN_LIGHT_THEME_URL : CDN_DARK_THEME_URL} rel="stylesheet" />
         <Group justify="flex-end" p={10}>
           {separateByDoctors && doctorsResourceData.length > DOCTORS_PER_PAGE &&
-              <Pagination
-                  withControls={false}
-                  value={currentDoctorsPage}
-                  onChange={(value) => {
-                    setCurrentDoctorsPage(value)
-                  }}
-                  total={Math.ceil(doctorsResourceData.length / DOCTORS_PER_PAGE)}
-              />}
+            <Pagination
+              withControls={false}
+              value={currentDoctorsPage}
+              onChange={(value) => {
+                setCurrentDoctorsPage(value)
+              }}
+              total={Math.ceil(doctorsResourceData.length / DOCTORS_PER_PAGE)}
+            />}
           <Switch
             checked={separateByDoctors}
             labelPosition="left"
@@ -327,11 +327,11 @@ const Calendar = (): React.JSX.Element => {
               />
             </ResourcesDirective>
             <ViewsDirective>
-              <ViewDirective option="Day"/>
-              <ViewDirective option="Week"/>
-              <ViewDirective option="Month"/>
+              <ViewDirective option="Day" />
+              <ViewDirective option="Week" />
+              <ViewDirective option="Month" />
             </ViewsDirective>
-            <Inject services={[Day, Week, Month]}/>
+            <Inject services={[Day, Week, Month]} />
           </ScheduleComponent>
         </RemoveScroll>
       </ModalsProvider>
@@ -346,7 +346,7 @@ const resourceHeaderTemplate = (props: { resourceData: DoctorResourceData }): Re
   return (
     <Box>
       <Avatar color={props.resourceData.color} radius="xl">
-        <IconStethoscope size={24}/>
+        <IconStethoscope size={24} />
       </Avatar>
 
       <Box>
