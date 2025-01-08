@@ -203,7 +203,7 @@ const Calendar = (): React.JSX.Element => {
   const data = appointments.map((appointment: Appointment) => {
     return {
       id: appointment.id,
-      subject: appointment.approved_by_patient ? (appointment.subject + "✅") : appointment.subject,
+      subject: appointment.approved_by_patient ? (appointment.subject + '✅') : appointment.subject,
       start_time: appointment.start_time,
       end_time: appointment.end_time,
       doctor_id: appointment.doctor_id,
@@ -240,12 +240,12 @@ const Calendar = (): React.JSX.Element => {
       currentDoctorsPage * DOCTORS_PER_PAGE
     )
     : [{
-      id: 0,
-      text: 'No doctors',
-      color: 'transparent',
-      name: '',
-      specialities: []
-    }]
+        id: 0,
+        text: 'No doctors',
+        color: 'transparent',
+        name: '',
+        specialities: []
+      }]
 
   return (
     <DoctorIdContext.Provider value={lastSelectedDoctorId}>
