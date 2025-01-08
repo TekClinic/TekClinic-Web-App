@@ -1,31 +1,63 @@
+// src/app/tasks/CreateTaskForm.tsx
 'use client'
 
 import React, { useState } from 'react'
 import { Button, TextInput } from '@mantine/core'
 
+// We'll now call onFinish with an object: { name, doctor, patient }
+interface FormData {
+  name: string
+  doctor: string
+  patient: string
+}
+
 interface CreateTaskFormProps {
-  onFinish: (title: string) => void
+  onFinish: (data: FormData) => void
 }
 
 export default function CreateTaskForm ({ onFinish }: CreateTaskFormProps): JSX.Element {
-  const [title, setTitle] = useState('')
+  const [name, setName] = useState('')
+  const [doctor, setDoctor] = useState('')
+  const [patient, setPatient] = useState('')
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
+  function handleSubmit (e: React.FormEvent<HTMLFormElement>): void {
     e.preventDefault()
-    onFinish(title) // No issue here as it's within a block
+    onFinish({
+      name,
+      doctor,
+      patient
+    })
   }
 
   return (
     <form onSubmit={handleSubmit}>
+      {/* 1) Task Name */}
       <TextInput
         label="Task Name"
-        placeholder="consise and informative description"
-        value={title}
-        onChange={(e) => {
-          setTitle(e.currentTarget.value) // Explicit block to satisfy the lint rule
-        }}
+        placeholder="e.g. Schedule a check-up"
+        value={name}
+        onChange={(e) => { setName(e.currentTarget.value) }}
         required
       />
+
+      {/* 2) Doctor */}
+      <TextInput
+        label="Doctor"
+        placeholder="e.g. Dr. Alice"
+        value={doctor}
+        onChange={(e) => { setDoctor(e.currentTarget.value) }}
+        required
+      />
+
+      {/* 3) Patient */}
+      <TextInput
+        label="Patient"
+        placeholder="e.g. Bob"
+        value={patient}
+        onChange={(e) => { setPatient(e.currentTarget.value) }}
+        required
+      />
+
       <Button type="submit" mt="md">
         Finish
       </Button>

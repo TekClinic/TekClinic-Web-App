@@ -1,3 +1,4 @@
+// src/app/tasks/page.tsx
 'use client'
 
 import React, { useState } from 'react'
@@ -7,14 +8,16 @@ import CreateTaskForm from './CreateTaskForm'
 
 interface TaskInMemory {
   id: number
-  title: string
+  name: string
+  doctor: string
+  patient: string
 }
 
 export default function TasksPage (): JSX.Element {
   const [tasks, setTasks] = useState<TaskInMemory[]>([])
   const [nextId, setNextId] = useState(1)
 
-  const handleShowCreateModal = ({
+  function handleShowCreateModal ({
     session,
     computedColorScheme,
     onSuccess
@@ -22,23 +25,26 @@ export default function TasksPage (): JSX.Element {
     session: any
     computedColorScheme: any
     onSuccess: () => Promise<void>
-  }): void => {
+  }): void {
     const modalId = 'create-task-modal'
     modals.open({
       modalId,
       title: 'Add Task',
       children: (
         <CreateTaskForm
-          onFinish={(title) => {
+          // Now CreateTaskForm returns { name, doctor, patient }
+          onFinish={(formData) => {
+            // Add new task to local state
             setTasks((prev) => [
               ...prev,
-              { id: nextId, title }
+              {
+                id: nextId,
+                ...formData // formData has { name, doctor, patient }
+              }
             ])
             setNextId((prev) => prev + 1)
 
             modals.close(modalId)
-
-            // We’re calling a function returning a Promise<void>, so we can do:
             void onSuccess()
           }}
         />
@@ -50,25 +56,39 @@ export default function TasksPage (): JSX.Element {
     <CustomTable<TaskInMemory>
       dataName="Task"
       storeColumnKey="task-columns"
+
+      // Include tasks in the queryKey so React Query re-runs each time tasks changes
       queryOptions={(session, page, pageSize) => ({
-        queryKey: ['tasks', page, pageSize],
-        queryFn: async () => {
-          return {
-            items: tasks,
-            count: tasks.length
-          }
-        }
+        queryKey: ['tasks', tasks, page, pageSize],
+        queryFn: async () => ({
+          items: tasks,
+          count: tasks.length
+        })
       })}
+
+      /*
+        We define 4 columns now:
+        # (id), Name (name), Doctor (doctor), Patient (patient).
+      */
       columns={[
         {
           title: '#',
           accessor: 'id'
         },
         {
-          title: 'Title',
-          accessor: 'title'
+          title: 'Name',
+          accessor: 'name'
+        },
+        {
+          title: 'Doctor',
+          accessor: 'doctor'
+        },
+        {
+          title: 'Patient',
+          accessor: 'patient'
         }
       ]}
+
       showCreateModal={handleShowCreateModal}
     />
   )
