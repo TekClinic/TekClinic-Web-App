@@ -4,7 +4,7 @@
 import React, { useState } from 'react'
 import { Button, TextInput } from '@mantine/core'
 
-// We'll now call onFinish with an object: { name, doctor, patient }
+
 interface FormData {
   name: string
   doctor: string

@@ -5,6 +5,8 @@ import React, { useState } from 'react'
 import { modals } from '@mantine/modals'
 import CustomTable from '@/src/components/CustomTable'
 import CreateTaskForm from './CreateTaskForm'
+import EditTaskForm from './EditTaskForm'
+import ViewTask from './ViewTask'
 
 interface TaskInMemory {
   id: number
@@ -13,40 +15,60 @@ interface TaskInMemory {
   patient: string
 }
 
-export default function TasksPage (): JSX.Element {
+export default function TasksPage(): JSX.Element {
   const [tasks, setTasks] = useState<TaskInMemory[]>([])
   const [nextId, setNextId] = useState(1)
 
-  function handleShowCreateModal ({
-    session,
-    computedColorScheme,
-    onSuccess
-  }: {
-    session: any
-    computedColorScheme: any
-    onSuccess: () => Promise<void>
-  }): void {
+  // "Add Task" callback:
+  function handleShowCreateModal ({ session, computedColorScheme, onSuccess }: any): void {
     const modalId = 'create-task-modal'
     modals.open({
       modalId,
       title: 'Add Task',
       children: (
         <CreateTaskForm
-          // Now CreateTaskForm returns { name, doctor, patient }
-          onFinish={(formData) => {
-            // Add new task to local state
-            setTasks((prev) => [
-              ...prev,
-              {
-                id: nextId,
-                ...formData // formData has { name, doctor, patient }
-              }
-            ])
-            setNextId((prev) => prev + 1)
-
+          onFinish={(data) => {
+            setTasks(prev => [...prev, { id: nextId, ...data }])
+            setNextId(prev => prev + 1)
             modals.close(modalId)
             void onSuccess()
           }}
+        />
+      )
+    })
+  }
+
+  // "Edit Task" callback:
+  function handleShowEditModal ({ item, session, computedColorScheme, onSuccess }: any): void {
+    const modalId = 'edit-task-modal'
+    modals.open({
+      modalId,
+      title: 'Edit Task',
+      children: (
+        <EditTaskForm
+          session={session}
+          computedColorScheme={computedColorScheme}
+          item={item}  // the existing task object
+          onSuccess={async () => {
+            modals.close(modalId)
+            await onSuccess()  // triggers a refetch in the table
+          }}
+        />
+      )
+    })
+  }
+
+  // "View Task" callback:
+  function handleShowViewModal ({ item, session, computedColorScheme, onSuccess }: any): void {
+    const modalId = 'view-task-modal'
+    modals.open({
+      modalId,
+      title: 'Task Information',
+      children: (
+        <ViewTask
+          session={session}
+          computedColorScheme={computedColorScheme}
+          task={item}  // the existing task object
         />
       )
     })
@@ -57,7 +79,6 @@ export default function TasksPage (): JSX.Element {
       dataName="Task"
       storeColumnKey="task-columns"
 
-      // Include tasks in the queryKey so React Query re-runs each time tasks changes
       queryOptions={(session, page, pageSize) => ({
         queryKey: ['tasks', tasks, page, pageSize],
         queryFn: async () => ({
@@ -66,30 +87,17 @@ export default function TasksPage (): JSX.Element {
         })
       })}
 
-      /*
-        We define 4 columns now:
-        # (id), Name (name), Doctor (doctor), Patient (patient).
-      */
-      columns={[
-        {
-          title: '#',
-          accessor: 'id'
-        },
-        {
-          title: 'Name',
-          accessor: 'name'
-        },
-        {
-          title: 'Doctor',
-          accessor: 'doctor'
-        },
-        {
-          title: 'Patient',
-          accessor: 'patient'
-        }
-      ]}
-
+      // Pass the callbacks so the icons appear:
       showCreateModal={handleShowCreateModal}
+      showEditModal={handleShowEditModal}
+      showViewModal={handleShowViewModal}
+      showDeleteModal={() => {}}
+      columns={[
+        { title: '#', accessor: 'id' },
+        { title: 'Name', accessor: 'name' },
+        { title: 'Doctor', accessor: 'doctor' },
+        { title: 'Patient', accessor: 'patient' }
+      ]}
     />
   )
 }
