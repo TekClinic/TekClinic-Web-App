@@ -7,29 +7,30 @@ import CustomTable from '@/src/components/CustomTable'
 import CreateTaskForm from './CreateTaskForm'
 import EditTaskForm from './EditTaskForm'
 import ViewTask from './ViewTask'
+import { buildDeleteModal } from '@/src/utils/modals'
+import { createTaskInMemory, type TaskInMemory } from './createTaskInMemory'
 
-interface TaskInMemory {
-  id: number
-  name: string
-  doctor: string
-  patient: string
-}
-
-export default function TasksPage(): JSX.Element {
+export default function TasksPage (): JSX.Element {
   const [tasks, setTasks] = useState<TaskInMemory[]>([])
   const [nextId, setNextId] = useState(1)
 
-  // "Add Task" callback:
-  function handleShowCreateModal ({ session, computedColorScheme, onSuccess }: any): void {
+  // "Add Task"
+  function handleShowCreateModal ({
+    session,
+    computedColorScheme,
+    onSuccess
+  }: any): void {
     const modalId = 'create-task-modal'
     modals.open({
       modalId,
       title: 'Add Task',
       children: (
         <CreateTaskForm
-          onFinish={(data) => {
-            setTasks(prev => [...prev, { id: nextId, ...data }])
+          onFinish={(formData) => {
+            const newTask = createTaskInMemory(nextId, formData.name, formData.doctor, formData.patient)
+            setTasks(prev => [...prev, newTask])
             setNextId(prev => prev + 1)
+
             modals.close(modalId)
             void onSuccess()
           }}
@@ -38,39 +39,76 @@ export default function TasksPage(): JSX.Element {
     })
   }
 
-  // "Edit Task" callback:
-  function handleShowEditModal ({ item, session, computedColorScheme, onSuccess }: any): void {
+  // "Edit Task"
+  function handleShowEditModal ({
+    item,
+    session,
+    computedColorScheme,
+    onSuccess
+  }: any): void {
     const modalId = 'edit-task-modal'
     modals.open({
       modalId,
       title: 'Edit Task',
       children: (
         <EditTaskForm
+          item={item}
           session={session}
           computedColorScheme={computedColorScheme}
-          item={item}  // the existing task object
           onSuccess={async () => {
             modals.close(modalId)
-            await onSuccess()  // triggers a refetch in the table
+            await onSuccess()
           }}
         />
       )
     })
   }
 
-  // "View Task" callback:
-  function handleShowViewModal ({ item, session, computedColorScheme, onSuccess }: any): void {
+  // "View Task"
+  function handleShowViewModal ({
+    item,
+    session,
+    computedColorScheme,
+    onSuccess
+  }: any): void {
     const modalId = 'view-task-modal'
     modals.open({
       modalId,
       title: 'Task Information',
       children: (
         <ViewTask
+          task={item}
           session={session}
           computedColorScheme={computedColorScheme}
-          task={item}  // the existing task object
         />
       )
+    })
+  }
+
+  const handleShowDeleteModal = buildDeleteModal<TaskInMemory>(
+    'task',
+    (task) => task.name
+  )
+
+  function handleDeleteModal ({
+    item,
+    session,
+    computedColorScheme,
+    onSuccess
+  }: {
+    item: TaskInMemory
+    session: any
+    computedColorScheme: any
+    onSuccess: () => Promise<void>
+  }): void {
+    handleShowDeleteModal({
+      item,
+      session,
+      computedColorScheme,
+      onSuccess: async () => {
+        setTasks(prev => prev.filter(t => t.id !== item.id))
+        await onSuccess()
+      }
     })
   }
 
@@ -78,7 +116,6 @@ export default function TasksPage(): JSX.Element {
     <CustomTable<TaskInMemory>
       dataName="Task"
       storeColumnKey="task-columns"
-
       queryOptions={(session, page, pageSize) => ({
         queryKey: ['tasks', tasks, page, pageSize],
         queryFn: async () => ({
@@ -86,12 +123,10 @@ export default function TasksPage(): JSX.Element {
           count: tasks.length
         })
       })}
-
-      // Pass the callbacks so the icons appear:
       showCreateModal={handleShowCreateModal}
       showEditModal={handleShowEditModal}
       showViewModal={handleShowViewModal}
-      showDeleteModal={() => {}}
+      showDeleteModal={handleDeleteModal}
       columns={[
         { title: '#', accessor: 'id' },
         { title: 'Name', accessor: 'name' },

@@ -4,7 +4,6 @@
 import React, { useState } from 'react'
 import { Button, TextInput } from '@mantine/core'
 
-
 interface FormData {
   name: string
   doctor: string

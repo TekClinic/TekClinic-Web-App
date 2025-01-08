@@ -19,7 +19,6 @@ interface TaskInMemory {
 
 /**
  * We'll adapt the same pattern as EditPatientForm:
- * 
  * - "item" is the existing Task we want to edit.
  * - onSuccess() is called once the update is done.
  */
@@ -48,15 +47,14 @@ export default function EditTaskForm (
     }
   })
 
-  async function handleSubmit(values: typeof form.values): Promise<void> {
+  async function handleSubmit (values: typeof form.values): Promise<void> {
     // If you had a real microservice, you might do:
-    //   initialTask.name = values.name
-    //   initialTask.doctor = values.doctor
-    //   initialTask.patient = values.patient
-    //   await initialTask.update(session)
-
+    // initialTask.name = values.name
+    // initialTask.doctor = values.doctor
+    // initialTask.patient = values.patient
+    // await initialTask.update(session)
     // In an in-memory approach, just mutate local state in TasksPage:
-    // but you don't have direct access to that here. 
+    // but you don't have direct access to that here.
     // Typically, you'd do something like "update the item" and let the parent re-render
     // For a simple approach, we can do:
     initialTask.name = values.name

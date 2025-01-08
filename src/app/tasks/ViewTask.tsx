@@ -19,7 +19,7 @@ interface ViewTaskProps {
 }
 
 /**
- * A simple read-only view of the Task fields, 
+ * A simple read-only view of the Task fields,
  * similar to "ViewPatient" but no advanced logic.
  */
 export default function ViewTask ({
@@ -27,9 +27,9 @@ export default function ViewTask ({
   task
 }: ViewTaskProps): JSX.Element {
   // If you needed to load more data (like in "ViewPatientAppointments"),
-  // you could do so with a useEffect & a "Task.load()" call. 
+  // you could do so with a useEffect & a "Task.load()" call.
   // For now, let's keep it simple.
-  
+
   return (
     <Box>
       <Stack>
